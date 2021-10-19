@@ -117,7 +117,7 @@ server <- function(input, output, session) {
     install.packages(p_to_install)
   }
   lapply(p_needed, require, character.only = TRUE)
-  
+
   # Set up pages (+ navigation)
   rv <- reactiveValues(page = 1)
   data_filtered <<- NULL
@@ -156,7 +156,7 @@ server <- function(input, output, session) {
         available_data = data_filtered,
         recodes_path = NULL,
         mappings_path = NULL,
-        selected_concepts = input$concepts, 
+        selected_concepts = input$concepts,
         selected_contexts = data_filtered$elec_id,
         map = input$map_par,
         map_vars = unlist(strsplit(input$map_vars_par, split = ",")),
@@ -175,31 +175,22 @@ server <- function(input, output, session) {
       stopApp()
     }
   })
-  
-  # read configuration data
-  data <-
-    read.csv("data/available_data.csv",
-             header = TRUE,
-             sep = ",")
-  
+
   # select concepts from input data
-  concepts_df <- read.csv("data/concepts.csv",
-                          header = TRUE)
   concepts <-
-    unique(concepts_df[!(concepts_df$base_concept %in% 
-                           c("drop", "region", "vote", "l_vote")), ]$description)
-  
+    unique(concepts_df[!(concepts_df$base_concept %in%
+                           c("drop", "region", "vote", "l_vote")),]$description)
+
   ##### Page 1: Concepts + Context List Output #####
   output$variables_concepts <-
     renderUI({
       tags$div(align = 'left',
                checkboxGroupInput("concepts",
                                   label = "",
-                                  choices = concepts
-                                  ))
+                                  choices = concepts))
 
     })
-  
+
   observe({
     if (input$selectall == 0)
       return(NULL)
@@ -219,39 +210,40 @@ server <- function(input, output, session) {
                                selected = concepts)
     }
   })
-  
+
   # Build country/year matrix
   data_country_year <-
-    data.frame(matrix(ncol = nrow(unique(data["year"])),
-                      nrow = nrow(unique(data["country_name"]))))
+    data.frame(matrix(ncol = nrow(unique(available_data["year"])),
+                      nrow = nrow(unique(available_data["country_name"]))))
   # set unique years as colnames
   colnames(data_country_year) <-
-    as.vector(unique(as.character(sort(data[["year"]]))))
+    as.vector(unique(as.character(sort(available_data[["year"]]))))
   # Write unique country values to new column
-  data_country_year["Country"] <- unique(data["country_name"])
+  data_country_year["Country"] <-
+    unique(available_data["country_name"])
   data_country_year <- data_country_year %>%
     select("Country", everything())
   # select Country as first column
   column_to_rownames(data_country_year, var = "Country")
-  
+
   # functon to set available (TRUE) combinations of country/year
   set_values_year <- function(row) {
     current_years <-
-      list(as.character(data[data$country_name == row["Country"], "year"]))
+      list(as.character(available_data[available_data$country_name == row["Country"], "year"]))
     for (year in current_years) {
       row[year] <- paste(year, "_", row["Country"], sep = "")
     }
     return(row)
   }
-  
+
   # iterate over rows of transposed matrix and call set_values_year function
   data_country_year <-
     as.data.frame(t(apply(data_country_year, 1, set_values_year)))
   options(DT.options = list(pageLength = 5))
-  
+
   # include checkbox matrix into data table
   counter <<- 1
-  
+
   data_country_year_datatable <- {
     data_country_year <- rbind("Select all", data_country_year)
     data_country_year <-
@@ -259,8 +251,8 @@ server <- function(input, output, session) {
                                          "Country")
     data_country_year[1, 2] <-
       glue::glue(paste('<input type="checkbox" id=select_all>'))
-    data_country_year[, -2] <-
-      apply(data_country_year[, -2], c(1, 2), function(x) {
+    data_country_year[,-2] <-
+      apply(data_country_year[,-2], c(1, 2), function(x) {
         # fill cell with NA if no context/row/column selection
         if (is.na(x)) {
           return(NA)
@@ -284,7 +276,7 @@ server <- function(input, output, session) {
           ))
         }
       })
-    
+
     # start at 1000 to prevent duplicate IDs of HTML elements
     counter <<- 1000
     data_country_year[, 1] <-
@@ -302,7 +294,7 @@ server <- function(input, output, session) {
           )
         ))
       })
-    
+
     # finally, configure data table
     datatable(
       data_country_year,
@@ -328,9 +320,9 @@ server <- function(input, output, session) {
       selection = "none"
     )
   }
-  
+
   output$countries_year = renderDT(data_country_year_datatable)
-  
+
   # add handlers to checkbox clicks
   runjs(
     "$('body').on('click', '#select_all',
@@ -359,7 +351,7 @@ server <- function(input, output, session) {
                 }
     );"
   )
-  
+
   runjs(
     "$('body').on('click', '.select_row',
                 function(event) {
@@ -376,7 +368,7 @@ server <- function(input, output, session) {
                 }
     );"
   )
-  
+
   runjs(
     "$('body').on('click', '.contexts',
             function() {
@@ -385,41 +377,41 @@ server <- function(input, output, session) {
             }
           );"
   )
-  
+
   observeEvent(input$resetall, {
     output$countries_year = renderDT(data_country_year_datatable)
   })
-  
-  
+
+
   ##### Page 2: Choose Directory #####
   # popup to choose directory
   observeEvent(input$dir, {
     toggleState("structure_creation", input$dir != "")
   })
-  
+
   observeEvent(input$structure_creation, {
     input_dir <- input$dir
-    
+
     checkbox_names = gsub("-",  " ", input$checkboxes, fixed = TRUE)
-    data <-
-      data %>% filter(year %in% unlist(sapply(
+    available_data <-
+      available_data %>% filter(year %in% unlist(sapply(
         str_split(checkbox_names, "_"), `[`, 1
       )))
-    data <-
-      data %>% filter(country_name %in% unlist(sapply(str_split(
+    available_data <-
+      available_data %>% filter(country_name %in% unlist(sapply(str_split(
         checkbox_names, "_"
       ), `[`)))
-    
-    for (context in 1:nrow(data)) {
-      dir.create(file.path(paste0(input_dir, "/"), paste0(data[context, "folder_name"], "/")), showWarnings = FALSE)
+
+    for (context in 1:nrow(available_data)) {
+      dir.create(file.path(paste0(input_dir, "/"), paste0(available_data[context, "folder_name"], "/")), showWarnings = FALSE)
     }
   })
-  
+
   # create data table with selected concepts
   several_files_found_msg <- "Multiple files found! Please check."
-  
+
   update_selected_table <- function() {
-    data_filtered <<- data
+    data_filtered <<- available_data
     selected_context_table <<- {
       checkbox_names = gsub("-",  " ", input$checkboxes, fixed = TRUE)
       data_filtered$file_name <<-
@@ -437,7 +429,7 @@ server <- function(input, output, session) {
             return("")
           }
         })
-      
+
       data_filtered$data_access <<-
         ifelse(data_filtered$data_access == 1,
                "non-restrictive",
@@ -450,7 +442,7 @@ server <- function(input, output, session) {
         ifelse(data_filtered$data_access == 3,
                "very restrictive",
                data_filtered$data_access)
-      
+
       data_filtered <<-
         data_filtered %>% filter(year %in% unlist(sapply(
           str_split(checkbox_names, "_"), `[`, 1
@@ -459,7 +451,7 @@ server <- function(input, output, session) {
         data_filtered %>% filter(country_name %in% unlist(sapply(
           str_split(checkbox_names, "_"), `[`
         )))
-      
+
       datatable(
         select(
           data_filtered,
@@ -485,23 +477,24 @@ server <- function(input, output, session) {
         selection = "none"
       )
     }
-    
+
     output$data_selected <- renderDT(
       selected_context_table %>% formatStyle(
         "file_name",
         target = 'cell',
         backgroundColor = styleEqual(c("", several_files_found_msg), c('red', 'yellow'))
-      ))
+      )
+    )
   }
-  
+
   observeEvent(input$refresh_table, {
     update_selected_table()
   })
-  
+
   observe({
     update_selected_table()
   })
-  
+
   has_missing_file_names <- function() {
     if (!is.null(data_filtered)) {
       return(nrow(

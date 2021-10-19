@@ -11,9 +11,6 @@
 #' @noRd
 
 build_infrastructure <- function(folder_location = NULL,
-                                 available_data = NULL,
-                                 recodes_path = NULL,
-                                 mappings_path = NULL,
                                  selected_concepts = NULL,
                                  selected_contexts = NULL,
                                  map = TRUE,
@@ -74,55 +71,27 @@ build_infrastructure <- function(folder_location = NULL,
   }
 
   ## ---- Input files ----
-  if (is.null(available_data)) {
-    available_data <- read.csv("data/available_data.csv") %>%
-      dplyr::mutate(election_date = as.Date(election_date)) %>%
-      dplyr::mutate_if(is.character, list(~ na_if(., "")))
-  } else {
-    available_data <- available_data %>%
-      dplyr::mutate(election_date = as.Date(election_date)) %>%
-      dplyr::mutate_if(is.character, list(~ na_if(., "")))
-  }
-
-  if (is.null(recodes_path)) {
-    recodes <- read.csv("data/recodes.csv")  %>%
-      dplyr::mutate(election_date = as.Date(election_date)) %>%
-      dplyr::mutate_if(is.character, list(~ na_if(., "")))
-  } else {
-    recodes <- read.csv(recodes_path)  %>%
-      dplyr::mutate(election_date = as.Date(election_date)) %>%
-      dplyr::mutate_if(is.character, list(~ na_if(., "")))
-  }
-
-  if (is.null(mappings_path)) {
-    mappings <- read.csv("data/mappings.csv") %>%
-      dplyr::select(elec_id, party, party_harmonized, map_vote, map_lr,
-                    any_of(map_vars))
-  } else {
-    mappings <- read.csv(mappings_path) %>%
-      dplyr::select(elec_id, party, party_harmonized, map_vote, map_lr,
-                    any_of(map_vars))
-  }
+  mappings <- mappings %>%
+    dplyr::select(elec_id, party, party_harmonized, map_vote, map_lr,
+                  any_of(map_vars))
 
   # ---- Selections ----
   ## Select concepts
-  concepts <- read.csv("data/concepts.csv",
-                       header = TRUE)
   if (is.null(selected_concepts)) {
     selected_concepts <-
-      concepts$concept[concepts$description %in%
-                         c("drop",
-                           "region",
-                           "Vote choice (t)",
-                           "Vote choice (t - 1)")]
+      concepts_df$concept[concepts$description %in%
+                            c("drop",
+                              "region",
+                              "Vote choice (t)",
+                              "Vote choice (t - 1)")]
   } else {
     selected_concepts <-
-      concepts$concept[concepts$description %in%
-                         c("drop",
-                           "region",
-                           "Vote choice (t)",
-                           "Vote choice (t - 1)",
-                           selected_concepts)]
+      concepts_df$concept[concepts$description %in%
+                            c("drop",
+                              "region",
+                              "Vote choice (t)",
+                              "Vote choice (t - 1)",
+                              selected_concepts)]
   }
 
   ## Select contexts

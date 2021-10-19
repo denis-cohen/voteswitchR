@@ -33,6 +33,7 @@ Depends:
 Imports:
     countrycode,
     dplyr (>= 1.0.0),
+    DT,
     hot.deck,
     labelled,
     lubridate,
@@ -40,6 +41,9 @@ Imports:
     parallel,
     rio,
     shiny,
+    shinyalert,
+    shinyFiles,
+    shinyjs,
     tidyr,
     methods,
     Rcpp (>= 0.12.0),
