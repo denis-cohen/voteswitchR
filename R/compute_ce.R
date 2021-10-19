@@ -1,4 +1,9 @@
-## compute_ce
+#' @title compute_ce
+#'
+#' @description Internal function to compute conditional expectations
+#'
+#' @noRd
+
 compute_ce <- function(eta, which_empty, s) {
   eta %>%
     sapply(function (x)

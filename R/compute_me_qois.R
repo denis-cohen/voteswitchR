@@ -1,4 +1,10 @@
-## quantities of interest (marginal effects)
+#' @title compute_me_qois
+#'
+#' @description Internal function to compute substantively
+#' meaningful quantities of interest (average marginal effects)
+#'
+#' @noRd
+
 compute_me_qois <- function(pr_obj_0,
                             pr_obj_1,
                             y_structure,
@@ -13,7 +19,7 @@ compute_me_qois <- function(pr_obj_0,
   retain <- y_structure$retain
   sup_t <- c(retain, gain)
   sup_tm1 <- c(retain, loss)
-  
+
   ## Denominator
   if (relative) {
     if (base == "t") {
@@ -30,39 +36,39 @@ compute_me_qois <- function(pr_obj_0,
   } else {
     denom <- 1.0
   }
-  
+
   ## ---- Overall quantities ---
   losses <-
     (((pr_obj_1[, loss] - pr_obj_0[, loss]) %>%
         apply(1, sum)) / denom) %>%
     quantile(posterior_quantiles) %>%
     `/`(predictor_shift)
-  
+
   gains <-
     (((pr_obj_1[, gain] - pr_obj_0[, gain]) %>%
         apply(1, sum)) / denom) %>%
     quantile(posterior_quantiles) %>%
     `/`(predictor_shift)
-  
+
   balance <- ((((pr_obj_1[, gain] - pr_obj_1[, loss]) -
                   (pr_obj_0[, gain] - pr_obj_0[, loss])
   ) %>%
     apply(1, sum)) / denom) %>%
     quantile(posterior_quantiles) %>%
     `/`(predictor_shift)
-  
+
   volume <- ((((pr_obj_1[, gain] + pr_obj_1[, loss]) -
                  (pr_obj_0[, gain] + pr_obj_0[, loss])
   ) %>%
     apply(1, sum)) / denom) %>%
     quantile(posterior_quantiles) %>%
     `/`(predictor_shift)
-  
+
   retention <-
     ((pr_obj_1[, retain] - pr_obj_0[, retain]) / denom) %>%
     quantile(posterior_quantiles) %>%
     `/`(predictor_shift)
-  
+
   ## Dyadic quantities
   dyadic_losses <-
     dyadic_gains <- dyadic_balances <- dyadic_volumes <- list()
@@ -71,25 +77,25 @@ compute_me_qois <- function(pr_obj_0,
       ((pr_obj_1[, loss[d]] - pr_obj_0[, loss[d]]) / denom) %>%
       quantile(posterior_quantiles) %>%
       `/`(predictor_shift)
-    
+
     dyadic_gains[[dyad_names[d]]] <-
       ((pr_obj_1[, gain[d]] - pr_obj_0[, gain[d]]) / denom) %>%
       quantile(posterior_quantiles) %>%
       `/`(predictor_shift)
-    
+
     dyadic_balances[[dyad_names[d]]] <-
       (((pr_obj_1[, gain[d]] - pr_obj_1[, loss[d]]) -
           (pr_obj_0[, gain[d]] - pr_obj_0[, loss[d]])) / denom) %>%
       quantile(posterior_quantiles) %>%
       `/`(predictor_shift)
-    
+
     dyadic_volumes[[dyad_names[d]]] <-
       (((pr_obj_1[, gain[d]] + pr_obj_1[, loss[d]]) -
           (pr_obj_0[, gain[d]] + pr_obj_0[, loss[d]])) / denom) %>%
       quantile(posterior_quantiles) %>%
       `/`(predictor_shift)
   }
-  
+
   ## Return
   me_qois <- list(
     losses = losses,

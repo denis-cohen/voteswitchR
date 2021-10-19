@@ -1,4 +1,10 @@
-## quantities of interest (conditional expectations)
+#' @title compute_ce_qois
+#'
+#' @description Internal function to compute substantively
+#' meaningful quantities of interest (conditional expectations)
+#'
+#' @noRd
+
 compute_ce_qois <- function(ce_obj,
                             y_structure,
                             base,
@@ -12,7 +18,7 @@ compute_ce_qois <- function(ce_obj,
   resid <- y_structure$resid
   sup_t <- c(retain, gain)
   sup_tm1 <- c(retain, loss)
-  
+
   ## Denominator
   if (relative) {
     if (base == "t") {
@@ -28,46 +34,46 @@ compute_ce_qois <- function(ce_obj,
   } else {
     denom <- 1.0
   }
-  
+
   ## ---- Overall quantities ---
   losses <-
     ((ce_obj[, loss,] %>% apply(c(1, 3), sum)) / denom) %>%
     apply(2, quantile, posterior_quantiles)
-  
+
   gains <-
     ((ce_obj[, gain,] %>% apply(c(1, 3), sum)) / denom) %>%
     apply(2, quantile, posterior_quantiles)
-  
+
   balance <- (((ce_obj[, gain, ] - ce_obj[, loss, ]) %>%
                  apply(c(1, 3), sum)) / denom) %>%
     apply(2, quantile, posterior_quantiles)
-  
+
   volume <- (((ce_obj[, gain, ] + ce_obj[, loss, ]) %>%
                 apply(c(1, 3), sum)) / denom) %>%
     apply(2, quantile, posterior_quantiles)
-  
+
   retention <- (ce_obj[, retain, ] / denom) %>%
     apply(2, quantile, posterior_quantiles)
-  
+
   ## Dyadic quantities
   dyadic_losses <-
     dyadic_gains <- dyadic_balances <- dyadic_volumes <- list()
   for (d in seq_along(gain)) {
     dyadic_losses[[dyad_names[d]]] <- (ce_obj[, loss[d],] / denom) %>%
       apply(2, quantile, posterior_quantiles)
-    
+
     dyadic_gains[[dyad_names[d]]] <- (ce_obj[, gain[d],] / denom) %>%
       apply(2, quantile, posterior_quantiles)
-    
+
     dyadic_balances[[dyad_names[d]]] <-
       ((ce_obj[, gain[d], ] - ce_obj[, loss[d], ]) / denom) %>%
       apply(2, quantile, posterior_quantiles)
-    
+
     dyadic_volumes[[dyad_names[d]]] <-
       ((ce_obj[, gain[d],] + ce_obj[, loss[d],]) / denom) %>%
       apply(2, quantile, posterior_quantiles)
   }
-  
+
   ## Return
   ce_qois <- list(
     losses = losses,

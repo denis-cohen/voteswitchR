@@ -1,4 +1,10 @@
-## reorder dyadic quantities of interest in conditional models
+#' @title reorder_qoi
+#'
+#' @description Internal function to reorder quantities
+#' of interest before returning outputs
+#'
+#' @noRd
+
 reorder_qoi <- function(qoi) {
   ## Auxiliary objects
   num_conditions <- length(qoi)
@@ -7,17 +13,17 @@ reorder_qoi <- function(qoi) {
   non_dyadic_quantities <-
     c("losses", "gains", "balance", "volume", "retention")
   dyad_names <- names(qoi[[1]][["dyadic_losses"]])
-  
+
   ## New qoi
   reordered_qoi <- list()
-  
+
   ## Non-dyadic quantities
   for (q in non_dyadic_quantities) {
     reordered_qoi[[q]] <- lapply(qoi, function(x)
       x[[q]]) %>%
       simplify2array()
   }
-  
+
   ## Dyadic quantities
   for (q in dyadic_quantities) {
     reordered_qoi[[q]] <- list()
@@ -28,7 +34,7 @@ reorder_qoi <- function(qoi) {
         simplify2array()
     }
   }
-  
+
   ## Return value
   return(reordered_qoi)
 }

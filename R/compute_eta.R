@@ -1,4 +1,10 @@
-## compute_eta
+#' @title compute_eta
+#'
+#' @description Internal function to compute the linear
+#' predictors
+#'
+#' @noRd
+
 compute_eta <- function (est,
                          num_cat,
                          num_catm1,

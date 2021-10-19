@@ -1,6 +1,6 @@
 Package: voteswitchR
 Type: Package
-Title: Build, Map, and Analyze Vote Switching data in R
+Title: Build, Map, and Analyze Vote Switching Data in R
 Version: 0.1.0
 Authors@R:
     c(person(given = "Denis",
@@ -31,21 +31,33 @@ BugReports: https://github.com/denis-cohen/voteswitchR/issues
 Depends:
     R (>= 4.0.0)
 Imports:
-    countrycode
-    dplyr (>= 1.0.0)
-    hot.deck
-    labelled
-    lubridate
-    magrittr
-    parallel
-    rio
-    rstan
-    shiny
-    tidyr
-Suggests:
+    countrycode,
+    dplyr (>= 1.0.0),
+    hot.deck,
+    labelled,
+    lubridate,
+    magrittr, 
+    parallel,
+    rio,
+    shiny,
+    tidyr,
+    methods,
+    Rcpp (>= 0.12.0),
+    RcppParallel (>= 5.0.1),
+    rstan (>= 2.18.1),
+    rstantools (>= 2.1.1)
 VignetteBuilder:
     knitr
 Encoding: UTF-8
 Language: en-US
 LazyData: true
-RoxygenNote: 7.1.0
+RoxygenNote: 7.1.2
+Biarch: true
+LinkingTo: 
+    BH (>= 1.66.0),
+    Rcpp (>= 0.12.0),
+    RcppEigen (>= 0.3.3.3.0),
+    RcppParallel (>= 5.0.1),
+    rstan (>= 2.18.1),
+    StanHeaders (>= 2.18.0)
+SystemRequirements: GNU make

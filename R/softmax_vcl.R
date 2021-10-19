@@ -1,4 +1,10 @@
-## softmax_vcl
+#' @title softmax_vcl
+#'
+#' @description Internal function for the inverse link
+#' function of the MAVCL model; a modified softmax function.
+#'
+#' @noRd
+
 softmax_vcl <- function(eta, which_empty) {
   eta[which_empty] <- NA
   if (is.vector(eta)) {

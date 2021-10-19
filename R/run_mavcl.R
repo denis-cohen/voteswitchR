@@ -1,3 +1,13 @@
+#' @title run_mavcl
+#'
+#' @description Runs the Mixed Aggregate Varying Choice Set Logit (MAVCL)
+#' model via \code{rstan}.
+#'
+#' @return Returns an object of class \code{mavcl_estimation}: A list that
+#' includes estimates and auxiliary information.
+#'
+#' @export
+
 run_mavcl <- function(data,
                       Y_names,
                       null_model = FALSE,
@@ -33,18 +43,18 @@ run_mavcl <- function(data,
              all()) {
     is_imputed <- TRUE
   }
-  
+
   ## ---- Data ----
   cat("Preparing data")
   cat("\n")
-  
+
   ## Initialize data list
   dat <- list()
-  
+
   for (m in seq_along(data)) {
     ## Initialize data list
     dat[[m]] <- list()
-    
+
     if (null_model) {
       rhs <- "~ 1"
       dat[[m]]$D <- 1L
@@ -59,7 +69,7 @@ run_mavcl <- function(data,
         cats_predictor <- levels(data[[m]][[main_predictor]])
       }
       rhs <- paste0("~ ", main_predictor)
-      
+
       ## Moderator
       if (not(is.null(moderator))) {
         if (not(moderator_continuous)) {
@@ -76,12 +86,12 @@ run_mavcl <- function(data,
                       " + ",
                       paste0(main_predictor, ":", moderator))
       }
-      
+
       ## Other covariates
       if (not(is.null(other_covariates))) {
         rhs <- paste0(rhs, " + ", paste(other_covariates, collapse = " + "))
       }
-      
+
       ## Number of varying coefs
       if (random_slopes) {
         dat[[m]]$D <- ifelse(predictor_continuous, 2L, cats_predictor)
@@ -89,14 +99,14 @@ run_mavcl <- function(data,
         dat[[m]]$D <- 1L
       }
     }
-    
+
     ## Data
     dat[[m]]$X <- model.matrix(as.formula(rhs), data = data[[m]])
     dat[[m]]$Y <- as.matrix(data[[m]][Y_names])
     dat[[m]]$ncat <- ncol(dat[[m]]$Y)
     dat[[m]]$J <- nrow(dat[[m]]$X)
     dat[[m]]$K = ncol(dat[[m]]$X)
-    
+
     ## Random intercepts
     if (re_parties) {
       dat[[m]]$num_parties <- length(unique(data[[m]]$party_harmonized))
@@ -108,7 +118,7 @@ run_mavcl <- function(data,
       dat[[m]]$num_parties <- NULL
       dat[[m]]$party_id <- NULL
     }
-    
+
     if (re_elections) {
       dat[[m]]$num_elections <- length(unique(data[[m]]$elec_id))
       dat[[m]]$election_id <- data[[m]]$elec_id
@@ -119,7 +129,7 @@ run_mavcl <- function(data,
       dat[[m]]$num_elections <- NULL
       dat[[m]]$election_id <- NULL
     }
-    
+
     if (re_countries) {
       dat[[m]]$num_countries <- length(unique(data[[m]]$iso2c))
       dat[[m]]$country_id <- data[[m]]$iso2c
@@ -130,13 +140,13 @@ run_mavcl <- function(data,
       dat[[m]]$num_countries <- NULL
       dat[[m]]$country_id <- NULL
     }
-    
+
     ## All optinal random effects
     dat[[m]]$V <- rbind(dat[[m]]$party_id,
                         dat[[m]]$election_id,
                         dat[[m]]$country_id)
   }
-  
+
   ## ---- Define Type ----
   ## Type
   type <- dplyr::case_when(
@@ -149,10 +159,10 @@ run_mavcl <- function(data,
     re_parties      & not(re_elections) &      re_countries ~ 7L,
     re_parties      &     re_elections  &      re_countries ~ 8L
   )
-  
+
   ## Type-specific model
   model_path <- paste0("mod/vclogit_l2_type", type, ".stan")
-  
+
   ## Parameters to sample
   pars <- c("beta", "Sigma", "nu")
   re_pars <- c("Sigma", "nu")
@@ -162,18 +172,18 @@ run_mavcl <- function(data,
     pars <- c(pars, paste(re_pars, "elections", sep = "_"))
   if (re_countries)
     pars <- c(pars, paste(re_pars, "countries", sep = "_"))
-  
-  
+
+
   ## ---- Compilation ----
   cat("Compiling MAVCL Model")
   cat("\n")
   mod <- stan_model(file = model_path,
                     model_name = paste0("MAVCL Model ", Sys.time()))
-  
+
   ## ---- Estimation ----
   cat("Performing Full Bayesian Inference")
   cat("\n")
-  
+
   if (parallelize) {
     ## Set up for parallel estimation
     if (Sys.info()["sysname"] == "Windows") {
@@ -203,7 +213,7 @@ run_mavcl <- function(data,
                         outfile = paste0("est/", savename, ".txt"),
                         type = "FORK")
     }
-    
+
     ## Sample
     est <- parLapply(cl, seq_along(dat),
                      function (m) {
@@ -225,7 +235,7 @@ run_mavcl <- function(data,
                          seed = seed
                        )
                      })
-    
+
     ## Exit parallel computation
     stopCluster(cl)
   } else {
@@ -247,7 +257,7 @@ run_mavcl <- function(data,
       seed = seed
     )
   }
-  
+
   ## Return output
   cat("Returning output")
   cat("\n")
@@ -278,9 +288,9 @@ run_mavcl <- function(data,
       output$moderator_levels <- cats_moderator
     }
   }
-  
+
   return(output)
-  
+
   ## Optionally: Save to file
   if (not(is.null(savepath))) {
     save_to <- paste0(savepath, "/", svnm, ".RData")

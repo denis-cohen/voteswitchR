@@ -1,3 +1,15 @@
+#' @title build_infrastructure
+#'
+#' @description Internal function called via the GUI of
+#' \code{shiny/run_data_file/app.R} that performs data recoding and,
+#' upon request, data mapping, imputation, and reshaping within each
+#' selected electoral context.
+#'
+#' @return Returns and/or stores and object called data_file which contains
+#' a list of data for all requested electoral contexts.
+#'
+#' @noRd
+
 build_infrastructure <- function(folder_location = NULL,
                                  available_data = NULL,
                                  recodes_path = NULL,
@@ -13,12 +25,12 @@ build_infrastructure <- function(folder_location = NULL,
                                  format = c("long", "wide"),
                                  existing_data_file = NULL,
                                  output_file_path = NULL) {
-  
+
   ## ---- Checks ----
   cat("Building your data infrastructure.\n")
   cat("Supplied arguments:\n")
   print(c(as.list(environment())))
-  
+
   ## ---- Dependencies ----
   ## Save package names as a vector of strings
   pkgs <-
@@ -32,14 +44,14 @@ build_infrastructure <- function(folder_location = NULL,
       "hot.deck",
       "labelled"
     )
-  
+
   ## Install uninstalled packages
   lapply(pkgs[!(pkgs %in% installed.packages())], install.packages)
-  
+
   ## Load all packages to library and adjust options
   lapply(pkgs, library, character.only = TRUE)
-  
-  
+
+
   ## ---- Initial checks ----
   if (impute & not(map)) {
     stop(
@@ -50,7 +62,7 @@ build_infrastructure <- function(folder_location = NULL,
       )
     )
   }
-  
+
   if (format == "long" & not(map)) {
     stop(
       paste(
@@ -60,7 +72,7 @@ build_infrastructure <- function(folder_location = NULL,
       )
     )
   }
-  
+
   ## ---- Input files ----
   if (is.null(available_data)) {
     available_data <- read.csv("data/available_data.csv") %>%
@@ -71,7 +83,7 @@ build_infrastructure <- function(folder_location = NULL,
       dplyr::mutate(election_date = as.Date(election_date)) %>%
       dplyr::mutate_if(is.character, list(~ na_if(., "")))
   }
-  
+
   if (is.null(recodes_path)) {
     recodes <- read.csv("data/recodes.csv")  %>%
       dplyr::mutate(election_date = as.Date(election_date)) %>%
@@ -81,7 +93,7 @@ build_infrastructure <- function(folder_location = NULL,
       dplyr::mutate(election_date = as.Date(election_date)) %>%
       dplyr::mutate_if(is.character, list(~ na_if(., "")))
   }
-  
+
   if (is.null(mappings_path)) {
     mappings <- read.csv("data/mappings.csv") %>%
       dplyr::select(elec_id, party, party_harmonized, map_vote, map_lr,
@@ -91,7 +103,7 @@ build_infrastructure <- function(folder_location = NULL,
       dplyr::select(elec_id, party, party_harmonized, map_vote, map_lr,
                     any_of(map_vars))
   }
-  
+
   # ---- Selections ----
   ## Select concepts
   concepts <- read.csv("data/concepts.csv",
@@ -99,9 +111,9 @@ build_infrastructure <- function(folder_location = NULL,
   if (is.null(selected_concepts)) {
     selected_concepts <-
       concepts$concept[concepts$description %in%
-                         c("drop", 
-                           "region", 
-                           "Vote choice (t)", 
+                         c("drop",
+                           "region",
+                           "Vote choice (t)",
                            "Vote choice (t - 1)")]
   } else {
     selected_concepts <-
@@ -112,12 +124,12 @@ build_infrastructure <- function(folder_location = NULL,
                            "Vote choice (t - 1)",
                            selected_concepts)]
   }
-  
+
   ## Select contexts
   if (is.null(selected_concepts)) {
     selected_contexts <- available_data$elec_id
   }
-  
+
   # ## ---- Initialize folder structure ----
   if (not(file.exists(folder_location))) {
     stop(
@@ -127,7 +139,7 @@ build_infrastructure <- function(folder_location = NULL,
             sep = " ")
     )
   }
-  
+
   ## Check folders
   needed_folders <-
     available_data$folder_name[available_data$elec_id %in% selected_contexts]
@@ -150,7 +162,7 @@ build_infrastructure <- function(folder_location = NULL,
                       "? [y/n]"
       )
     )
-    
+
     if (initialize_folders == "y") {
       for (f in missing_folders) {
         dir.create(paste0(folder_location, f))
@@ -165,7 +177,7 @@ build_infrastructure <- function(folder_location = NULL,
                         "\n \nReady to proceed? [y/n]"
         )
       )
-      
+
       if (not(put_files == "y")) {
         stop("Please come back when the original data files are ready.")
       }
@@ -173,7 +185,7 @@ build_infrastructure <- function(folder_location = NULL,
       stop("You need data folders for all selected contexts to proceed.")
     }
   }
-  
+
   ## ---- Define auxiliary objects ----
   core_concepts <- c(
     "iso2c",
@@ -199,7 +211,7 @@ build_infrastructure <- function(folder_location = NULL,
                      paste("like", LETTERS, sep = "_"))
   mappings_p_vars <- names(mappings)[names(mappings) != "elec_id"]
 
-  
+
   ## ---- Define sub-functions ----
   reshape_k <- function (x) {
     varying_x <-
@@ -282,10 +294,10 @@ build_infrastructure <- function(folder_location = NULL,
       ) %>%
         cat()
     )
-    
+
     ## Load and attach existing file
     data_file <- import(existing_data_file)
-    
+
     ## Overwrite arguments
     map <- data_file$info_aux$map
     impute <- data_file$info_aux$impute
@@ -294,11 +306,11 @@ build_infrastructure <- function(folder_location = NULL,
     format <- data_file$info_aux$format
   }
 
-  
+
   ## ---- Start loop through selected contexts ----
   counter <- 0L
   for (j in selected_contexts) {
-    
+
     ## ---- Data in ----
     ## Show progress:
     counter <- counter + 1L
@@ -312,7 +324,7 @@ build_infrastructure <- function(folder_location = NULL,
       ".\n"
     ) %>%
       cat()
-    
+
     ## Import data
     available_data_j <- available_data %>%
       filter(elec_id == j)
@@ -333,7 +345,7 @@ build_infrastructure <- function(folder_location = NULL,
              -iso2c,
              -elec_id,
              -source)
-    
+
     ## Select concepts
     names_selected_concepts_j <- c(
       selected_concepts[not(is.na(available_data_j[selected_concepts]))],
@@ -343,7 +355,7 @@ build_infrastructure <- function(folder_location = NULL,
 
     selected_concepts_j <-
       as.vector(available_data_j[names_selected_concepts_j])
-    
+
     ## Adjust recodes_j
     recodes_j <- recodes_j %>%
       dplyr::filter(concept %in% names_selected_concepts_j)
@@ -364,14 +376,14 @@ build_infrastructure <- function(folder_location = NULL,
       data_j <- paste0("subset(data_j, !(", drop_if, "))") %>%
         str2lang() %>%
         eval()
-      
+
       ## Adjust selected concepts
       selected_concepts_j <-
         selected_concepts_j[-which(names_selected_concepts_j == "drop")]
       names_selected_concepts_j <-
         names_selected_concepts_j[-which(names_selected_concepts_j == "drop")]
     }
-    
+
     ## Adjust original variable (ov) names
     names(data_j) <- paste0("ov_", names(data_j))
     selected_concepts_j[not(is.na(selected_concepts_j))] <-
@@ -385,7 +397,7 @@ build_infrastructure <- function(folder_location = NULL,
     data_j$exp_elec_id <- j
     data_j$exp_id <-
       paste(j, sprintf("%04d", 1:nrow(data_j)), sep = "-")
-    
+
     ## Rename selected concepts
     rename_concepts <-
       paste0("dplyr::mutate(data_j, ",
@@ -399,11 +411,11 @@ build_infrastructure <- function(folder_location = NULL,
     data_j <- rename_concepts %>%
       str2lang() %>%
       eval()
-    
-    
+
+
     ## Container for replace by variable (after numeric recodes)
     replace_j_deriv <- data.frame()
-    
+
     ## ---- Recodes (I) ----
     ## Start loop through selected concepts
     for (k in seq_along(selected_concepts_j)) {
@@ -411,18 +423,18 @@ build_infrastructure <- function(folder_location = NULL,
       concept_jk <- selected_concepts_j[k]
       conname_jk <- names_selected_concepts_j[k]
       expname_jk <- paste0("exp_", conname_jk)
-      
+
       ## Extract recode sequence
       recodes_jk <- recodes_j %>%
         filter(concept == conname_jk) %>%
         select(-concept)
-      
+
       ## Filter relevant operations
       recodes_jk <- recodes_jk %>%
         select(which(not(is.na(
           slice(recodes_jk, 1)
         ))))
-      
+
       ## If applicable: extract recodes
       if (any(grepl("recode", names(recodes_jk)))) {
         recode_values_jk <- recodes_jk %>%
@@ -440,18 +452,18 @@ build_infrastructure <- function(folder_location = NULL,
                  ),
                  ", TRUE ~ data_j[[expname_jk]])")
       }
-      
+
       ## Other operations are single-row
       recodes_jk <- recodes_jk %>%
         slice(1)
-      
+
       ## start_empty; else generate copy
       if ("start_empty" %in% names(recodes_jk)) {
         data_j[[expname_jk]] <- NA_real_
       } else {
         data_j[[expname_jk]] <- data_j[[conname_jk]]
       }
-      
+
       ## mvdecode
       if ("mvdecode" %in% names(recodes_jk)) {
         na_vals <- eval(str2lang(recodes_jk[["mvdecode"]]))
@@ -459,7 +471,7 @@ build_infrastructure <- function(folder_location = NULL,
           data_j[[expname_jk]] <- na_if(data_j[[expname_jk]], na_vals[i])
         }
       }
-      
+
       ## valid_range_min, valid_range_max
       if ("valid_range_min" %in% names(recodes_jk)) {
         data_j[[expname_jk]] <-
@@ -473,14 +485,14 @@ build_infrastructure <- function(folder_location = NULL,
                  NA,
                  data_j[[expname_jk]])
       }
-      
+
       ## recode
       if (any(grepl("recode", names(recodes_jk)))) {
         data_j[[expname_jk]] <- recode_values_jk %>%
           str2lang() %>%
           eval()
       }
-      
+
       ## rescale
       if ("rescale_add" %in% names(recodes_jk)) {
         data_j[[expname_jk]] <-
@@ -493,7 +505,7 @@ build_infrastructure <- function(folder_location = NULL,
         data_j[[expname_jk]] <-
           data_j[[expname_jk]] * rescale_multiply
       }
-      
+
       ## replace (by numeric/original variable)
       is_replace <-
         sapply(names(recodes_jk), function(x)
@@ -516,12 +528,12 @@ build_infrastructure <- function(folder_location = NULL,
           replace_by = replace_by,
           replace_type = replace_type
         )
-        
+
         if (any(replace_jk$replace_type == "orig")) {
           ## Operations involving replace by numeric / original variable values
           replace_jk_orig <- replace_jk %>%
             filter(replace_type == "orig")
-          
+
           for (r in seq_len(nrow(replace_jk_orig))) {
             if (replace_jk_orig$replace_if[r] == "always") {
               replace_values_jk <-
@@ -532,7 +544,7 @@ build_infrastructure <- function(folder_location = NULL,
                   replace_jk_orig$replace_by[r],
                   ")"
                 )
-              
+
               data_j <- replace_values_jk %>%
                 str2lang() %>%
                 eval()
@@ -549,14 +561,14 @@ build_infrastructure <- function(folder_location = NULL,
                   expname_jk,
                   "))"
                 )
-              
+
               data_j[[expname_jk]] <- replace_values_jk %>%
                 str2lang() %>%
                 eval()
             }
           }
         }
-        
+
         if (any(replace_jk$replace_type == "deriv")) {
           replace_j_deriv <- replace_j_deriv %>%
             bind_rows(replace_jk %>%
@@ -564,13 +576,13 @@ build_infrastructure <- function(folder_location = NULL,
         }
       }
     } ## End loop through selected concepts
-    
-    
+
+
     ## ---- Recodes (Replace if/by derived concepts) ----
     if (nrow(replace_j_deriv > 0)) {
       replace_j_deriv <-
         split(replace_j_deriv, replace_j_deriv$expname_jk)
-      
+
       for (k in names(replace_j_deriv)) {
         if (any(replace_j_deriv[[k]]$replace_if == "always")) {
           replace_values_jk <-
@@ -582,7 +594,7 @@ build_infrastructure <- function(folder_location = NULL,
               ")",
               " %>% ungroup()"
             )
-          
+
           data_j <- replace_values_jk %>%
             str2lang() %>%
             eval()
@@ -600,7 +612,7 @@ build_infrastructure <- function(folder_location = NULL,
                 k,
                 "))"
               )
-            
+
             data_j[[k]] <- replace_values_jk %>%
               str2lang() %>%
               eval()
@@ -608,7 +620,7 @@ build_infrastructure <- function(folder_location = NULL,
         }
       }
     }
-    
+
     ## ---- Post-Recode Processing ----
     data_j <- data_j %>%
       select(starts_with("exp_")) %>%
@@ -665,12 +677,12 @@ build_infrastructure <- function(folder_location = NULL,
       kk <- j
     }
     names(data_j) <- kk
-    
+
     for (k in kk) {
       ## Get data
       data_k <- as.data.frame(data_j[[k]]) %>%
         labelled::remove_attributes(c("groups", "label", "labels", "format.stata"))
-      
+
       ## ---- Mapping ----
       if (map) {
         paste0(
@@ -683,7 +695,7 @@ build_infrastructure <- function(folder_location = NULL,
           ".\n"
         ) %>%
           cat()
-        
+
         ## Party-specific survey-vars
         survey_p_vars_k <-
           survey_p_vars[survey_p_vars %in% names(data_k)]
@@ -701,7 +713,7 @@ build_infrastructure <- function(folder_location = NULL,
             data_k$l_vote
           )))) %>%
           dplyr::select(-elec_id)
-        
+
         ## Meta information
         prty <- unique(mappings_k$party_harmonized)
         n_prty <- nrow(mappings_k)
@@ -725,12 +737,12 @@ build_infrastructure <- function(folder_location = NULL,
           data_k <- data_k %>%
             dplyr::mutate(vote_new = NA_integer_,
                    l_vote_new = NA_integer_)
-          
+
           if ("pid" %in% names(data_k)) {
             data_k <- data_k %>%
               dplyr::mutate(pid_new = NA_integer_)
           }
-          
+
           ## Map
           for (p in 1:n_prty) {
             p_alph <- mappings_k$map_lr[p]
@@ -748,7 +760,7 @@ build_infrastructure <- function(folder_location = NULL,
                        p,
                        data_k$pid_new) # new PID ID
             }
-            
+
             for (v in mappings_p_vars) {
               # assign mappings party vars
               data_k <- within(data_k,
@@ -790,19 +802,19 @@ build_infrastructure <- function(folder_location = NULL,
                 TRUE ~ l_vote
               )
             )
-          
+
           if ("pid" %in% names(data_k)) {
             data_k <- data_k %>%
               dplyr::rename(pid_old = pid) %>%
               dplyr::rename(pid = pid_new) %>%
               dplyr::mutate(pid = case_when(
                 is.na(pid) & pid_old == 0 ~ 99L,
-                is.na(pid) & 
+                is.na(pid) &
                   pid_old != 0 & not(is.na(pid_old)) ~ 98L,
                 TRUE ~ pid
               ))
           }
-          
+
           ## Variable Selection
           ids <- c(
             "iso2c",
@@ -815,7 +827,7 @@ build_infrastructure <- function(folder_location = NULL,
             paste(rep(mappings_p_vars, each = n_prty), 1:n_prty, sep = "_")
           )
           ids <- ids[ids %in% names(data_k)]
-          
+
           noms <- c("vote", "l_vote", "pid", "male")
           noms <- noms[noms %in% names(data_k)]
           imp_vars <- c(noms,
@@ -827,11 +839,11 @@ build_infrastructure <- function(folder_location = NULL,
                         ), each = n_prty), 1:n_prty, sep = "_"))
           imp_vars <- imp_vars[imp_vars %in% names(data_k)]
           vars <- c(ids, imp_vars)
-          
+
           ## Remove all-missing rows
           all_na <-
             which(rowSums(is.na(data_k[, imp_vars])) == ncol(data_k[, imp_vars]))
-          
+
           if (length(all_na) >= 1) {
             warning(
               paste0(
@@ -844,7 +856,7 @@ build_infrastructure <- function(folder_location = NULL,
             data_k <- data_k %>%
               slice(-all_na)
           }
-          
+
           ## Drop old/auxiliary variables
           data_k <- data_k %>%
             dplyr::select(-any_of(
@@ -871,13 +883,13 @@ build_infrastructure <- function(folder_location = NULL,
           ".\n"
         ) %>%
           cat()
-        
+
         ## Maximum number of categories in discrete variables
         max_cats <- data_k[noms] %>%
           sapply(function(var)
             length(unique(var))) %>%
           max()
-        
+
         data_k_imp <- hot.deck(
           data_k[, vars],
           method = "p.draw",
@@ -888,7 +900,7 @@ build_infrastructure <- function(folder_location = NULL,
           optimizeSD = TRUE,
           seed = seed
         )
-        
+
         ## Store to data_file
         if (include_info_imp) {
           data_file$info_imp[[k]] <- data_k_imp
@@ -909,14 +921,14 @@ build_infrastructure <- function(folder_location = NULL,
           ".\n"
         ) %>%
           cat()
-        
+
         data_k <- reshape_k(data_k)
-        
+
         ## Store to_data_file
         if (impute) {
           data_file$data_imp[[k]] <- lapply(data_k_imp$data, reshape_k)
         }
-        
+
         ## ---- Output ----
         if (not(no_map) & not(no_l_vote)) {
           data_file$data[[k]] <- data_k
@@ -924,12 +936,17 @@ build_infrastructure <- function(folder_location = NULL,
       }
     }
   } ## End loop through selected contexts
-  
+
+  ## Define class
+  class(data_file) <- "voteswitchr_data_file"
+
   ## ---- Value ----
-  cat("Data processing completed. Storing data file(s). (Gloval Environment and data_file.RData)")
+  cat("Data processing completed. Storing data file(s).\n")
   if (is.null(output_file_path)) {
     list2env(list("data_file" = data_file), envir = .GlobalEnv)
+    cat("An object 'data_file' has been stored in the global environment.\n")
   } else {
     save(data_file, file = output_file_path)
+    cat(paste0("An object 'data_file' has been saved at ", output_file_path))
   }
 }

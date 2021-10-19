@@ -1,4 +1,9 @@
-## compute_ame
+#' @title compute_ame
+#'
+#' @description Internal function to compute average marginal effects
+#'
+#' @noRd
+
 compute_ame <-
   function(eta0,
            eta1,
