@@ -9,22 +9,22 @@ Authors@R:
              role = c("cre", "aut")),
       person(given = "Tim",
              family = "Allinger",
-             email = "",
+             email = "tialling@mail.uni-mannheim.de",
              role = c("ctb")),
       person(given = "Nick",
              family = "Baumann",
-             email = "",
+             email = "nbaumann@mail.uni-mannheim.de",
              role = c("ctb")),
       person(given = "Werner",
              family = "Krause",
-             email = "",
+             email = "werner.krause@hu-berlin.de",
              role = c("ctb")),
       person(given = "Andreas",
              family = "Küpfer",
-             email = "",
+             email = "akuepfer@mail.uni-mannheim.de",
              role = c("ctb", "aut")))
 Maintainer: Denis Cohen <denis.cohen@mzes.uni-mannheim.de>
-Description: ...
+Description: The \code{voteswitchR} package is...
 License: GPL-3
 URL: https://github.com/denis-cohen/voteswitchR
 BugReports: https://github.com/denis-cohen/voteswitchR/issues
@@ -37,6 +37,7 @@ Imports:
     labelled
     lubridate
     magrittr
+    parallel
     rio
     rstan
     shiny
