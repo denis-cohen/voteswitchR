@@ -7,6 +7,10 @@ Authors@R:
              family = "Cohen",
              email = "denis.cohen@mzes.uni-mannheim.de",
              role = c("cre", "aut")),
+      person(given = "Andreas",
+             family = "Küpfer",
+             email = "akuepfer@mail.uni-mannheim.de",
+             role = c("aut", "ctb")),
       person(given = "Tim",
              family = "Allinger",
              email = "tialling@mail.uni-mannheim.de",
@@ -18,11 +22,7 @@ Authors@R:
       person(given = "Werner",
              family = "Krause",
              email = "werner.krause@hu-berlin.de",
-             role = c("ctb")),
-      person(given = "Andreas",
-             family = "Küpfer",
-             email = "akuepfer@mail.uni-mannheim.de",
-             role = c("ctb", "aut")))
+             role = c("ctb")))
 Maintainer: Denis Cohen <denis.cohen@mzes.uni-mannheim.de>
 Description: The \code{voteswitchR} package is...
 License: GPL-3
@@ -31,18 +31,23 @@ BugReports: https://github.com/denis-cohen/voteswitchR/issues
 Depends:
     R (>= 4.0.0)
 Imports:
-    countrycode (>= 1.3.0),
+    countrycode,
     dplyr (>= 1.0.0),
-    DT (>= 0.19),
-    hot.deck (>= 1.2),
-    labelled (>= 2.8.0),
-    lubridate (>= 1.8.0),
-    magrittr (>= 2.0.1), 
-    rio (>= 0.5.27),
-    shiny (>=	1.7.1),
-    shinyalert (>= 2.0.0),
-    shinyjs (>= 2.0.0),
-    tidyr (>= 1.1.4),
+    DT,
+    hot.deck,
+    labelled,
+    lubridate,
+    magrittr, 
+    parallel,
+    rio,
+    shiny,
+    shinyalert,
+    shinyFiles,
+    shinyjs,
+    stringr,
+    tibble,
+    tidyr,
+    methods,
     Rcpp (>= 0.12.0),
     RcppParallel (>= 5.0.1),
     rstan (>= 2.18.1),
