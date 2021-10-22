@@ -8,7 +8,6 @@
 #'
 #' @export
 
-
 build_data_file <- function() {
   appDir <-
     system.file("shiny", "build_data_file", package = "voteswitchR")
