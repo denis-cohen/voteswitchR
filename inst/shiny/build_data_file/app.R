@@ -2,26 +2,10 @@
 NUM_PAGES <- 3
 ui <- fluidPage(
   useShinyalert(),
-  tags$head(tags$style(
-    HTML(
-      ".multicol .shiny-options-group{
-
-                              -webkit-column-count: 4; /* Chrome, Safari, Opera */
-                              -moz-column-count: 4;    /* Firefox */
-                              column-count: 4;
-                              -moz-column-fill: balanced;
-                              -column-fill: balanced;
-                              }
-                              .checkbox{
-                              margin-top: 0px !important;
-                              -webkit-margin-after: 0px !important;
-                              }
-                              "
-    )
-  )),
   useShinyjs(),
   titlePanel("Vote Switching Data"),
   hidden(lapply(seq(NUM_PAGES), function(i) {
+    # Landing Page (Concepts+Contexts Selection)
     if (i == 1) {
       div(
         class = "page",
@@ -35,6 +19,7 @@ ui <- fluidPage(
         actionLink("resetall", "Reset Context Selection"),
         DTOutput('countries_year')
       )
+    # Data Download/Selection
     } else if (i == 2) {
       div(
         class = "page",
@@ -50,6 +35,7 @@ ui <- fluidPage(
         actionLink("refresh_table", "Generate/Update Context Table"),
         DTOutput('data_selected')
       )
+    # Parameter Setting for infrastructure function
     } else if (i == 3) {
       div(
         class = "page",
@@ -98,17 +84,6 @@ ui <- fluidPage(
 
 #### BACKEND PART ####
 server <- function(input, output, session) {
-  # Load & update the packages we need
-  # set options
-  options(stringsAsFactors = F)
-  p_needed <- c("dplyr")
-  packages <- rownames(installed.packages())
-  p_to_install <- p_needed[!(p_needed %in% packages)]
-  if (length(p_to_install) > 0) {
-    install.packages(p_to_install)
-  }
-  lapply(p_needed, require, character.only = TRUE)
-
   # Set up pages (+ navigation)
   rv <- reactiveValues(page = 1)
   data_filtered <<- NULL
@@ -165,12 +140,12 @@ server <- function(input, output, session) {
     }
   })
 
+  ##### Page 1: Concepts + Context List Output #####
   # select concepts from input data
   concepts <-
     unique(voteswitchr:::concepts_df[!(voteswitchr:::concepts_df$base_concept %in%
                                          c("drop", "region", "vote", "l_vote")), ]$description)
 
-  ##### Page 1: Concepts + Context List Output #####
   output$variables_concepts <-
     renderUI({
       tags$div(align = 'left',
@@ -226,7 +201,7 @@ server <- function(input, output, session) {
     current_years <-
       list(as.character(voteswitchr:::available_data[voteswitchr:::available_data$country_name == row["Country"], "year"]))
     for (year in current_years) {
-      row[year] <- paste(year, "_", row["Country"], sep = "")
+      row[year] <- paste0(year, "_", row["Country"])
     }
     return(row)
   }
@@ -241,9 +216,8 @@ server <- function(input, output, session) {
 
   data_country_year_datatable <- {
     data_country_year <- rbind("Select all", data_country_year)
-    data_country_year <-
-      data_country_year %>% add_column(' ' = data_country_year$Country, .before =
-                                         "Country")
+    data_country_year <- data_country_year %>%
+      add_column(' ' = data_country_year$Country, .before = "Country")
     data_country_year[1, 2] <-
       glue::glue(paste('<input type="checkbox" id=select_all>'))
     data_country_year[,-2] <-
@@ -316,9 +290,10 @@ server <- function(input, output, session) {
     )
   }
 
+  # Render Data Table with preprocessed data
   output$countries_year = renderDT(data_country_year_datatable)
 
-  # add handlers to checkbox clicks
+  # add JS handlers to checkbox clicks
   runjs(
     "$('body').on('click', '#select_all',
                 function() {
@@ -373,6 +348,7 @@ server <- function(input, output, session) {
           );"
   )
 
+  # Event to reset context selections
   observeEvent(input$resetall, {
     output$countries_year = renderDT(data_country_year_datatable)
   })
@@ -384,6 +360,7 @@ server <- function(input, output, session) {
     toggleState("structure_creation", input$dir != "")
   })
 
+  # Event for creation of initial folder structure (button)
   observeEvent(input$structure_creation, {
     input_dir <- input$dir
 
@@ -397,7 +374,7 @@ server <- function(input, output, session) {
     }
   })
 
-  # create data table with selected concepts
+  # Create Data Table with selected contexts
   several_files_found_msg <- "Multiple files found! Please check."
 
   update_selected_table <- function() {
@@ -420,6 +397,7 @@ server <- function(input, output, session) {
           }
         })
 
+      # Map numbers for data access to labels
       data_filtered$data_access <<-
         ifelse(data_filtered$data_access == 1,
                "non-restrictive",
@@ -442,6 +420,7 @@ server <- function(input, output, session) {
           str_split(checkbox_names, "_"), `[`
         )))
 
+      # Define Data Table
       datatable(
         select(
           data_filtered,
@@ -468,23 +447,29 @@ server <- function(input, output, session) {
       )
     }
 
+    # Render Data Table
     output$data_selected <- renderDT(
       selected_context_table %>% formatStyle(
         "file_name",
         target = 'cell',
-        backgroundColor = styleEqual(c("", several_files_found_msg), c('red', 'yellow'))
+        backgroundColor =
+          styleEqual(c("", several_files_found_msg), c('red', 'yellow'))
       )
     )
   }
 
+  # Event for updating the selected concepts table (Button)
   observeEvent(input$refresh_table, {
     update_selected_table()
   })
 
+  # Event for updating the selected concepts table on change on UI
   observe({
     update_selected_table()
   })
 
+  # function to check whether there are file names missing in the
+  # selected concepts list
   has_missing_file_names <- function() {
     if (!is.null(data_filtered)) {
       return(nrow(
