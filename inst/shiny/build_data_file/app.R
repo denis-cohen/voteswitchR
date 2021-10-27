@@ -42,9 +42,7 @@ ui <- fluidPage(
         id = paste0("step", i),
         h4('Execution Specification:'),
         checkboxInput("map_par", "map", value = TRUE),
-        textInput("map_vars_par", "map_vars", placeholder = "e.g. var1,var2,var3"),
         checkboxInput("impute_par", "impute", value = TRUE),
-        checkboxInput("include_info_imp_par", "include_info_imp"),
         textInput(
           "n_imp_par",
           "n_imp",
@@ -57,6 +55,8 @@ ui <- fluidPage(
           value = "20210910",
           placeholder = "e.g. 20210910"
         ),
+        checkboxInput("rake_par", "rake", value = TRUE),
+        checkboxInput("aggregate_par", "aggregate", value = TRUE),
         radioButtons(
           "format_par",
           selected = "long",
@@ -64,6 +64,11 @@ ui <- fluidPage(
           c("long" = "long",
             "wide" = "wide")
         ),
+        checkboxInput("return_data_par", "return_data", value = TRUE),
+        checkboxInput("return_data_imp_par", "return_data_imp", value = TRUE),
+        checkboxInput("return_agg_data_par", "return_agg_data", value = TRUE),
+        checkboxInput("return_agg_data_imp_par", "return_agg_data_imp", value = TRUE),
+        checkboxInput("return_info_imp_par", "return_info_imp", value = TRUE),
         textInput(
           "existing_data_file_par",
           "existing_data_file",
@@ -123,12 +128,17 @@ server <- function(input, output, session) {
         selected_concepts = input$concepts,
         selected_contexts = data_filtered$elec_id,
         map = input$map_par,
-        map_vars = unlist(strsplit(input$map_vars_par, split = ",")),
         impute = input$impute_par,
-        include_info_imp = input$include_info_imp_par,
         n_imp = as.numeric(input$n_imp_par),
         seed = as.numeric(input$seed_par),
+        rake = input$rake_par,
+        aggregate = input$aggregate_par,
         format = input$format_par,
+        return_data = input$return_data_par,
+        return_data_imp = input$return_data_imp_par,
+        return_agg_data = input$return_agg_data_par,
+        return_agg_data_imp = input$return_agg_data_imp_par,
+        return_info_imp = input$return_info_imp_par,
         existing_data_file = if (input$existing_data_file_par != "")
           input$existing_data_file_par,
         output_file_path = if (input$output_file_path_par != "")
@@ -479,6 +489,50 @@ server <- function(input, output, session) {
     }
     return(TRUE)
   }
+
+  # Event for updating the selected concepts table on change on UI
+  observe({
+    if (!input$map_par) {
+      input$impute_par = FALSE
+      shinyjs::disable("impute_par")
+      input$rake_par = FALSE
+      shinyjs::disable("rake_par")
+      input$aggregate_par = FALSE
+      shinyjs::disable("aggregate_par")
+      input$format_par = "wide"
+      shinyjs::disable("format_par")
+      input$return_data_imp_par = FALSE
+      shinyjs::disable("return_data_imp_par")
+      input$return_agg_data_par = FALSE
+      shinyjs::disable("return_agg_data_par")
+      input$return_agg_data_imp_par = FALSE
+      shinyjs::disable("return_agg_data_imp_par")
+      input$return_info_imp_par = FALSE
+      shinyjs::disable("return_info_imp_par")
+    } else {
+      shinyjs::enable("impute_par")
+      shinyjs::enable("rake_par")
+      shinyjs::enable("aggregate_par")
+      shinyjs::enable("format_par")
+      shinyjs::enable("return_data_imp_par")
+      shinyjs::enable("return_agg_data_par")
+      shinyjs::enable("return_agg_data_imp_par")
+      shinyjs::enable("return_info_imp_par")
+    }
+
+    if (!input$impute_par) {
+      input$return_data_imp_par = FALSE
+      shinyjs::disable("return_data_imp_par")
+      input$return_agg_data_imp_par = FALSE
+      shinyjs::disable("return_agg_data_imp_par")
+      input$return_info_imp_par = FALSE
+      shinyjs::disable("return_info_imp_par")
+    } else {
+      shinyjs::enable("return_data_imp_par")
+      shinyjs::enable("return_agg_data_imp_par")
+      shinyjs::enable("return_info_imp_par")
+    }
+  })
 }
 
 shinyApp(ui, server)
