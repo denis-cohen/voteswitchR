@@ -1,6 +1,6 @@
 Package: voteswitchR
 Type: Package
-Title: Build, Map, and Analyze Vote Switching Data in R
+Title: Data and Methods for Analyzing Comparative Vote Switching Data
 Version: 0.1.0
 Authors@R:
     c(person(given = "Denis",
@@ -31,6 +31,7 @@ BugReports: https://github.com/denis-cohen/voteswitchR/issues
 Depends:
     R (>= 4.0.0)
 Imports:
+    anesrake (>= 0.8.0),
     countrycode (>= 1.3.0),
     dplyr (>= 1.0.0),
     DT (>= 0.19),

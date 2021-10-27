@@ -15,48 +15,49 @@ build_infrastructure <- function(folder_location = NULL,
                                  selected_concepts = NULL,
                                  selected_contexts = NULL,
                                  map = TRUE,
-                                 map_vars = NULL,
                                  impute = TRUE,
-                                 include_info_imp = FALSE,
                                  n_imp = 5L,
                                  seed = 19890213L,
+                                 rake = TRUE,
                                  aggregate = TRUE,
+                                 return_data = TRUE,
+                                 return_data_imp = TRUE,
+                                 return_agg_data = TRUE,
+                                 return_agg_data_imp = TRUE,
+                                 return_info_imp = FALSE,
                                  format = c("long", "wide"),
                                  existing_data_file = NULL,
                                  output_file_path = NULL) {
 
-  ## ---- Checks ----
+  ## ---- Initial checks ----
   cat("Building your data infrastructure.\n")
   cat("Supplied arguments:\n")
-  print(c(as.list(environment())))
+  args <- c(as.list(environment()))
+  print(args)
 
-  ## ---- Dependencies ----
-  ## Save package names as a vector of strings
-  pkgs <-
-    c(
-      "countrycode",
-      "dplyr",
-      "magrittr",
-      "lubridate",
-      "rio",
-      "tidyr",
-      "hot.deck",
-      "labelled"
-    )
-
-  ## Install uninstalled packages
-  lapply(pkgs[!(pkgs %in% installed.packages())], install.packages)
-
-  ## Load all packages to library and adjust options
-  lapply(pkgs, library, character.only = TRUE)
-
-
-  ## ---- Initial checks ----
   if (impute & not(map)) {
     stop(
       paste(
         "Imputation can only be performed after mapping.",
         "Please set map = TRUE.",
+        sep = " "
+      )
+    )
+  }
+
+  if (rake & not(map)) {
+    stop(paste(
+      "Raking can only be performed after mapping.",
+      "Please set map = TRUE.",
+      sep = " "
+    ))
+  }
+
+  if (aggregate & not(map)) {
+    stop(
+      paste(
+        'Aggregation requires mapped data.',
+        'Please set format = "long" and map = TRUE.',
         sep = " "
       )
     )
@@ -74,13 +75,27 @@ build_infrastructure <- function(folder_location = NULL,
 
   ## ---- Input files ----
   mappings <- voteswitchr:::mappings %>%
-    dplyr::select(elec_id,
-                  peid,
-                  party,
-                  party_harmonized,
-                  map_vote,
-                  map_lr,
-                  any_of(map_vars))
+    dplyr::select(
+      elec_id,
+      stack,
+      peid,
+      party,
+      party_harmonized,
+      map_vote,
+      map_lr,
+      vote_share,
+      vote_share_lag,
+      turnout,
+      turnout_lag
+    ) %>%
+    dplyr::mutate(
+      vote_share = dplyr::if_else(vote_share == 0.0,
+                                  0.005,
+                                  vote_share),
+      vote_share_lag = dplyr::if_else(vote_share_lag == 0.0,
+                                      0.005,
+                                      vote_share_lag),
+    )
 
   # ---- Selections ----
   ## Select concepts
@@ -109,10 +124,12 @@ build_infrastructure <- function(folder_location = NULL,
   # ## ---- Initialize folder structure ----
   if (not(file.exists(folder_location))) {
     stop(
-      paste("The sub-directory",
-            folder_location,
-            "does not exist in your current directory.",
-            sep = " ")
+      paste(
+        "The sub-directory",
+        folder_location,
+        "does not exist in your current directory.",
+        sep = " "
+      )
     )
   }
 
@@ -122,20 +139,23 @@ build_infrastructure <- function(folder_location = NULL,
   needed_files <-
     available_data$file_name[available_data$elec_id %in% selected_contexts]
   available_folders <- list.files(folder_location)
-  missing_folders <- needed_folders[not(needed_folders %in% available_folders)]
-  missing_files <- needed_files[not(needed_folders %in% available_folders)]
+  missing_folders <-
+    needed_folders[not(needed_folders %in% available_folders)]
+  missing_files <-
+    needed_files[not(needed_folders %in% available_folders)]
 
   ## Initialize folders
   if (length(missing_folders) == 0L) {
     cat("All folders found. Proceeding.\n")
   } else {
     initialize_folders <- readline(
-      prompt = paste0("Folders \n",
-                      paste(missing_folders, collapse = "\n"),
-                      "\n not found. ",
-                      "Create folders in ",
-                      folder_location,
-                      "? [y/n]"
+      prompt = paste0(
+        "Folders \n",
+        paste(missing_folders, collapse = "\n"),
+        "\n not found. ",
+        "Create folders in ",
+        folder_location,
+        "? [y/n]"
       )
     )
 
@@ -144,13 +164,16 @@ build_infrastructure <- function(folder_location = NULL,
         dir.create(paste0(folder_location, f))
       }
       put_files <- readline(
-        prompt = paste0("Folders created.\n",
-                        "Please store all original data files in their ",
-                        "respective folders before you proceed.\n\n",
-                        "Make sure they are named exactly as follows:\n",
-                        paste(paste(missing_folders, missing_files, sep = "/"),
-                              collapse ="\n"),
-                        "\n \nReady to proceed? [y/n]"
+        prompt = paste0(
+          "Folders created.\n",
+          "Please store all original data files in their ",
+          "respective folders before you proceed.\n\n",
+          "Make sure they are named exactly as follows:\n",
+          paste(
+            paste(missing_folders, missing_files, sep = "/"),
+            collapse = "\n"
+          ),
+          "\n \nReady to proceed? [y/n]"
         )
       )
 
@@ -244,7 +267,7 @@ build_infrastructure <- function(folder_location = NULL,
     data_file$data <- list()
     if (impute) {
       data_file$data_imp <- list()
-      if (include_info_imp) {
+      if (return_info_imp) {
         data_file$info_imp <- list()
       } else {
         data_file$info_imp <- NULL
@@ -253,18 +276,12 @@ build_infrastructure <- function(folder_location = NULL,
       data_file$data_imp <- NULL
       data_file$info_imp <- NULL
     }
-    data_file$info_aux <- list(
-      map = map,
-      impute = impute,
-      n_imp = n_imp,
-      seed = seed,
-      format = format
-    )
+    data_file$info_aux <- args
   } else {
     warning(
       paste(
         "You are updating 'selected_contexts' in an existing data file.",
-        "Your arguments 'map', 'impute', 'n_imp', 'seed', and 'format'",
+        "Your arguments suppied arguments",
         "will be overwritten with those stored in the existing data file.\n",
         sep = " "
       ) %>%
@@ -272,21 +289,19 @@ build_infrastructure <- function(folder_location = NULL,
     )
 
     ## Load and attach existing file
+    cat("Importing existing_data_file. \n")
     data_file <- import(existing_data_file)
 
     ## Overwrite arguments
-    map <- data_file$info_aux$map
-    impute <- data_file$info_aux$impute
-    n_imp <- data_file$info_aux$n_imp
-    seed <- data_file$info_aux$seed
-    format <- data_file$info_aux$format
+    for (arg in names(data_file$info_aux)) {
+      assign(arg, data_file$info_aux[[arg]])
+    }
   }
 
 
   ## ---- Start loop through selected contexts ----
   counter <- 0L
   for (j in selected_contexts) {
-
     ## ---- Data in ----
     ## Show progress:
     counter <- counter + 1L
@@ -304,10 +319,12 @@ build_infrastructure <- function(folder_location = NULL,
     ## Import data
     available_data_j <- available_data %>%
       filter(elec_id == j)
-    data_path_j <- paste(folder_location,
-                         available_data_j$folder_name,
-                         available_data_j$file_name,
-                         sep = "/")
+    data_path_j <- paste(
+      folder_location,
+      available_data_j$folder_name,
+      available_data_j$file_name,
+      sep = "/"
+    )
 
     data_j <- import(data_path_j) %>%
       dplyr::mutate_if(is.factor, as.character)
@@ -316,17 +333,16 @@ build_infrastructure <- function(folder_location = NULL,
     recodes_j <- voteswitchr:::recodes %>%
       dplyr::filter(elec_id == j) %>%
       dplyr::select(-country_name,
-             -year,
-             -election_date,
-             -iso2c,
-             -elec_id,
-             -source)
+                    -year,
+                    -election_date,
+                    -iso2c,
+                    -elec_id,
+                    -source)
 
     ## Select concepts
-    names_selected_concepts_j <- c(
-      selected_concepts[not(is.na(available_data_j[selected_concepts]))],
-      recodes_j$concept[recodes_j$concept %in% selected_concepts]
-    ) %>%
+    names_selected_concepts_j <-
+      c(selected_concepts[not(is.na(available_data_j[selected_concepts]))],
+        recodes_j$concept[recodes_j$concept %in% selected_concepts]) %>%
       unique()
 
     selected_concepts_j <-
@@ -712,7 +728,7 @@ build_infrastructure <- function(folder_location = NULL,
           ## Initialize containers
           data_k <- data_k %>%
             dplyr::mutate(vote_new = NA_integer_,
-                   l_vote_new = NA_integer_)
+                          l_vote_new = NA_integer_)
 
           if ("pid" %in% names(data_k)) {
             data_k <- data_k %>%
@@ -878,11 +894,112 @@ build_infrastructure <- function(folder_location = NULL,
         )
 
         ## Store to data_file
-        if (include_info_imp) {
+        if (return_info_imp) {
           data_file$info_imp[[k]] <- data_k_imp
           data_file$info_imp[[k]]$data <- NULL
         }
         data_file$data_imp[[k]] <- data_k_imp$data
+      }
+
+      ## ---- Raking ----
+      if (rake) {
+        paste0(
+          "Raking vote switching weights for context ",
+          counter,
+          " of ",
+          length(selected_contexts),
+          ". Current context: ",
+          k,
+          ".\n"
+        ) %>%
+          cat()
+
+        ## True marginals
+        levels_vote <- sort(na.omit(unique(data_k$vote)))
+        levels_l_vote <- sort(na.omit(unique(data_k$l_vote)))
+        mappings_k_vote <- mappings_k %>%
+          dplyr::select(stack, vote_share, turnout) %>%
+          dplyr::filter(stack %in% levels_vote) %>%
+          dplyr::mutate(vote_share =
+                          ifelse(is.na(vote_share), 0.005, vote_share)) %>%
+          na.omit()
+        mappings_k_l_vote <- mappings_k %>%
+          dplyr::select(stack, vote_share_lag, turnout_lag) %>%
+          dplyr::filter(stack %in% levels_l_vote)  %>%
+          dplyr::mutate(vote_share_lag =
+                          ifelse(is.na(vote_share_lag), 0.005, vote_share_lag)) %>%
+          na.omit()
+        vote <- mappings_k_vote$vote_share
+        turnout <- unique(mappings_k_vote$turnout)
+        turnout_na <- is.na(turnout)
+        l_vote <- mappings_k_l_vote$vote_share_lag
+        l_turnout <- unique(mappings_k_l_vote$turnout_lag)
+        l_turnout_na <- is.na(l_turnout)
+
+        if (turnout_na | l_turnout_na) {
+          warning(
+            paste0(
+              "Turnout information incomplete. Raking skipped. ",
+              "Returning unraked weights for this context.\n"
+            )
+          ) %>%
+            cat()
+        } else {
+          ## Check vote shares
+          sum_vote <- sum(vote, na.rm = T)
+          sum_l_vote <- sum(l_vote, na.rm = T)
+
+          if (sum_vote >= 1) {
+            warning("Combined vote shares exceed 1. Please check.")
+            oth_vote <- 0.005
+          } else {
+            oth_vote <- 1 - sum_vote
+          }
+
+          if (sum_l_vote >= 1) {
+            warning("Combined past vote shares exceed 1. Please check.")
+            oth_l_vote <- 0.005
+          } else {
+            oth_l_vote <- 1 - sum_l_vote
+          }
+
+          ## Continue true marginals
+          vote <- c(vote, oth_vote)
+          vote <- na.omit(c(vote * turnout, 1 - turnout))
+          l_vote <- c(l_vote, oth_l_vote)
+          l_vote <- na.omit(c(l_vote * l_turnout, 1 - l_turnout))
+          names(vote) <-
+            as.character(c(mappings_k_vote$stack, 98, 99))
+          names(l_vote) <-
+            as.character(c(mappings_k_l_vote$stack, 98, 99))
+
+          ## Raking
+          if (impute) {
+            for (m in seq_len(n_imp)) {
+              data_k[[m]]$weight <- anesrake::anesrake(
+                inputter = list(vote = vote,
+                                l_vote = l_vote),
+                dataframe = data_k[[m]] %>%
+                  mutate_at(.vars = vars(vote, l_vote),
+                            .funs = as.factor),
+                caseid = data_k[[m]]$id,
+                weightvec = data_k[[m]]$weights,
+                pctlim = 0.005
+              )$weightvec
+            }
+          } else {
+            data_k$weight <- anesrake::anesrake(
+              inputter = list(vote = vote,
+                              l_vote = l_vote),
+              dataframe = data_k %>%
+                mutate_at(.vars = vars(vote, l_vote),
+                          .funs = as.factor),
+              caseid = seq_along(data_k$id),
+              weightvec = data_k$weights,
+              pctlim = 0.005
+            )$weightvec
+          }
+        }
       }
 
       ## ---- Reshaping ----
@@ -913,8 +1030,89 @@ build_infrastructure <- function(folder_location = NULL,
     }
   } ## End loop through selected contexts
 
+  ## ---- Append data ----
+  cat("Integrating context-specific data.\n")
+  if (return_data) {
+    data_file$data <- do.call(bind_rows, data_file$data)
+  }
+  if (impute & return_data_imp) {
+    for (m in seq_len(n_imp)) {
+      data_file$data_imp[[m]] <-
+        do.call(bind_rows, data_file$data_imp[[m]])
+    }
+  }
+
+  ## ---- Aggregation ----
+  cat("Aggreagting vote switching data.\n")
+  if (aggregate) {
+    ## Raw data
+    if (format == "wide") {
+      data_file$switches <-
+        aggregate_switches(
+          data_file$data_imp,
+          context_vars = "elec_id",
+          weights_var = "weights",
+          switch_from = "l_vote",
+          switch_to = "vote"
+        )
+    } else if (format == "long") {
+      data_file$switches <-
+        aggregate_switches(
+          data_file$data %>%
+            dplyr::filter(stack == 1),
+          context_vars = "elec_id",
+          weights_var = "weights",
+          switch_from = "l_vote",
+          switch_to = "vote"
+        )
+    }
+
+    ## Imputed
+    if (impute) {
+      data_file$switches_imp <- list()
+      if (format == "wide") {
+        for (m in seq_len(n_imp)) {
+          data_file$switches_imp[[m]] <-
+            aggregate_switches(
+              data_file$data_imp[[m]],
+              context_vars = "elec_id",
+              weights_var = "weights",
+              switch_from = "l_vote",
+              switch_to = "vote"
+            )
+        }
+      } else if (format == "long") {
+        for (m in seq_len(n_imp)) {
+          data_file$switches_imp[[m]] <-
+            aggregate_switches(
+              data_file$data_imp[[m]] %>%
+                dplyr::filter(stack == 1),
+              context_vars = "elec_id",
+              weights_var = "weights",
+              switch_from = "l_vote",
+              switch_to = "vote"
+            )
+        }
+      }
+    }
+  }
+
+  ## ---- Select return values ----
+  if (not(return_data)) {
+    data_file$data <- NULL
+  }
+  if (not(return_data_imp)) {
+    data_file$data_imp <- NULL
+  }
+  if (aggregate & not(return_agg_data)) {
+    data_file$switches <- NULL
+  }
+  if (aggregate & not(return_agg_data_imp)) {
+    data_file$switches_imp <- NULL
+  }
+
   ## Define class
-  class(data_file) <- "voteswitchr_data_file"
+  class(data_file) <- "voteswitchR_data_file"
 
   ## ---- Value ----
   cat("Data processing completed. Storing data file(s).\n")
