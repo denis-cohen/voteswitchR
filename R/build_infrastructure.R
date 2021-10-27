@@ -20,12 +20,12 @@ build_infrastructure <- function(folder_location = NULL,
                                  seed = 19890213L,
                                  rake = TRUE,
                                  aggregate = TRUE,
+                                 format = c("long", "wide"),
                                  return_data = TRUE,
                                  return_data_imp = TRUE,
                                  return_agg_data = TRUE,
                                  return_agg_data_imp = TRUE,
                                  return_info_imp = FALSE,
-                                 format = c("long", "wide"),
                                  existing_data_file = NULL,
                                  output_file_path = NULL) {
 
