@@ -11,13 +11,15 @@ compute_ce_qois <- function(ce_obj,
                             posterior_quantiles,
                             relative) {
   ## Auxiliary
-  dyad_names <- y_structure$dyads$dyad_names
-  gain <- y_structure$dyads$gain
-  loss <- y_structure$dyads$loss
-  retain <- y_structure$retain
-  resid <- y_structure$resid
-  sup_t <- c(retain, gain)
-  sup_tm1 <- c(retain, loss)
+  dyad_names_vec <- y_structure$dyad[y_structure$type == "gain"]
+  dyad_names <- tapply(dyad_names_vec, dyad_names_vec, unique)
+  gain_vec <- y_structure$pos[y_structure$type == "gain"]
+  gain <- tapply(gain_vec, dyad_names_vec, unique)
+  loss_vec <- y_structure$pos[y_structure$type == "loss"]
+  loss <- tapply(loss_vec, dyad_names_vec, unique)
+  retain <- y_structure$pos[y_structure$type == "retain"]
+  sup_t <- c(retain, gain_vec)
+  sup_tm1 <- c(retain, loss_vec)
 
   ## Denominator
   if (relative) {
@@ -37,18 +39,18 @@ compute_ce_qois <- function(ce_obj,
 
   ## ---- Overall quantities ---
   losses <-
-    ((ce_obj[, loss,] %>% apply(c(1, 3), sum)) / denom) %>%
+    ((ce_obj[, loss_vec,] %>% apply(c(1, 3), sum)) / denom) %>%
     apply(2, quantile, posterior_quantiles)
 
   gains <-
-    ((ce_obj[, gain,] %>% apply(c(1, 3), sum)) / denom) %>%
+    ((ce_obj[, gain_vec,] %>% apply(c(1, 3), sum)) / denom) %>%
     apply(2, quantile, posterior_quantiles)
 
-  balance <- (((ce_obj[, gain, ] - ce_obj[, loss, ]) %>%
+  balance <- (((ce_obj[, gain_vec, ] - ce_obj[, loss_vec, ]) %>%
                  apply(c(1, 3), sum)) / denom) %>%
     apply(2, quantile, posterior_quantiles)
 
-  volume <- (((ce_obj[, gain, ] + ce_obj[, loss, ]) %>%
+  volume <- (((ce_obj[, gain_vec, ] + ce_obj[, loss_vec, ]) %>%
                 apply(c(1, 3), sum)) / denom) %>%
     apply(2, quantile, posterior_quantiles)
 
@@ -59,18 +61,26 @@ compute_ce_qois <- function(ce_obj,
   dyadic_losses <-
     dyadic_gains <- dyadic_balances <- dyadic_volumes <- list()
   for (d in seq_along(gain)) {
-    dyadic_losses[[dyad_names[d]]] <- (ce_obj[, loss[d],] / denom) %>%
+    dyadic_losses[[dyad_names[d]]] <-
+      ((ce_obj[, loss[[d]], , drop = FALSE] %>%
+          apply(c(1, 3), sum)) / denom) %>%
       apply(2, quantile, posterior_quantiles)
-
-    dyadic_gains[[dyad_names[d]]] <- (ce_obj[, gain[d],] / denom) %>%
+    
+    dyadic_gains[[dyad_names[d]]] <-
+      ((ce_obj[, gain[[d]], , drop = FALSE] %>%
+          apply(c(1, 3), sum)) / denom) %>%
       apply(2, quantile, posterior_quantiles)
-
+    
     dyadic_balances[[dyad_names[d]]] <-
-      ((ce_obj[, gain[d], ] - ce_obj[, loss[d], ]) / denom) %>%
+      (((ce_obj[, gain[[d]], , drop = FALSE] -
+           ce_obj[, loss[[d]], , drop = FALSE]) %>%
+          apply(c(1, 3), sum)) / denom) %>%
       apply(2, quantile, posterior_quantiles)
-
+    
     dyadic_volumes[[dyad_names[d]]] <-
-      ((ce_obj[, gain[d],] + ce_obj[, loss[d],]) / denom) %>%
+      (((ce_obj[, gain[[d]], , drop = FALSE] +
+           ce_obj[, loss[[d]], , drop = FALSE]) %>%
+          apply(c(1, 3), sum)) / denom) %>%
       apply(2, quantile, posterior_quantiles)
   }
 

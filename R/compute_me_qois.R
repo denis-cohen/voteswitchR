@@ -13,13 +13,16 @@ compute_me_qois <- function(pr_obj_0,
                             predictor_shift,
                             relative) {
   ## Auxiliary
-  dyad_names <- y_structure$dyads$dyad_names
-  gain <- y_structure$dyads$gain
-  loss <- y_structure$dyads$loss
-  retain <- y_structure$retain
-  sup_t <- c(retain, gain)
-  sup_tm1 <- c(retain, loss)
-
+  dyad_names_vec <- y_structure$dyad[y_structure$type == "gain"]
+  dyad_names <- tapply(dyad_names_vec, dyad_names_vec, unique)
+  gain_vec <- y_structure$pos[y_structure$type == "gain"]
+  gain <- tapply(gain_vec, dyad_names_vec, unique)
+  loss_vec <- y_structure$pos[y_structure$type == "loss"]
+  loss <- tapply(loss_vec, dyad_names_vec, unique)
+  retain <- y_structure$pos[y_structure$type == "retain"]
+  sup_t <- c(retain, gain_vec)
+  sup_tm1 <- c(retain, loss_vec)
+  
   ## Denominator
   if (relative) {
     if (base == "t") {
@@ -36,66 +39,78 @@ compute_me_qois <- function(pr_obj_0,
   } else {
     denom <- 1.0
   }
-
+  
   ## ---- Overall quantities ---
   losses <-
-    (((pr_obj_1[, loss] - pr_obj_0[, loss]) %>%
+    (((pr_obj_1[, loss_vec] - pr_obj_0[, loss_vec]) %>%
         apply(1, sum)) / denom) %>%
     quantile(posterior_quantiles) %>%
     `/`(predictor_shift)
-
+  
   gains <-
-    (((pr_obj_1[, gain] - pr_obj_0[, gain]) %>%
+    (((pr_obj_1[, gain_vec] - pr_obj_0[, gain_vec]) %>%
         apply(1, sum)) / denom) %>%
     quantile(posterior_quantiles) %>%
     `/`(predictor_shift)
-
-  balance <- ((((pr_obj_1[, gain] - pr_obj_1[, loss]) -
-                  (pr_obj_0[, gain] - pr_obj_0[, loss])
+  
+  balance <- ((((pr_obj_1[, gain_vec] - pr_obj_1[, loss_vec]) -
+                  (pr_obj_0[, gain_vec] - pr_obj_0[, loss_vec])
   ) %>%
     apply(1, sum)) / denom) %>%
     quantile(posterior_quantiles) %>%
     `/`(predictor_shift)
-
-  volume <- ((((pr_obj_1[, gain] + pr_obj_1[, loss]) -
-                 (pr_obj_0[, gain] + pr_obj_0[, loss])
+  
+  volume <- ((((pr_obj_1[, gain_vec] + pr_obj_1[, loss_vec]) -
+                 (pr_obj_0[, gain_vec] + pr_obj_0[, loss_vec])
   ) %>%
     apply(1, sum)) / denom) %>%
     quantile(posterior_quantiles) %>%
     `/`(predictor_shift)
-
+  
   retention <-
     ((pr_obj_1[, retain] - pr_obj_0[, retain]) / denom) %>%
     quantile(posterior_quantiles) %>%
     `/`(predictor_shift)
-
+  
   ## Dyadic quantities
   dyadic_losses <-
     dyadic_gains <- dyadic_balances <- dyadic_volumes <- list()
   for (d in seq_along(gain)) {
     dyadic_losses[[dyad_names[d]]] <-
-      ((pr_obj_1[, loss[d]] - pr_obj_0[, loss[d]]) / denom) %>%
+      (((pr_obj_1[, loss[[d]], drop = FALSE] -
+           pr_obj_0[, loss[[d]], drop = FALSE])  %>%
+          apply(1, sum)) / denom) %>%
       quantile(posterior_quantiles) %>%
       `/`(predictor_shift)
-
+    
     dyadic_gains[[dyad_names[d]]] <-
-      ((pr_obj_1[, gain[d]] - pr_obj_0[, gain[d]]) / denom) %>%
+      (((pr_obj_1[, gain[[d]], drop = FALSE] -
+           pr_obj_0[, gain[[d]], drop = FALSE])  %>%
+          apply(1, sum)) / denom) %>%
       quantile(posterior_quantiles) %>%
       `/`(predictor_shift)
-
+    
     dyadic_balances[[dyad_names[d]]] <-
-      (((pr_obj_1[, gain[d]] - pr_obj_1[, loss[d]]) -
-          (pr_obj_0[, gain[d]] - pr_obj_0[, loss[d]])) / denom) %>%
+      ((((pr_obj_1[, gain[[d]], drop = FALSE] -
+            pr_obj_1[, loss[[d]], drop = FALSE]) -
+           (pr_obj_0[, gain[[d]], drop = FALSE] -
+              pr_obj_0[, loss[[d]], drop = FALSE])
+      )  %>%
+        apply(1, sum)) / denom) %>%
       quantile(posterior_quantiles) %>%
       `/`(predictor_shift)
-
+    
     dyadic_volumes[[dyad_names[d]]] <-
-      (((pr_obj_1[, gain[d]] + pr_obj_1[, loss[d]]) -
-          (pr_obj_0[, gain[d]] + pr_obj_0[, loss[d]])) / denom) %>%
+      ((((pr_obj_1[, gain[[d]], drop = FALSE] +
+            pr_obj_1[, loss[[d]], drop = FALSE]) -
+           (pr_obj_0[, gain[[d]], drop = FALSE] +
+              pr_obj_0[, loss[[d]], drop = FALSE])
+      ) %>%
+        apply(1, sum)) / denom) %>%
       quantile(posterior_quantiles) %>%
       `/`(predictor_shift)
   }
-
+  
   ## Return
   me_qois <- list(
     losses = losses,
