@@ -161,7 +161,7 @@ run_mavcl <- function(data,
   )
 
   ## Type-specific model
-  model_path <- paste0("mod/vclogit_l2_type", type, ".stan")
+  model_name <- paste0("vclogit_l2_type", type, ".stan")
 
   ## Parameters to sample
   pars <- c("beta", "Sigma", "nu")
@@ -172,13 +172,6 @@ run_mavcl <- function(data,
     pars <- c(pars, paste(re_pars, "elections", sep = "_"))
   if (re_countries)
     pars <- c(pars, paste(re_pars, "countries", sep = "_"))
-
-
-  ## ---- Compilation ----
-  cat("Compiling MAVCL Model")
-  cat("\n")
-  mod <- stan_model(file = model_path,
-                    model_name = paste0("MAVCL Model ", Sys.time()))
 
   ## ---- Estimation ----
   cat("Performing Full Bayesian Inference")
@@ -218,7 +211,7 @@ run_mavcl <- function(data,
     est <- parLapply(cl, seq_along(dat),
                      function (m) {
                        sampling(
-                         mod,
+                         stanmodels[[model_type]],
                          data = dat[[m]],
                          pars = pars,
                          algorithm = "NUTS",
@@ -240,7 +233,7 @@ run_mavcl <- function(data,
     stopCluster(cl)
   } else {
     est <- sampling(
-      mod,
+      stanmodels[[model_type]],
       data = dat[[1]],
       pars = pars,
       algorithm = "NUTS",

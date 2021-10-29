@@ -1,8 +1,8 @@
 #### UI PART ####
 NUM_PAGES <- 3
 ui <- fluidPage(
-  useShinyalert(),
-  useShinyjs(),
+  shinyalert::useShinyalert(),
+  shinyjs::useShinyjs(),
   titlePanel("Vote Switching Data"),
   hidden(lapply(seq(NUM_PAGES), function(i) {
     # Landing Page (Concepts+Contexts Selection)

@@ -2,4 +2,10 @@
 
 export(build_data_file)
 export(calculate_pred_error)
+export(compute_qoi)
+export(recode_switches)
 export(run_mavcl)
+import(Rcpp)
+import(methods)
+importFrom(rstan,sampling)
+useDynLib(voteswitchR, .registration = TRUE)
