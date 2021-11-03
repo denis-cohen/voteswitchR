@@ -1,3 +1,11 @@
+library(shiny)
+library(shinyjs)
+library(DT)
+library(dplyr)
+library(tibble)
+library(stringr)
+library(shinyalert)
+
 #### UI PART ####
 NUM_PAGES <- 3
 ui <- fluidPage(
