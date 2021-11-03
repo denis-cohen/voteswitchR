@@ -1,11 +1,3 @@
-library(shiny)
-library(shinyjs)
-library(DT)
-library(dplyr)
-library(tibble)
-library(stringr)
-library(shinyalert)
-
 #### UI PART ####
 NUM_PAGES <- 3
 ui <- fluidPage(
@@ -161,7 +153,7 @@ server <- function(input, output, session) {
   ##### Page 1: Concepts + Context List Output #####
   # select concepts from input data
   concepts <-
-    unique(voteswitchr:::concepts_df[!(voteswitchr:::concepts_df$base_concept %in%
+    unique(voteswitchR:::concepts_df[!(voteswitchR:::concepts_df$base_concept %in%
                                          c("drop", "region", "vote", "l_vote")), ]$description)
 
   output$variables_concepts <-
@@ -196,19 +188,19 @@ server <- function(input, output, session) {
   # Build country/year matrix
   data_country_year <-
     data.frame(matrix(ncol = nrow(unique(
-      voteswitchr:::available_data["year"]
+      voteswitchR:::available_data["year"]
     )),
     nrow = nrow(unique(
-      voteswitchr:::available_data["country_name"]
+      voteswitchR:::available_data["country_name"]
     ))))
   # set unique years as colnames
   colnames(data_country_year) <-
     as.vector(unique(as.character(sort(
-      voteswitchr:::available_data[["year"]]
+      voteswitchR:::available_data[["year"]]
     ))))
   # Write unique country values to new column
   data_country_year["Country"] <-
-    unique(voteswitchr:::available_data["country_name"])
+    unique(voteswitchR:::available_data["country_name"])
   data_country_year <- data_country_year %>%
     select("Country", everything())
   # select Country as first column
@@ -217,7 +209,7 @@ server <- function(input, output, session) {
   # functon to set available (TRUE) combinations of country/year
   set_values_year <- function(row) {
     current_years <-
-      list(as.character(voteswitchr:::available_data[voteswitchr:::available_data$country_name == row["Country"], "year"]))
+      list(as.character(voteswitchR:::available_data[voteswitchR:::available_data$country_name == row["Country"], "year"]))
     for (year in current_years) {
       row[year] <- paste0(year, "_", row["Country"])
     }
@@ -236,6 +228,7 @@ server <- function(input, output, session) {
     data_country_year <- rbind("Select all", data_country_year)
     data_country_year <- data_country_year %>%
       add_column(' ' = data_country_year$Country, .before = "Country")
+
     data_country_year[1, 2] <-
       glue::glue(paste('<input type="checkbox" id=select_all>'))
     data_country_year[,-2] <-
@@ -383,7 +376,7 @@ server <- function(input, output, session) {
     input_dir <- input$dir
 
     checkbox_names = gsub("-",  " ", input$checkboxes, fixed = TRUE)
-    data <- voteswitchr:::available_data %>%
+    data <- voteswitchR:::available_data %>%
       filter(year %in% unlist(sapply(str_split(checkbox_names, "_"), `[`, 1))) %>%
       filter(country_name %in% unlist(sapply(str_split(checkbox_names, "_"), `[`)))
 
