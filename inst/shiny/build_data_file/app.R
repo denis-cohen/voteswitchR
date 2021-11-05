@@ -1,3 +1,12 @@
+library(shiny)
+library(shinyjs)
+library(DT)
+library(dplyr)
+library(tibble)
+library(stringr)
+library(shinyalert)
+library(usethis)
+
 #### UI PART ####
 NUM_PAGES <- 3
 ui <- fluidPage(
@@ -121,8 +130,7 @@ server <- function(input, output, session) {
       navPage(1)
     } else {
       # Call process function from external source
-      source("build_infrastructure.R", echo = TRUE)
-      build_infrastructure(
+      voteswitchR:::build_infrastructure(
         folder_location = input$dir,
         available_data = data_filtered,
         selected_concepts = input$concepts,
@@ -155,7 +163,6 @@ server <- function(input, output, session) {
   concepts <-
     unique(voteswitchR:::concepts_df[!(voteswitchR:::concepts_df$base_concept %in%
                                          c("drop", "region", "vote", "l_vote")), ]$description)
-
   output$variables_concepts <-
     renderUI({
       tags$div(align = 'left',
@@ -209,9 +216,9 @@ server <- function(input, output, session) {
   # functon to set available (TRUE) combinations of country/year
   set_values_year <- function(row) {
     current_years <-
-      list(as.character(voteswitchR:::available_data[voteswitchR:::available_data$country_name == row["Country"], "year"]))
+      list(as.character(voteswitchR:::available_data[voteswitchR:::available_data$country_name == row["Country"], ]$year))
     for (year in current_years) {
-      row[year] <- paste0(year, "_", row["Country"])
+      row[year] <- paste(year, "_", row["Country"], sep = "")
     }
     return(row)
   }
@@ -227,8 +234,7 @@ server <- function(input, output, session) {
   data_country_year_datatable <- {
     data_country_year <- rbind("Select all", data_country_year)
     data_country_year <- data_country_year %>%
-      add_column(' ' = data_country_year$Country, .before = "Country")
-
+      add_column(" " = data_country_year$Country, .before = "Country")
     data_country_year[1, 2] <-
       glue::glue(paste('<input type="checkbox" id=select_all>'))
     data_country_year[,-2] <-
@@ -389,7 +395,7 @@ server <- function(input, output, session) {
   several_files_found_msg <- "Multiple files found! Please check."
 
   update_selected_table <- function() {
-    data_filtered <<- data
+    data_filtered <<- voteswitchR:::available_data
     selected_context_table <<- {
       checkbox_names = gsub("-",  " ", input$checkboxes, fixed = TRUE)
       data_filtered$file_name <<-
