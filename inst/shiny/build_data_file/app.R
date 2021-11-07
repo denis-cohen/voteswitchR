@@ -500,21 +500,21 @@ server <- function(input, output, session) {
   # Event for updating the selected concepts table on change on UI
   observe({
     if (!input$map_par) {
-      input$impute_par = FALSE
+      updateCheckboxInput(session, "impute_par", value = FALSE)
       shinyjs::disable("impute_par")
-      input$rake_par = FALSE
+      updateCheckboxInput(session, "rake_par", value = FALSE)
       shinyjs::disable("rake_par")
-      input$aggregate_par = FALSE
+      updateCheckboxInput(session, "aggregate_par", value = FALSE)
       shinyjs::disable("aggregate_par")
-      input$format_par = "wide"
+      updateRadioButtons(session, "format_par", selected = "wide")
       shinyjs::disable("format_par")
-      input$return_data_imp_par = FALSE
+      updateCheckboxInput(session, "return_data_imp_par", value = FALSE)
       shinyjs::disable("return_data_imp_par")
-      input$return_agg_data_par = FALSE
+      updateCheckboxInput(session, "return_agg_data_par", value = FALSE)
       shinyjs::disable("return_agg_data_par")
-      input$return_agg_data_imp_par = FALSE
+      updateCheckboxInput(session, "return_agg_data_imp_par", value = FALSE)
       shinyjs::disable("return_agg_data_imp_par")
-      input$return_info_imp_par = FALSE
+      updateCheckboxInput(session, "return_info_imp_par", value = FALSE)
       shinyjs::disable("return_info_imp_par")
     } else {
       shinyjs::enable("impute_par")
@@ -528,11 +528,11 @@ server <- function(input, output, session) {
     }
 
     if (!input$impute_par) {
-      input$return_data_imp_par = FALSE
+      updateCheckboxInput(session, "return_data_imp_par", value = FALSE)
       shinyjs::disable("return_data_imp_par")
-      input$return_agg_data_imp_par = FALSE
+      updateCheckboxInput(session, "return_agg_data_imp_par", value = FALSE)
       shinyjs::disable("return_agg_data_imp_par")
-      input$return_info_imp_par = FALSE
+      updateCheckboxInput(session, "return_info_imp_par", value = FALSE)
       shinyjs::disable("return_info_imp_par")
     } else {
       shinyjs::enable("return_data_imp_par")
