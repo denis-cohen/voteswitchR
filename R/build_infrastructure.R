@@ -74,7 +74,7 @@ build_infrastructure <- function(folder_location = NULL,
   }
 
   ## ---- Input files ----
-  mappings <- voteswitchr:::mappings %>%
+  mappings <- voteswitchR:::mappings %>%
     dplyr::select(
       elec_id,
       stack,
@@ -101,14 +101,14 @@ build_infrastructure <- function(folder_location = NULL,
   ## Select concepts
   if (is.null(selected_concepts)) {
     selected_concepts <-
-      voteswitchr:::concepts_df$concept[concepts$description %in%
+      voteswitchR:::concepts_df$concept[concepts$description %in%
                                           c("drop",
                                             "region",
                                             "Vote choice (t)",
                                             "Vote choice (t - 1)")]
   } else {
     selected_concepts <-
-      voteswitchr:::concepts_df$concept[concepts$description %in%
+      voteswitchR:::concepts_df$concept[concepts$description %in%
                                           c("drop",
                                             "region",
                                             "Vote choice (t)",
@@ -330,7 +330,7 @@ build_infrastructure <- function(folder_location = NULL,
       dplyr::mutate_if(is.factor, as.character)
 
     ## Select recodes
-    recodes_j <- voteswitchr:::recodes %>%
+    recodes_j <- voteswitchR:::recodes %>%
       dplyr::filter(elec_id == j) %>%
       dplyr::select(-country_name,
                     -year,
