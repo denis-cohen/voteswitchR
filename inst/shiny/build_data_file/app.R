@@ -28,7 +28,7 @@ ui <- fluidPage(
         actionLink("resetall", "Reset Context Selection"),
         DTOutput('countries_year')
       )
-    # Data Download/Selection
+      # Data Download/Selection
     } else if (i == 2) {
       div(
         class = "page",
@@ -44,7 +44,7 @@ ui <- fluidPage(
         actionLink("refresh_table", "Generate/Update Context Table"),
         DTOutput('data_selected')
       )
-    # Parameter Setting for infrastructure function
+      # Parameter Setting for infrastructure function
     } else if (i == 3) {
       div(
         class = "page",

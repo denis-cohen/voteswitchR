@@ -35,7 +35,7 @@ build_infrastructure <- function(folder_location = NULL,
   args <- c(as.list(environment()))
   print(args)
 
-  if (impute & not(map)) {
+  if (impute & magrittr::not(map)) {
     stop(
       paste(
         "Imputation can only be performed after mapping.",
@@ -45,7 +45,7 @@ build_infrastructure <- function(folder_location = NULL,
     )
   }
 
-  if (rake & not(map)) {
+  if (rake & magrittr::not(map)) {
     stop(paste(
       "Raking can only be performed after mapping.",
       "Please set map = TRUE.",
@@ -53,7 +53,7 @@ build_infrastructure <- function(folder_location = NULL,
     ))
   }
 
-  if (aggregate & not(map)) {
+  if (aggregate & magrittr::not(map)) {
     stop(
       paste(
         'Aggregation requires mapped data.',
@@ -63,7 +63,7 @@ build_infrastructure <- function(folder_location = NULL,
     )
   }
 
-  if (format == "long" & not(map)) {
+  if (format == "long" & magrittr::not(map)) {
     stop(
       paste(
         "Long format data can only be generated after mapping.",
@@ -101,14 +101,14 @@ build_infrastructure <- function(folder_location = NULL,
   ## Select concepts
   if (is.null(selected_concepts)) {
     selected_concepts <-
-      voteswitchR:::concepts_df$concept[concepts$description %in%
+      voteswitchR:::concepts_df$concept[voteswitchR:::concepts_df$description %in%
                                           c("drop",
                                             "region",
                                             "Vote choice (t)",
                                             "Vote choice (t - 1)")]
   } else {
     selected_concepts <-
-      voteswitchR:::concepts_df$concept[concepts$description %in%
+      voteswitchR:::concepts_df$concept[voteswitchR:::concepts_df$description %in%
                                           c("drop",
                                             "region",
                                             "Vote choice (t)",
@@ -122,7 +122,7 @@ build_infrastructure <- function(folder_location = NULL,
   }
 
   # ## ---- Initialize folder structure ----
-  if (not(file.exists(folder_location))) {
+  if (magrittr::not(file.exists(folder_location))) {
     stop(
       paste(
         "The sub-directory",
@@ -140,9 +140,9 @@ build_infrastructure <- function(folder_location = NULL,
     available_data$file_name[available_data$elec_id %in% selected_contexts]
   available_folders <- list.files(folder_location)
   missing_folders <-
-    needed_folders[not(needed_folders %in% available_folders)]
+    needed_folders[magrittr::not(needed_folders %in% available_folders)]
   missing_files <-
-    needed_files[not(needed_folders %in% available_folders)]
+    needed_files[magrittr::not(needed_folders %in% available_folders)]
 
   ## Initialize folders
   if (length(missing_folders) == 0L) {
@@ -177,7 +177,7 @@ build_infrastructure <- function(folder_location = NULL,
         )
       )
 
-      if (not(put_files == "y")) {
+      if (magrittr::not(put_files == "y")) {
         stop("Please come back when the original data files are ready.")
       }
     } else {
@@ -218,7 +218,7 @@ build_infrastructure <- function(folder_location = NULL,
         c(mappings_p_vars, survey_p_vars_k_stubs), "_"
       ),
       each = n_prty), 1:n_prty)
-    varying_na <- varying_x[not(varying_x %in% names(x))]
+    varying_na <- varying_x[magrittr::not(varying_x %in% names(x))]
     for (v in varying_na) {
       x <- within(x, assign(v, NA_real_))
     }
@@ -290,7 +290,7 @@ build_infrastructure <- function(folder_location = NULL,
 
     ## Load and attach existing file
     cat("Importing existing_data_file. \n")
-    data_file <- import(existing_data_file)
+    data_file <- rio::import(existing_data_file)
 
     ## Overwrite arguments
     for (arg in names(data_file$info_aux)) {
@@ -326,7 +326,7 @@ build_infrastructure <- function(folder_location = NULL,
       sep = "/"
     )
 
-    data_j <- import(data_path_j) %>%
+    data_j <- rio::import(data_path_j) %>%
       dplyr::mutate_if(is.factor, as.character)
 
     ## Select recodes
@@ -341,7 +341,7 @@ build_infrastructure <- function(folder_location = NULL,
 
     ## Select concepts
     names_selected_concepts_j <-
-      c(selected_concepts[not(is.na(available_data_j[selected_concepts]))],
+      c(selected_concepts[magrittr::not(is.na(available_data_j[selected_concepts]))],
         recodes_j$concept[recodes_j$concept %in% selected_concepts]) %>%
       unique()
 
@@ -378,8 +378,8 @@ build_infrastructure <- function(folder_location = NULL,
 
     ## Adjust original variable (ov) names
     names(data_j) <- paste0("ov_", names(data_j))
-    selected_concepts_j[not(is.na(selected_concepts_j))] <-
-      paste0("ov_", selected_concepts_j[not(is.na(selected_concepts_j))])
+    selected_concepts_j[magrittr::not(is.na(selected_concepts_j))] <-
+      paste0("ov_", selected_concepts_j[magrittr::not(is.na(selected_concepts_j))])
 
     ## Define general meta variables
     data_j$exp_iso2c <- available_data_j$iso2c
@@ -394,8 +394,8 @@ build_infrastructure <- function(folder_location = NULL,
     rename_concepts <-
       paste0("dplyr::mutate(data_j, ",
              paste(
-               paste(names_selected_concepts_j[not(is.na(selected_concepts_j))],
-                     selected_concepts_j[not(is.na(selected_concepts_j))],
+               paste(names_selected_concepts_j[magrittr::not(is.na(selected_concepts_j))],
+                     selected_concepts_j[magrittr::not(is.na(selected_concepts_j))],
                      sep = " = "),
                collapse = ", "
              ),
@@ -423,7 +423,7 @@ build_infrastructure <- function(folder_location = NULL,
 
       ## Filter relevant operations
       recodes_jk <- recodes_jk %>%
-        select(which(not(is.na(
+        select(which(magrittr::not(is.na(
           slice(recodes_jk, 1)
         ))))
 
@@ -759,7 +759,7 @@ build_infrastructure <- function(folder_location = NULL,
                                assign(paste(v, p , sep = "_"),
                                       mappings_k[p, v]))
             }
-            if (nchar(p_alph) > 0 & not(is.na(p_alph))) {
+            if (nchar(p_alph) > 0 & magrittr::not(is.na(p_alph))) {
               # assign survey party vars
               for (v in survey_p_vars_k_stubs) {
                 if (paste(v, p_alph, sep = "_") %in% survey_p_vars_k) {
@@ -783,14 +783,14 @@ build_infrastructure <- function(folder_location = NULL,
                 is.na(vote) & part == 0 ~ 99L,
                 is.na(vote) & is.na(vote_old) ~ NA_integer_,
                 is.na(vote) &
-                  not(vote_old %in% mappings_k$map_vote) ~ 98L,
+                  magrittr::not(vote_old %in% mappings_k$map_vote) ~ 98L,
                 TRUE ~ vote
               ),
               l_vote = case_when(
                 is.na(l_vote) & l_part == 0 ~ 99L,
                 is.na(l_vote) & is.na(l_vote_old) ~ NA_integer_,
                 is.na(l_vote) &
-                  not(l_vote_old %in% mappings_k$map_vote) ~ 98L,
+                  magrittr::not(l_vote_old %in% mappings_k$map_vote) ~ 98L,
                 TRUE ~ l_vote
               )
             )
@@ -802,7 +802,7 @@ build_infrastructure <- function(folder_location = NULL,
               dplyr::mutate(pid = case_when(
                 is.na(pid) & pid_old == 0 ~ 99L,
                 is.na(pid) &
-                  pid_old != 0 & not(is.na(pid_old)) ~ 98L,
+                  pid_old != 0 & magrittr::not(is.na(pid_old)) ~ 98L,
                 TRUE ~ pid
               ))
           }
@@ -864,7 +864,7 @@ build_infrastructure <- function(folder_location = NULL,
       }
 
       ## ---- Imputation ----
-      if (impute & not(no_map) & not(no_l_vote)) {
+      if (impute & magrittr::not(no_map) & magrittr::not(no_l_vote)) {
         paste0(
           "Imputing context ",
           counter,
@@ -1003,7 +1003,7 @@ build_infrastructure <- function(folder_location = NULL,
       }
 
       ## ---- Reshaping ----
-      if (format == "long" & not(no_map) & not(no_l_vote)) {
+      if (format == "long" & magrittr::not(no_map) & magrittr::not(no_l_vote)) {
         paste0(
           "Reshaping context ",
           counter,
@@ -1023,7 +1023,7 @@ build_infrastructure <- function(folder_location = NULL,
         }
 
         ## ---- Output ----
-        if (not(no_map) & not(no_l_vote)) {
+        if (magrittr::not(no_map) & magrittr::not(no_l_vote)) {
           data_file$data[[k]] <- data_k
         }
       }
@@ -1098,16 +1098,16 @@ build_infrastructure <- function(folder_location = NULL,
   }
 
   ## ---- Select return values ----
-  if (not(return_data)) {
+  if (magrittr::not(return_data)) {
     data_file$data <- NULL
   }
-  if (not(return_data_imp)) {
+  if (magrittr::not(return_data_imp)) {
     data_file$data_imp <- NULL
   }
-  if (aggregate & not(return_agg_data)) {
+  if (aggregate & magrittr::not(return_agg_data)) {
     data_file$switches <- NULL
   }
-  if (aggregate & not(return_agg_data_imp)) {
+  if (aggregate & magrittr::not(return_agg_data_imp)) {
     data_file$switches_imp <- NULL
   }
 
