@@ -16,6 +16,8 @@ aggregate_switches <- function(
   subgroup = NULL
 ) {
 
+  `%>%` <- magrittr::`%>%`
+  
   # Input vectors
   all_vars <- c(context_vars, weights_var, switch_from, switch_to, subgroup)
   switch_vars <- c(switch_from, switch_to, subgroup)
@@ -99,7 +101,7 @@ aggregate_switches <- function(
     dplyr::ungroup() %>%
     dplyr::select(-starts_with("cats")) %>%
     dplyr::mutate_at(
-      .vars = vars(switch_from, switch_to),
+      .vars = dplyr::vars(switch_from, switch_to),
       .funs = ~as.numeric(as.character(.))
     )
 

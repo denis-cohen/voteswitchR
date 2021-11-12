@@ -32,6 +32,8 @@ run_mavcl <- function(data,
                       savename = "mavcl",
                       savepath = NULL,
                       outfile = TRUE) {
+  `%>%` <- magrittr::`%>%`
+
   ## ---- Imputed data ----
   if (any(class(data) %in% c("tbl_df", "tbl", "data.frame"))) {
     is_imputed <- FALSE
@@ -180,11 +182,11 @@ run_mavcl <- function(data,
   if (parallelize) {
     ## Set up for parallel estimation
     if (Sys.info()["sysname"] == "Windows") {
-      cl <- makeCluster(length(dat),
+      cl <- parallel::makeCluster(length(dat),
                         outfile = paste0("est/", savename, ".txt"),
                         type = "PSOCK")
-      clusterEvalQ(cl, library(rstan))
-      clusterExport(
+      parallel::clusterEvalQ(cl, library(rstan))
+      parallel::clusterExport(
         cl,
         c(
           "mod",
@@ -202,13 +204,13 @@ run_mavcl <- function(data,
         envir = environment()
       )
     } else {
-      cl <- makeCluster(length(dat),
+      cl <- parallel::makeCluster(length(dat),
                         outfile = paste0("est/", savename, ".txt"),
                         type = "FORK")
     }
 
     ## Sample
-    est <- parLapply(cl, seq_along(dat),
+    est <- parallel::parLapply(cl, seq_along(dat),
                      function (m) {
                        sampling(
                          stanmodels[[model_type]],
@@ -230,7 +232,7 @@ run_mavcl <- function(data,
                      })
 
     ## Exit parallel computation
-    stopCluster(cl)
+    parallel::stopCluster(cl)
   } else {
     est <- sampling(
       stanmodels[[model_type]],

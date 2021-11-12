@@ -1,32 +1,25 @@
-library(shiny)
-library(shinyjs)
-library(DT)
-library(dplyr)
-library(tibble)
-library(stringr)
-library(shinyalert)
-library(usethis)
+`%>%` <- magrittr::`%>%`
 
 #### UI PART ####
 NUM_PAGES <- 3
-ui <- fluidPage(
+ui <- shiny::fluidPage(
   shinyalert::useShinyalert(),
   shinyjs::useShinyjs(),
-  titlePanel("Vote Switching Data"),
-  hidden(lapply(seq(NUM_PAGES), function(i) {
+  shiny::titlePanel("Vote Switching Data"),
+  shinyjs::hidden(lapply(seq(NUM_PAGES), function(i) {
     # Landing Page (Concepts+Contexts Selection)
     if (i == 1) {
       div(
         class = "page",
         id = paste0("step", i),
         h4('Concepts:'),
-        actionLink("selectall", "Select All"),
-        fluidRow(column(
+        shiny::actionLink("selectall", "Select All"),
+        shiny::fluidRow(column(
           width = 4, uiOutput("variables_concepts")
         )),
         h4('Contexts:'),
-        actionLink("resetall", "Reset Context Selection"),
-        DTOutput('countries_year')
+        shiny::actionLink("resetall", "Reset Context Selection"),
+        DT::DTOutput('countries_year')
       )
       # Data Download/Selection
     } else if (i == 2) {
@@ -37,12 +30,12 @@ ui <- fluidPage(
         h5(
           "In case you haven't already done, please download the selected data manually using the provided download links and put the files into the respective folders."
         ),
-        textInput("dir", "Input directory", placeholder = "e.g. ./data"),
-        actionButton("structure_creation", "Create initial folder structure"),
+        shiny::textInput("dir", "Input directory", placeholder = "e.g. ./data"),
+        shiny::actionButton("structure_creation", "Create initial folder structure"),
         h4('Selected Contexts:'),
         h5("Please Note: File format must be either .sav, .dta or .rdata."),
-        actionLink("refresh_table", "Generate/Update Context Table"),
-        DTOutput('data_selected')
+        shiny::actionLink("refresh_table", "Generate/Update Context Table"),
+        DT::DTOutput('data_selected')
       )
       # Parameter Setting for infrastructure function
     } else if (i == 3) {
@@ -50,40 +43,40 @@ ui <- fluidPage(
         class = "page",
         id = paste0("step", i),
         h4('Execution Specification:'),
-        checkboxInput("map_par", "map", value = TRUE),
-        checkboxInput("impute_par", "impute", value = TRUE),
-        textInput(
+        shiny::checkboxInput("map_par", "map", value = TRUE),
+        shiny::checkboxInput("impute_par", "impute", value = TRUE),
+        shiny::textInput(
           "n_imp_par",
           "n_imp",
           value = "5",
           placeholder = "e.g. 5"
         ),
-        textInput(
+        shiny::textInput(
           "seed_par",
           "seed",
           value = "20210910",
           placeholder = "e.g. 20210910"
         ),
-        checkboxInput("rake_par", "rake", value = TRUE),
-        checkboxInput("aggregate_par", "aggregate", value = TRUE),
-        radioButtons(
+        shiny::checkboxInput("rake_par", "rake", value = TRUE),
+        shiny::checkboxInput("aggregate_par", "aggregate", value = TRUE),
+        shiny::radioButtons(
           "format_par",
           selected = "long",
           "format",
           c("long" = "long",
             "wide" = "wide")
         ),
-        checkboxInput("return_data_par", "return_data", value = TRUE),
-        checkboxInput("return_data_imp_par", "return_data_imp", value = TRUE),
-        checkboxInput("return_agg_data_par", "return_agg_data", value = TRUE),
-        checkboxInput("return_agg_data_imp_par", "return_agg_data_imp", value = TRUE),
-        checkboxInput("return_info_imp_par", "return_info_imp", value = TRUE),
-        textInput(
+        shiny::checkboxInput("return_data_par", "return_data", value = TRUE),
+        shiny::checkboxInput("return_data_imp_par", "return_data_imp", value = TRUE),
+        shiny::checkboxInput("return_agg_data_par", "return_agg_data", value = TRUE),
+        shiny::checkboxInput("return_agg_data_imp_par", "return_agg_data_imp", value = TRUE),
+        shiny::checkboxInput("return_info_imp_par", "return_info_imp", value = TRUE),
+        shiny::textInput(
           "existing_data_file_par",
           "existing_data_file",
           placeholder = "e.g. path/to/data/existing_data_file.csv"
         ),
-        textInput(
+        shiny::textInput(
           "output_file_path_par",
           "output_file_path (If empty, the output file is stored in the R Environment)",
           placeholder = "e.g. path/to/data/data_file.RData"
@@ -92,34 +85,34 @@ ui <- fluidPage(
     }
   })),
   br(),
-  actionButton("prevBtn", "< Previous"),
-  actionButton("nextBtn", "Next >")
+  shiny::actionButton("prevBtn", "< Previous"),
+  shiny::actionButton("nextBtn", "Next >")
 )
 
 #### BACKEND PART ####
 server <- function(input, output, session) {
   # Set up pages (+ navigation)
-  rv <- reactiveValues(page = 1)
+  rv <- shiny::reactiveValues(page = 1)
   data_filtered <<- NULL
-  observe({
-    toggleState(id = "prevBtn", condition = rv$page > 1)
+  shiny::observe({
+    shinyjs::toggleState(id = "prevBtn", condition = rv$page > 1)
     if (rv$page == 3) {
-      updateActionButton(session, "nextBtn", label = "Execute")
+      shiny::updateActionButton(session, "nextBtn", label = "Execute")
     } else {
-      updateActionButton(session, "nextBtn", label = "Next >")
+      shiny::updateActionButton(session, "nextBtn", label = "Next >")
     }
-    hide(selector = ".page")
-    show(paste0("step", rv$page))
+    shinyjs::hide(selector = ".page")
+    shinyjs::show(paste0("step", rv$page))
   })
   navPage <- function(direction) {
     rv$page <- rv$page + direction
   }
-  observeEvent(input$prevBtn, navPage(-1))
-  observeEvent(input$nextBtn, {
+  shiny::observeEvent(input$prevBtn, navPage(-1))
+  shiny::observeEvent(input$nextBtn, {
     if (rv$page < 3) {
       update_selected_table()
       if (rv$page > 1 && has_missing_file_names()) {
-        shinyalert(
+        shinyalert::shinyalert(
           "Please download the selected data manually using the provided download links and put the files into the respective folders.",
           size = "l",
           animation = "slide-from-top",
@@ -154,7 +147,7 @@ server <- function(input, output, session) {
         else
           NULL
       )
-      stopApp()
+      shiny::stopApp()
     }
   })
 
@@ -166,25 +159,25 @@ server <- function(input, output, session) {
   output$variables_concepts <-
     renderUI({
       tags$div(align = 'left',
-               checkboxGroupInput("concepts",
+               shiny::checkboxGroupInput("concepts",
                                   label = "",
                                   choices = concepts))
 
     })
 
-  observe({
+  shiny::observe({
     if (input$selectall == 0)
       return(NULL)
     else if (input$selectall %% 2 == 0)
     {
-      updateCheckboxGroupInput(session,
+      shiny::updateCheckboxGroupInput(session,
                                "concepts",
                                "",
                                choices = concepts)
     }
     else
     {
-      updateCheckboxGroupInput(session,
+      shiny::updateCheckboxGroupInput(session,
                                "concepts",
                                "",
                                choices = concepts,
@@ -209,9 +202,9 @@ server <- function(input, output, session) {
   data_country_year["Country"] <-
     unique(voteswitchR:::available_data["country_name"])
   data_country_year <- data_country_year %>%
-    select("Country", everything())
+    dplyr::select("Country", everything())
   # select Country as first column
-  column_to_rownames(data_country_year, var = "Country")
+  tibble::column_to_rownames(data_country_year, var = "Country")
 
   # functon to set available (TRUE) combinations of country/year
   set_values_year <- function(row) {
@@ -234,7 +227,7 @@ server <- function(input, output, session) {
   data_country_year_datatable <- {
     data_country_year <- rbind("Select all", data_country_year)
     data_country_year <- data_country_year %>%
-      add_column(" " = data_country_year$Country, .before = "Country")
+      tibble::add_column(" " = data_country_year$Country, .before = "Country")
     data_country_year[1, 2] <-
       glue::glue(paste('<input type="checkbox" id=select_all>'))
     data_country_year[,-2] <-
@@ -282,7 +275,7 @@ server <- function(input, output, session) {
       })
 
     # finally, configure data table
-    datatable(
+    DT::datatable(
       data_country_year,
       extensions = "FixedColumns",
       escape = F,
@@ -308,10 +301,10 @@ server <- function(input, output, session) {
   }
 
   # Render Data Table with preprocessed data
-  output$countries_year = renderDT(data_country_year_datatable)
+  output$countries_year = DT::renderDT(data_country_year_datatable)
 
   # add JS handlers to checkbox clicks
-  runjs(
+  shinyjs::runjs(
     "$('body').on('click', '#select_all',
                 function() {
                   $('[class*=contexts]').attr('checked', event.target.checked)
@@ -323,7 +316,7 @@ server <- function(input, output, session) {
                 }
     );"
   )
-  runjs(
+  shinyjs::runjs(
     "$('body').on('click', '.select_column',
                 function(event) {
                   let firstCells = document.querySelectorAll('td:nth-child(' + event.target.id + ')');
@@ -339,7 +332,7 @@ server <- function(input, output, session) {
     );"
   )
 
-  runjs(
+  shinyjs::runjs(
     "$('body').on('click', '.select_row',
                 function(event) {
                   let nextSibling = document.getElementById(event.target.id).parentElement.nextElementSibling;
@@ -356,7 +349,7 @@ server <- function(input, output, session) {
     );"
   )
 
-  runjs(
+  shinyjs::runjs(
     "$('body').on('click', '.contexts',
             function() {
               let checkboxes = [...document.querySelectorAll('.contexts:checked')].map(item => item.id);
@@ -366,25 +359,25 @@ server <- function(input, output, session) {
   )
 
   # Event to reset context selections
-  observeEvent(input$resetall, {
-    output$countries_year = renderDT(data_country_year_datatable)
+  shiny::observeEvent(input$resetall, {
+    output$countries_year = DT::renderDT(data_country_year_datatable)
   })
 
 
   ##### Page 2: Choose Directory #####
   # popup to choose directory
-  observeEvent(input$dir, {
-    toggleState("structure_creation", input$dir != "")
+  shiny::observeEvent(input$dir, {
+    shinyjs::toggleState("structure_creation", input$dir != "")
   })
 
   # Event for creation of initial folder structure (button)
-  observeEvent(input$structure_creation, {
+  shiny::observeEvent(input$structure_creation, {
     input_dir <- input$dir
 
     checkbox_names = gsub("-",  " ", input$checkboxes, fixed = TRUE)
     data <- voteswitchR:::available_data %>%
-      filter(year %in% unlist(sapply(str_split(checkbox_names, "_"), `[`, 1))) %>%
-      filter(country_name %in% unlist(sapply(str_split(checkbox_names, "_"), `[`)))
+      dplyr::filter(year %in% unlist(sapply(stringr::str_split(checkbox_names, "_"), `[`, 1))) %>%
+      dplyr::filter(country_name %in% unlist(sapply(stringr::str_split(checkbox_names, "_"), `[`)))
 
     for (context in 1:nrow(data)) {
       dir.create(file.path(paste0(input_dir, "/"), paste0(data[context, "folder_name"], "/")), showWarnings = FALSE)
@@ -429,17 +422,17 @@ server <- function(input, output, session) {
                data_filtered$data_access)
 
       data_filtered <<-
-        data_filtered %>% filter(year %in% unlist(sapply(
-          str_split(checkbox_names, "_"), `[`, 1
+        data_filtered %>% dplyr::filter(year %in% unlist(sapply(
+          stringr::str_split(checkbox_names, "_"), `[`, 1
         )))
       data_filtered <<-
-        data_filtered %>% filter(country_name %in% unlist(sapply(
-          str_split(checkbox_names, "_"), `[`
+        data_filtered %>% dplyr::filter(country_name %in% unlist(sapply(
+          stringr::str_split(checkbox_names, "_"), `[`
         )))
 
       # Define Data Table
-      datatable(
-        select(
+      DT::datatable(
+        dplyr::select(
           data_filtered,
           "elec_id",
           "source",
@@ -465,23 +458,23 @@ server <- function(input, output, session) {
     }
 
     # Render Data Table
-    output$data_selected <- renderDT(
-      selected_context_table %>% formatStyle(
+    output$data_selected <- DT::renderDT(
+      selected_context_table %>% DT::formatStyle(
         "file_name",
         target = 'cell',
         backgroundColor =
-          styleEqual(c("", several_files_found_msg), c('red', 'yellow'))
+          DT::styleEqual(c("", several_files_found_msg), c('red', 'yellow'))
       )
     )
   }
 
   # Event for updating the selected concepts table (Button)
-  observeEvent(input$refresh_table, {
+  shiny::observeEvent(input$refresh_table, {
     update_selected_table()
   })
 
   # Event for updating the selected concepts table on change on UI
-  observe({
+  shiny::observe({
     update_selected_table()
   })
 
@@ -490,7 +483,7 @@ server <- function(input, output, session) {
   has_missing_file_names <- function() {
     if (!is.null(data_filtered)) {
       return(nrow(
-        data_filtered %>% filter(file_name == "" ||
+        data_filtered %>% dplyr::filter(file_name == "" ||
                                    file_name == several_files_found_msg)
       ) > 0)
     }
@@ -498,23 +491,23 @@ server <- function(input, output, session) {
   }
 
   # Event for updating the selected concepts table on change on UI
-  observe({
+  shiny::observe({
     if (!input$map_par) {
-      updateCheckboxInput(session, "impute_par", value = FALSE)
+      shiny::updateCheckboxInput(session, "impute_par", value = FALSE)
       shinyjs::disable("impute_par")
-      updateCheckboxInput(session, "rake_par", value = FALSE)
+      shiny::updateCheckboxInput(session, "rake_par", value = FALSE)
       shinyjs::disable("rake_par")
-      updateCheckboxInput(session, "aggregate_par", value = FALSE)
+      shiny::updateCheckboxInput(session, "aggregate_par", value = FALSE)
       shinyjs::disable("aggregate_par")
       updateRadioButtons(session, "format_par", selected = "wide")
       shinyjs::disable("format_par")
-      updateCheckboxInput(session, "return_data_imp_par", value = FALSE)
+      shiny::updateCheckboxInput(session, "return_data_imp_par", value = FALSE)
       shinyjs::disable("return_data_imp_par")
-      updateCheckboxInput(session, "return_agg_data_par", value = FALSE)
+      shiny::updateCheckboxInput(session, "return_agg_data_par", value = FALSE)
       shinyjs::disable("return_agg_data_par")
-      updateCheckboxInput(session, "return_agg_data_imp_par", value = FALSE)
+      shiny::updateCheckboxInput(session, "return_agg_data_imp_par", value = FALSE)
       shinyjs::disable("return_agg_data_imp_par")
-      updateCheckboxInput(session, "return_info_imp_par", value = FALSE)
+      shiny::updateCheckboxInput(session, "return_info_imp_par", value = FALSE)
       shinyjs::disable("return_info_imp_par")
     } else {
       shinyjs::enable("impute_par")
@@ -528,11 +521,11 @@ server <- function(input, output, session) {
     }
 
     if (!input$impute_par) {
-      updateCheckboxInput(session, "return_data_imp_par", value = FALSE)
+      shiny::updateCheckboxInput(session, "return_data_imp_par", value = FALSE)
       shinyjs::disable("return_data_imp_par")
-      updateCheckboxInput(session, "return_agg_data_imp_par", value = FALSE)
+      shiny::updateCheckboxInput(session, "return_agg_data_imp_par", value = FALSE)
       shinyjs::disable("return_agg_data_imp_par")
-      updateCheckboxInput(session, "return_info_imp_par", value = FALSE)
+      shiny::updateCheckboxInput(session, "return_info_imp_par", value = FALSE)
       shinyjs::disable("return_info_imp_par")
     } else {
       shinyjs::enable("return_data_imp_par")
@@ -542,4 +535,4 @@ server <- function(input, output, session) {
   })
 }
 
-shinyApp(ui, server)
+shiny::shinyApp(ui, server)

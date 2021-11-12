@@ -13,6 +13,8 @@ recode_switches <- function(switches,
                             mappings = NULL,
                             switch_factor,
                             type = c("elections", "party-elections")) {
+  `%>%` <- magrittr::`%>%`
+  
   ## ---- Preparation ----
   ## No summarize info
   options(dplyr.summarise.inform = FALSE)
@@ -20,7 +22,7 @@ recode_switches <- function(switches,
   ## switch_factor as character
   mappings[[switch_factor]] <-
     as.factor(mappings[[switch_factor]]) %>%
-    droplevels() %>%
+    dplyr::droplevels() %>%
     as.character()
   
   ## Check for missingness in switch_factor
@@ -41,10 +43,10 @@ recode_switches <- function(switches,
   ## Determine party-level variables in mappings
   if (type == "elections") {
     peid_vars <- mappings %>%
-      group_by(elec_id) %>%
-      summarize_all(.funs = ~ length(na.omit(unique(.)))) %>%
-      ungroup() %>%
-      summarize_if(is.numeric, .funs = ~ max(., na.rm = T)) %>%
+      dplyr::group_by(elec_id) %>%
+      dplyr::summarize_all(.funs = ~ length(na.omit(unique(.)))) %>%
+      dplyr::ungroup() %>%
+      dplyr::summarize_if(is.numeric, .funs = ~ max(., na.rm = T)) %>%
       as.matrix()
     peid_vars <- colnames(peid_vars)[peid_vars[1,] != 1]
   }
@@ -52,7 +54,7 @@ recode_switches <- function(switches,
   ## ---- Recoding of switches ----
   ## Augment switching
   switches <- switches %>%
-    filter(elec_id %in% mappings$elec_id) %>%
+    dplyr::filter(elec_id %in% mappings$elec_id) %>%
     dplyr::left_join(
       mappings %>%
         dplyr::rename(from = !!as.name(switch_factor)) %>%
@@ -66,13 +68,13 @@ recode_switches <- function(switches,
       by = c("elec_id", "switch_to" = "stack")
     ) %>%
     dplyr::mutate(
-      from = case_when(
+      from = dplyr::case_when(
         switch_from == 98 ~ "oth",
         switch_from == 99 ~ "non",
         is.na(from) ~ "oth",
         TRUE ~ from
       ),
-      to = case_when(
+      to = dplyr::case_when(
         switch_to == 98 ~ "oth",
         switch_to == 99 ~ "non",
         is.na(to) ~ "oth",
@@ -103,7 +105,7 @@ recode_switches <- function(switches,
         TRUE ~ NA_character_
       )) %>%
       dplyr::select(-from, -to) %>%
-      split(., .$cat) %>%
+      dplyr::split(., .$cat) %>%
       lapply(., function (x) x %>% dplyr::mutate(pos = row_number()))
     y_names <- y_structure[[1]]$switch
     
@@ -125,7 +127,7 @@ recode_switches <- function(switches,
     output <- list(
       data = mappings %>%
         dplyr::select(-all_of(peid_vars),-any_of(switch_factor)) %>%
-        distinct() %>%
+        dplyr::distinct() %>%
         dplyr::inner_join(elec_switches,
                           by = c("elec_id")),
       y_names = y_names,
@@ -178,7 +180,7 @@ recode_switches <- function(switches,
       )) %>%
       dplyr::select(-to, -from) %>%
       dplyr::distinct() %>%
-      dplyr::arrange(not(is.na(dyad)), type, dyad) %>% 
+      dplyr::arrange(!(is.na(dyad)), type, dyad) %>% 
       dplyr::mutate(pos = row_number())
     y_names <- y_structure$switch
     
