@@ -287,7 +287,7 @@ run_mavcl <- function(data,
   return(output)
 
   ## Optionally: Save to file
-  if (!(is.null(savepath)) {
+  if (!is.null(savepath)) {
     save_to <- paste0(savepath, "/", svnm, ".RData")
     save(output, file = paste0(savepath, "/", svnm, ".RData"))
     cat(paste0("Output saved at ", save_to, "."))
