@@ -889,7 +889,7 @@ build_infrastructure <- function(folder_location = NULL,
             length(unique(var))) %>%
           max()
 
-        data_k_imp <- hot.deck(
+        data_k_imp <- hot.deck::hot.deck(
           data_k[, vars],
           method = "p.draw",
           m = n_imp,
