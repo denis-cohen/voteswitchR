@@ -62,7 +62,7 @@ run_mavcl <- function(data,
       dat[[m]]$D <- 1L
     } else {
       ## Main predictor
-      if (not(predictor_continuous)) {
+      if (!predictor_continuous) {
         data[[m]] <- data[[m]] %>%
           dplyr::mutate(!!main_predictor :=
                           droplevels(as.factor(!!as.symbol(
@@ -73,8 +73,8 @@ run_mavcl <- function(data,
       rhs <- paste0("~ ", main_predictor)
 
       ## Moderator
-      if (not(is.null(moderator))) {
-        if (not(moderator_continuous)) {
+      if (!is.null(moderator)) {
+        if (!moderator_continuous) {
           data[[m]] <- data[[m]] %>%
             dplyr::mutate(!!moderator :=
                             droplevels(as.factor(!!as.symbol(
@@ -90,7 +90,7 @@ run_mavcl <- function(data,
       }
 
       ## Other covariates
-      if (not(is.null(other_covariates))) {
+      if (!is.null(other_covariates)) {
         rhs <- paste0(rhs, " + ", paste(other_covariates, collapse = " + "))
       }
 
@@ -152,13 +152,13 @@ run_mavcl <- function(data,
   ## ---- Define Type ----
   ## Type
   type <- dplyr::case_when(
-    not(re_parties) & not(re_elections) & not(re_countries) ~ 1L,
-    re_parties      & not(re_elections) & not(re_countries) ~ 2L,
-    not(re_parties) &      re_elections & not(re_countries) ~ 3L,
-    not(re_parties) & not(re_elections) &      re_countries ~ 4L,
-    re_parties      & re_elections      & not(re_countries) ~ 5L,
-    not(re_parties) & re_elections      &      re_countries ~ 6L,
-    re_parties      & not(re_elections) &      re_countries ~ 7L,
+    !re_parties & !re_elections & !re_countries ~ 1L,
+    re_parties      & !re_elections & !re_countries ~ 2L,
+    !re_parties &      re_elections & !re_countries ~ 3L,
+    !re_parties & !re_elections &      re_countries ~ 4L,
+    re_parties      & re_elections      & !re_countries ~ 5L,
+    !re_parties & re_elections      &      re_countries ~ 6L,
+    re_parties      & !re_elections &      re_countries ~ 7L,
     re_parties      &     re_elections  &      re_countries ~ 8L
   )
 
@@ -276,10 +276,10 @@ run_mavcl <- function(data,
       type = type,
       pars = pars
     )
-    if (not(predictor_continuous)) {
+    if (!predictor_continuous) {
       output$predictor_levels <- cats_predictor
     }
-    if (not(is.null(moderator)) & not(moderator_continuous)) {
+    if (!is.null(moderator) & !moderator_continuous) {
       output$moderator_levels <- cats_moderator
     }
   }
@@ -287,7 +287,7 @@ run_mavcl <- function(data,
   return(output)
 
   ## Optionally: Save to file
-  if (not(is.null(savepath))) {
+  if (!(is.null(savepath)) {
     save_to <- paste0(savepath, "/", svnm, ".RData")
     save(output, file = paste0(savepath, "/", svnm, ".RData"))
     cat(paste0("Output saved at ", save_to, "."))

@@ -27,7 +27,7 @@ compute_qoi <- function(mavcl_object,
     warning("Quantities of interest for new parties will be NaN.")
   }
 
-  if (atmeans & not(re_null)) {
+  if (atmeans & !re_null) {
     warning("Option 'atmeans = TRUE' ist only available with 're_null = TRUE'")
     cat("\n")
     prompt_text <-
@@ -47,10 +47,10 @@ compute_qoi <- function(mavcl_object,
   moderator_continuous <- mavcl_object$moderator_continuous
   is_imputed <- mavcl_object$is_imputed
 
-  if (not(predictor_continuous)) {
+  if (!predictor_continuous) {
     predictor_levels <- mavcl_object$predictor_levels
   }
-  if (not(is.null(moderator)) & not(moderator_continuous)) {
+  if (!is.null(moderator) & !moderator_continuous) {
     moderator_levels <- mavcl_object$moderator_levels
   }
 
@@ -132,7 +132,7 @@ compute_qoi <- function(mavcl_object,
   }
 
   ## Moderator
-  if (not(is.null(moderator))) {
+  if (!is.null(moderator)) {
     if (moderator_continuous) {
       ## Moderator position
       which_moderator <- which(x_names == moderator)
@@ -229,7 +229,7 @@ compute_qoi <- function(mavcl_object,
 
   ## ---- Conditional expectations ----
   if (conditional_expectation |
-      (average_marginal_effect & not(predictor_continuous))) {
+      (average_marginal_effect & !predictor_continuous)) {
     ## Copy of x_default
     x_tmp <- x_default
 
@@ -316,7 +316,7 @@ compute_qoi <- function(mavcl_object,
           }
         }
       }
-    } else if (not(is.null(moderator)) & moderator_continuous) {
+    } else if (!is.null(moderator) & moderator_continuous) {
       if (predictor_continuous) {
         ## Initialize container
         ce_est <-
@@ -421,8 +421,8 @@ compute_qoi <- function(mavcl_object,
                          relative = relative) %>%
           reorder_qoi()
       }
-    } else if (not(is.null(moderator)) &
-               not(moderator_continuous)) {
+    } else if (!is.null(moderator) &
+               !moderator_continuous) {
       if (predictor_continuous) {
         ## Initialize containers
         ce_est <- array(NA,
@@ -600,7 +600,7 @@ compute_qoi <- function(mavcl_object,
           }
         }
       }
-    } else if (not(is.null(moderator)) & moderator_continuous) {
+    } else if (!is.null(moderator) & moderator_continuous) {
       if (predictor_continuous) {
         ## Copy of x_default
         x_tmp_1 <- x_tmp_0 <- x_default
@@ -689,8 +689,8 @@ compute_qoi <- function(mavcl_object,
         }
       }
 
-    } else if (not(is.null(moderator)) &
-               not(moderator_continuous)) {
+    } else if (!is.null(moderator) &
+               !moderator_continuous) {
       if (predictor_continuous) {
         ## Compute average marginal effect
         pi_1 <-
@@ -812,7 +812,7 @@ compute_qoi <- function(mavcl_object,
     output$average_marginal_effect <- NULL
   }
 
-  if (not(is.null(moderator))) {
+  if (!is.null(moderator)) {
     if (moderator_continuous) {
       output$moderator <- moderator_sequence
     } else {

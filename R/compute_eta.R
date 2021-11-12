@@ -19,7 +19,7 @@ compute_eta <- function (est,
   eta_est <- lapply(seq_len(num_catm1),
                     function (c) {
                       eta_c <- est$beta[, c , ] %*% x_obj
-                      if (not(re_null)) {
+                      if (!re_null) {
                         if (D == 1) {
                           eta_c <- eta_c + est$nu[, , c]
                         } else if (D > 1) {

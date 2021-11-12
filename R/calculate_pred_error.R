@@ -114,7 +114,7 @@ calculate_pred_error <- function(mavcl_object,
   }
 
   if (type == "rmse") {
-    se <- pi[not(is.na(pi))] - prop[not(is.na(prop))] ^ 2
+    se <- pi[!(is.na(pi))] - prop[!(is.na(prop))] ^ 2
     rmse <- sqrt(mean(se, na.rm = TRUE))
     return(rmse)
   }
