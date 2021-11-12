@@ -84,7 +84,7 @@ aggregate_switches <- function(
         dplyr::select(all_of(context_vars),
                       starts_with("cats"),
                       n) %>%
-        distinct(),
+        dplyr::distinct(),
       by = context_vars
     ) %>%
     dplyr::rowwise() %>%
