@@ -983,14 +983,14 @@ build_infrastructure <- function(folder_location = NULL,
           ## Raking
           if (impute) {
             for (m in seq_len(n_imp)) {
-              data_k[[m]]$weight <- anesrake::anesrake(
+              data_k_imp$data[[m]]$weight <- anesrake::anesrake(
                 inputter = list(vote = vote,
                                 l_vote = l_vote),
-                dataframe = data_k[[m]] %>%
+                dataframe = data_k_imp$data[[m]] %>%
                   dplyr::mutate_at(.vars = dplyr::vars(vote, l_vote),
-                            .funs = as.factor),
-                caseid = data_k[[m]]$id,
-                weightvec = data_k[[m]]$weights,
+                                   .funs = as.factor),
+                caseid = data_k_imp$data[[m]]$id,
+                weightvec = data_k_imp$data[[m]]$weights,
                 pctlim = 0.005
               )$weightvec
             }
