@@ -27,7 +27,7 @@ aggregate_switches <- function(
     dplyr::group_by_at(context_vars) %>%
     dplyr::mutate(weights =
                     !!as.name(weights_var) / mean(!!as.name(weights_var))) %>%
-    dplyr::mutate(n = n()) %>%
+    dplyr::mutate(n = dplyr::n()) %>%
     dplyr::mutate(
       cats_switch_to = list(sort(unique(!!as.name(switch_to)))),
       cats_switch_from = list(sort(unique(!!as.name(switch_from)))),
