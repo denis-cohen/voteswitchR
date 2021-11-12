@@ -17,7 +17,7 @@ aggregate_switches <- function(
 ) {
 
   `%>%` <- magrittr::`%>%`
-  
+
   # Input vectors
   all_vars <- c(context_vars, weights_var, switch_from, switch_to, subgroup)
   switch_vars <- c(switch_from, switch_to, subgroup)
@@ -44,7 +44,7 @@ aggregate_switches <- function(
       cats_switch_from = unique(cats_switch_from),
       n = unique(n)
     ) %>%
-    rowwise() %>%
+    dplyr::rowwise() %>%
     dplyr::mutate(
       switch_to = factor(!!as.name(switch_to), levels = unlist(cats_comb)),
       switch_from = factor(!!as.name(switch_from), levels = unlist(cats_comb))
