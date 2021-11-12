@@ -28,17 +28,16 @@ build_infrastructure <- function(folder_location = NULL,
                                  return_info_imp = FALSE,
                                  existing_data_file = NULL,
                                  output_file_path = NULL) {
-  `%>%` <- magrittr::`%>%`
-
-  ## ---- Initial checks ----
+  ## ---- Start ----
   cat("Building your data infrastructure.\n")
   cat("Supplied arguments:\n")
   args <- as.list(environment())
   print(c(args))
 
-  list2env(args, envir = .GlobalEnv)
-  cat("Supplied arguments have been stored in the global environment.\n")
+  ## magrittr functions
+  `%>%` <- magrittr::`%>%`
 
+  ## ---- Initial checks ----
   if (impute & !(map)) {
     stop(
       paste(
@@ -1041,6 +1040,10 @@ build_infrastructure <- function(folder_location = NULL,
   cat("Integrating context-specific data.\n")
   data_file$data <- dplyr::bind_rows(data_file$data)
   if (impute) {
+    data_file$data_imp <-
+      lapply(seq_len(n_imp), function(m)
+        lapply(data_file$data_imp, function(dat)
+          dat[[m]]))
     for (m in seq_len(n_imp)) {
       data_file$data_imp[[m]] <-
         dplyr::bind_rows(data_file$data_imp[[m]])
