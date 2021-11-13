@@ -739,27 +739,28 @@ build_infrastructure <- function(folder_location = NULL,
 
           ## Map
           for (p in 1:n_prty) {
+            p_num <- mappings_k$stack[p]
             p_alph <- mappings_k$map_lr[p]
             data_k$vote_new <-
               ifelse(mappings_k$map_vote[p] == data_k$vote,
-                     p,
+                     p_num,
                      data_k$vote_new)
             data_k$l_vote_new <-
               ifelse(mappings_k$map_vote[p] == data_k$l_vote,
-                     p,
+                     p_num,
                      data_k$l_vote_new)
 
             if ("pid" %in% names(data_k)) {
               data_k$pid_new <-
                 ifelse(mappings_k$map_vote[p] == data_k$pid,
-                       p,
+                       p_num,
                        data_k$pid_new) # new PID ID
             }
 
             for (v in mappings_p_vars) {
               # assign mappings party vars
               data_k <- within(data_k,
-                               assign(paste(v, p , sep = "_"),
+                               assign(paste(v, p_num , sep = "_"),
                                       mappings_k[p, v]))
             }
             if (nchar(p_alph) > 0 & !(is.na(p_alph))) {
@@ -768,7 +769,7 @@ build_infrastructure <- function(folder_location = NULL,
                 if (paste(v, p_alph, sep = "_") %in% survey_p_vars_k) {
                   data_k <-
                     within(data_k,
-                           assign(paste(v, p , sep = "_"),
+                           assign(paste(v, p_num, sep = "_"),
                                   data_k[, paste(v, p_alph, sep = "_")]))
                 }
               }
