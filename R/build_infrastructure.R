@@ -941,6 +941,8 @@ build_infrastructure <- function(folder_location = NULL,
         l_vote <- mappings_k_l_vote$vote_share_lag
         l_turnout <- unique(mappings_k_l_vote$turnout_lag)
         l_turnout_na <- is.na(l_turnout)
+        oth_exist <- any(!(levels_vote %in% c(mappings_k$stack, 99L)))
+        l_oth_exist <- any(!(levels_l_vote %in% c(mappings_k$stack, 99L)))
 
         if (turnout_na | l_turnout_na) {
           warning(
@@ -955,16 +957,23 @@ build_infrastructure <- function(folder_location = NULL,
           sum_vote <- sum(vote, na.rm = T)
           sum_l_vote <- sum(l_vote, na.rm = T)
 
-          if (sum_vote >= 1) {
-            warning("Combined vote shares exceed 1. Please check.")
+          if (sum_vote >= 1 & oth_exist) {
+            if (sum_vote >= 1.005)
+              warning("Combined vote shares exceed 1. Please check.")
             oth_vote <- 0.005
-          } else {
+          } else if (!oth_exist) {
+            oth_vote <- NULL
+          }
+          else {
             oth_vote <- 1 - sum_vote
           }
 
-          if (sum_l_vote >= 1) {
-            warning("Combined past vote shares exceed 1. Please check.")
+          if (sum_l_vote >= 1 & l_oth_exist) {
+            if (sum_l_vote >= 1.005)
+              warning("Combined vote shares exceed 1. Please check.")
             oth_l_vote <- 0.005
+          } else if (!l_oth_exist) {
+            oth_l_vote <- NULL
           } else {
             oth_l_vote <- 1 - sum_l_vote
           }
@@ -974,10 +983,23 @@ build_infrastructure <- function(folder_location = NULL,
           vote <- na.omit(c(vote * turnout, 1 - turnout))
           l_vote <- c(l_vote, oth_l_vote)
           l_vote <- na.omit(c(l_vote * l_turnout, 1 - l_turnout))
-          names(vote) <-
-            as.character(c(mappings_k_vote$stack, 98, 99))
-          names(l_vote) <-
-            as.character(c(mappings_k_l_vote$stack, 98, 99))
+
+          # Name true marginals
+          if (oth_exist) {
+            names(vote) <-
+              as.character(c(mappings_k_vote$stack, 98, 99))
+          } else {
+            names(vote) <-
+              as.character(c(mappings_k_vote$stack, 99))
+          }
+
+          if (l_oth_exist) {
+            names(l_vote) <-
+              as.character(c(mappings_k_l_vote$stack, 98, 99))
+          } else {
+            names(l_vote) <-
+              as.character(c(mappings_k_l_vote$stack, 99))
+          }
 
           ## Raking
           if (impute) {
