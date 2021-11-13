@@ -396,7 +396,7 @@ server <- function(input, output, session) {
           file_path <- paste0(input$dir, "/", row["folder_name"])
           files <-
             list.files(path = file_path,
-                       pattern = "\\.(dta|sav|rdata)$",
+                       pattern = "\\.(dta|sav|rdata|DTA|SAV|RDATA|Rdata|RData)$",
                        full.names = FALSE)
           if (length(files) == 1) {
             return(files[1])

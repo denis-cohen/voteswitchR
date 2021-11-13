@@ -982,7 +982,7 @@ build_infrastructure <- function(folder_location = NULL,
           ## Raking
           if (impute) {
             for (m in seq_len(n_imp)) {
-              data_k_imp$data[[m]]$weight <- anesrake::anesrake(
+              data_k_imp$data[[m]]$raked_weights <- anesrake::anesrake(
                 inputter = list(vote = vote,
                                 l_vote = l_vote),
                 dataframe = data_k_imp$data[[m]] %>%
@@ -994,7 +994,7 @@ build_infrastructure <- function(folder_location = NULL,
               )$weightvec
             }
           } else {
-            data_k$weight <- anesrake::anesrake(
+            data_k$raked_weights <- anesrake::anesrake(
               inputter = list(vote = vote,
                               l_vote = l_vote),
               dataframe = data_k %>%
@@ -1063,6 +1063,16 @@ build_infrastructure <- function(folder_location = NULL,
           switch_from = "l_vote",
           switch_to = "vote"
         )
+      if (rake) {
+        data_file$raked_switches <-
+          aggregate_switches(
+            data_file$data,
+            context_vars = "elec_id",
+            weights_var = "raked_weights",
+            switch_from = "l_vote",
+            switch_to = "vote"
+          )
+      }
     } else if (format == "long") {
       data_file$switches <-
         aggregate_switches(
@@ -1073,6 +1083,17 @@ build_infrastructure <- function(folder_location = NULL,
           switch_from = "l_vote",
           switch_to = "vote"
         )
+      if (rake) {
+        data_file$raked_switches <-
+          aggregate_switches(
+            data_file$data %>%
+              dplyr::filter(stack == 1),
+            context_vars = "elec_id",
+            weights_var = "raked_weights",
+            switch_from = "l_vote",
+            switch_to = "vote"
+          )
+      }
     }
 
     ## Imputed
@@ -1089,6 +1110,19 @@ build_infrastructure <- function(folder_location = NULL,
               switch_to = "vote"
             )
         }
+        if (rake) {
+          data_file$raked_switches_imp <- list()
+          for (m in seq_len(n_imp)) {
+            data_file$raked_switches_imp[[m]] <-
+              aggregate_switches(
+                data_file$data_imp[[m]],
+                context_vars = "elec_id",
+                weights_var = "raked_weights",
+                switch_from = "l_vote",
+                switch_to = "vote"
+              )
+          }
+        }
       } else if (format == "long") {
         for (m in seq_len(n_imp)) {
           data_file$switches_imp[[m]] <-
@@ -1100,6 +1134,20 @@ build_infrastructure <- function(folder_location = NULL,
               switch_from = "l_vote",
               switch_to = "vote"
             )
+        }
+        if (rake) {
+          data_file$raked_switches_imp <- list()
+          for (m in seq_len(n_imp)) {
+            data_file$raked_switches_imp[[m]] <-
+              aggregate_switches(
+                data_file$data_imp[[m]] %>%
+                  dplyr::filter(stack == 1),
+                context_vars = "elec_id",
+                weights_var = "raked_weights",
+                switch_from = "l_vote",
+                switch_to = "vote"
+              )
+          }
         }
       }
     }
