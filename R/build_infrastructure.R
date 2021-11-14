@@ -942,8 +942,12 @@ build_infrastructure <- function(folder_location = NULL,
         l_vote <- mappings_k_l_vote$vote_share_lag
         l_turnout <- unique(mappings_k_l_vote$turnout_lag)
         l_turnout_na <- is.na(l_turnout)
+
+        # Determine if others and/or non-voters are in the data
         oth_exist <- any(!(levels_vote %in% c(mappings_k$stack, 99L)))
         l_oth_exist <- any(!(levels_l_vote %in% c(mappings_k$stack, 99L)))
+        non_exist <- any(levels_vote == 99L)
+        l_non_exist <- any(levels_l_vote == 99L)
 
         if (turnout_na | l_turnout_na) {
           warning(
@@ -980,27 +984,39 @@ build_infrastructure <- function(folder_location = NULL,
           }
 
           ## Continue true marginals
-          vote <- c(vote, oth_vote)
-          vote <- na.omit(c(vote * turnout, 1 - turnout))
-          l_vote <- c(l_vote, oth_l_vote)
-          l_vote <- na.omit(c(l_vote * l_turnout, 1 - l_turnout))
-
-          # Name true marginals
           if (oth_exist) {
-            names(vote) <-
-              as.character(c(mappings_k_vote$stack, 98, 99))
+            oth_val <- 98L
+            vote <- c(vote, oth_vote)
           } else {
-            names(vote) <-
-              as.character(c(mappings_k_vote$stack, 99))
+            oth_val <- NULL
           }
 
           if (l_oth_exist) {
-            names(l_vote) <-
-              as.character(c(mappings_k_l_vote$stack, 98, 99))
+            l_oth_val <- 98L
+            l_vote <- c(l_vote, oth_l_vote)
           } else {
-            names(l_vote) <-
-              as.character(c(mappings_k_l_vote$stack, 99))
+            l_oth_val <- NULL
           }
+
+          if (non_exist) {
+            non_val <- 99L
+            vote <- na.omit(c(vote * turnout, 1 - turnout))
+          } else {
+            non_val <- NULL
+          }
+
+          if (l_non_exist) {
+            l_non_val <- 99L
+            l_vote <- na.omit(c(l_vote * l_turnout, 1 - l_turnout))
+          } else {
+            l_non_val <- NULL
+          }
+
+          # Name true marginals
+          names(vote) <-
+            as.character(c(mappings_k_vote$stack, oth_val, non_val))
+          names(l_vote) <-
+            as.character(c(mappings_k_l_vote$stack, l_oth_val, l_non_val))
 
           ## Raking
           if (impute) {
