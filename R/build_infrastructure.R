@@ -1020,6 +1020,7 @@ build_infrastructure <- function(folder_location = NULL,
             as.character(c(mappings_k_l_vote$stack, l_oth_val, l_non_val))
 
           ## Raking
+          # imputed data
           if (impute) {
             for (m in seq_len(n_imp)) {
               data_k_imp$data[[m]]$raked_weights <- anesrake::anesrake(
@@ -1034,19 +1035,20 @@ build_infrastructure <- function(folder_location = NULL,
               )$weightvec
             }
             data_file$data_imp[[k]] <- data_k_imp$data
-          } else {
-            data_k$raked_weights <- anesrake::anesrake(
-              inputter = list(vote = vote,
-                              l_vote = l_vote),
-              dataframe = data_k %>%
-                dplyr::mutate_at(.vars = dplyr::vars(vote, l_vote),
-                          .funs = as.factor),
-              caseid = seq_along(data_k$id),
-              weightvec = data_k$weights,
-              pctlim = 0.005
-            )$weightvec
-            data_file$data[[k]] <- data_k
           }
+
+          # original data
+          data_k$raked_weights <- anesrake::anesrake(
+            inputter = list(vote = vote,
+                            l_vote = l_vote),
+            dataframe = data_k %>%
+              dplyr::mutate_at(.vars = dplyr::vars(vote, l_vote),
+                               .funs = as.factor),
+            caseid = seq_along(data_k$id),
+            weightvec = data_k$weights,
+            pctlim = 0.005
+          )$weightvec
+          data_file$data[[k]] <- data_k
         }
       }
 
@@ -1080,7 +1082,8 @@ build_infrastructure <- function(folder_location = NULL,
 
   ## ---- Append data ----
   cat("Integrating context-specific data.\n")
-  data_file$data <- dplyr::bind_rows(data_file$data)
+  data_file$data <- dplyr::bind_rows(data_file$data) %>%
+    dplyr::ungroup()
   if (impute) {
     data_file$data_imp <-
       lapply(seq_len(n_imp), function(m)
@@ -1088,7 +1091,8 @@ build_infrastructure <- function(folder_location = NULL,
           dat[[m]]))
     for (m in seq_len(n_imp)) {
       data_file$data_imp[[m]] <-
-        dplyr::bind_rows(data_file$data_imp[[m]])
+        dplyr::bind_rows(data_file$data_imp[[m]]) %>%
+        dplyr::ungroup()
     }
   }
 
