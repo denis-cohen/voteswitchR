@@ -483,8 +483,8 @@ server <- function(input, output, session) {
   has_missing_file_names <- function() {
     if (!is.null(data_filtered)) {
       return(nrow(
-        data_filtered %>% dplyr::filter(file_name == "" ||
-                                   file_name == several_files_found_msg)
+        data_filtered %>% dplyr::filter((file_name == "") |
+                                   (file_name == several_files_found_msg))
       ) > 0)
     }
     return(TRUE)
