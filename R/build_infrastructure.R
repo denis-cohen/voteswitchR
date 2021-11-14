@@ -875,6 +875,7 @@ build_infrastructure <- function(folder_location = NULL,
       if (impute & !(no_map) & !(no_l_vote)) {
         paste0(
           "Imputing context ",
+          counter,
           " of ",
           length(selected_contexts),
           ". Current context: ",

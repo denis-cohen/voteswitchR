@@ -12,15 +12,16 @@ compute_me_qois <- function(pr_obj_0,
                             posterior_quantiles,
                             predictor_shift,
                             relative) {
-  `%>%` <- magrittr::`%>%`
-
   ## Auxiliary
-  dyad_names_vec <- y_structure$dyad[y_structure$type == "gain"]
-  dyad_names <- tapply(dyad_names_vec, dyad_names_vec, unique)
+  `%>%` <- magrittr::`%>%`
+  dyad_names_gain_vec <- y_structure$dyad[y_structure$type == "gain"]
+  dyad_names_gain <- tapply(dyad_names_vec, dyad_names_vec, unique)
+  dyad_names_loss_vec <- y_structure$dyad[y_structure$type == "loss"]
+  dyad_names_loss <- tapply(dyad_names_vec, dyad_names_vec, unique)
   gain_vec <- y_structure$pos[y_structure$type == "gain"]
-  gain <- tapply(gain_vec, dyad_names_vec, unique)
+  gain <- tapply(gain_vec, dyad_names_gain_vec, unique)
   loss_vec <- y_structure$pos[y_structure$type == "loss"]
-  loss <- tapply(loss_vec, dyad_names_vec, unique)
+  loss <- tapply(loss_vec, dyad_names_loss_vec, unique)
   retain <- y_structure$pos[y_structure$type == "retain"]
   sup_t <- c(retain, gain_vec)
   sup_tm1 <- c(retain, loss_vec)
