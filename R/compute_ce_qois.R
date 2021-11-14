@@ -14,6 +14,7 @@ compute_ce_qois <- function(ce_obj,
   `%>%` <- magrittr::`%>%`
   dyad_names_gain_vec <- y_structure$dyad[y_structure$type == "gain"]
   dyad_names_loss_vec <- y_structure$dyad[y_structure$type == "loss"]
+  dyad_names <- sort(unique(c(dyad_names_gain_vec, dyad_names_loss_vec)))
   gain_vec <- y_structure$pos[y_structure$type == "gain"]
   gain <- tapply(gain_vec, dyad_names_gain_vec, unique)
   loss_vec <- y_structure$pos[y_structure$type == "loss"]
@@ -61,24 +62,24 @@ compute_ce_qois <- function(ce_obj,
   ## Dyadic quantities
   dyadic_losses <-
     dyadic_gains <- dyadic_balances <- dyadic_volumes <- list()
-  for (d in seq_along(gain)) {
-    dyadic_losses[[dyad_names[d]]] <-
+  for (d in dyad_names) {
+    dyadic_losses[[d]] <-
       ((ce_obj[, loss[[d]], , drop = FALSE] %>%
           apply(c(1, 3), sum)) / denom) %>%
       apply(2, quantile, posterior_quantiles)
 
-    dyadic_gains[[dyad_names[d]]] <-
+    dyadic_gains[[d]] <-
       ((ce_obj[, gain[[d]], , drop = FALSE] %>%
           apply(c(1, 3), sum)) / denom) %>%
       apply(2, quantile, posterior_quantiles)
 
-    dyadic_balances[[dyad_names[d]]] <-
+    dyadic_balances[[d]] <-
       (((ce_obj[, gain[[d]], , drop = FALSE] -
            ce_obj[, loss[[d]], , drop = FALSE]) %>%
           apply(c(1, 3), sum)) / denom) %>%
       apply(2, quantile, posterior_quantiles)
 
-    dyadic_volumes[[dyad_names[d]]] <-
+    dyadic_volumes[[d]] <-
       (((ce_obj[, gain[[d]], , drop = FALSE] +
            ce_obj[, loss[[d]], , drop = FALSE]) %>%
           apply(c(1, 3), sum)) / denom) %>%

@@ -16,6 +16,7 @@ compute_me_qois <- function(pr_obj_0,
   `%>%` <- magrittr::`%>%`
   dyad_names_gain_vec <- y_structure$dyad[y_structure$type == "gain"]
   dyad_names_loss_vec <- y_structure$dyad[y_structure$type == "loss"]
+  dyad_names <- sort(unique(c(dyad_names_gain_vec, dyad_names_loss_vec)))
   gain_vec <- y_structure$pos[y_structure$type == "gain"]
   gain <- tapply(gain_vec, dyad_names_gain_vec, unique)
   loss_vec <- y_structure$pos[y_structure$type == "loss"]
@@ -76,22 +77,22 @@ compute_me_qois <- function(pr_obj_0,
   ## Dyadic quantities
   dyadic_losses <-
     dyadic_gains <- dyadic_balances <- dyadic_volumes <- list()
-  for (d in seq_along(gain)) {
-    dyadic_losses[[dyad_names[d]]] <-
+  for (d in dyad_names) {
+    dyadic_losses[[d]] <-
       (((pr_obj_1[, loss[[d]], drop = FALSE] -
            pr_obj_0[, loss[[d]], drop = FALSE])  %>%
           apply(1, sum)) / denom) %>%
       quantile(posterior_quantiles) %>%
       `/`(predictor_shift)
 
-    dyadic_gains[[dyad_names[d]]] <-
+    dyadic_gains[[d]] <-
       (((pr_obj_1[, gain[[d]], drop = FALSE] -
            pr_obj_0[, gain[[d]], drop = FALSE])  %>%
           apply(1, sum)) / denom) %>%
       quantile(posterior_quantiles) %>%
       `/`(predictor_shift)
 
-    dyadic_balances[[dyad_names[d]]] <-
+    dyadic_balances[[d]] <-
       ((((pr_obj_1[, gain[[d]], drop = FALSE] -
             pr_obj_1[, loss[[d]], drop = FALSE]) -
            (pr_obj_0[, gain[[d]], drop = FALSE] -
@@ -101,7 +102,7 @@ compute_me_qois <- function(pr_obj_0,
       quantile(posterior_quantiles) %>%
       `/`(predictor_shift)
 
-    dyadic_volumes[[dyad_names[d]]] <-
+    dyadic_volumes[[d]] <-
       ((((pr_obj_1[, gain[[d]], drop = FALSE] +
             pr_obj_1[, loss[[d]], drop = FALSE]) -
            (pr_obj_0[, gain[[d]], drop = FALSE] +
