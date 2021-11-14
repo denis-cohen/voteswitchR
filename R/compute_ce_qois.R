@@ -13,9 +13,7 @@ compute_ce_qois <- function(ce_obj,
   ## Auxiliary
   `%>%` <- magrittr::`%>%`
   dyad_names_gain_vec <- y_structure$dyad[y_structure$type == "gain"]
-  dyad_names_gain <- tapply(dyad_names_vec, dyad_names_vec, unique)
   dyad_names_loss_vec <- y_structure$dyad[y_structure$type == "loss"]
-  dyad_names_loss <- tapply(dyad_names_vec, dyad_names_vec, unique)
   gain_vec <- y_structure$pos[y_structure$type == "gain"]
   gain <- tapply(gain_vec, dyad_names_gain_vec, unique)
   loss_vec <- y_structure$pos[y_structure$type == "loss"]
