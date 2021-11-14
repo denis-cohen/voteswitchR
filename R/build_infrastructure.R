@@ -1033,6 +1033,7 @@ build_infrastructure <- function(folder_location = NULL,
                 pctlim = 0.005
               )$weightvec
             }
+            data_file$data_imp[[k]] <- data_k_imp$data
           } else {
             data_k$raked_weights <- anesrake::anesrake(
               inputter = list(vote = vote,
@@ -1044,6 +1045,7 @@ build_infrastructure <- function(folder_location = NULL,
               weightvec = data_k$weights,
               pctlim = 0.005
             )$weightvec
+            data_file$data[[k]] <- data_k
           }
         }
       }
