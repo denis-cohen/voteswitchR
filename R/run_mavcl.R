@@ -153,13 +153,16 @@ run_mavcl <- function(data,
   ## Type
   type <- dplyr::case_when(
     !re_parties & !re_elections & !re_countries ~ 1L,
-    re_parties      & !re_elections & !re_countries ~ 2L,
-    !re_parties &      re_elections & !re_countries ~ 3L,
-    !re_parties & !re_elections &      re_countries ~ 4L,
-    re_parties      & re_elections      & !re_countries ~ 5L,
-    !re_parties & re_elections      &      re_countries ~ 6L,
-    re_parties      & !re_elections &      re_countries ~ 7L,
-    re_parties      &     re_elections  &      re_countries ~ 8L
+    re_parties & !re_elections & !re_countries ~ 2L,
+    !re_parties &
+      re_elections & !re_countries ~ 3L,
+    !re_parties &
+      !re_elections & re_countries ~ 4L,
+    re_parties & re_elections & !re_countries ~ 5L,
+    !re_parties &
+      re_elections & re_countries ~ 6L,
+    re_parties & !re_elections & re_countries ~ 7L,
+    re_parties & re_elections & re_countries ~ 8L
   )
 
   ## Type-specific model
@@ -212,7 +215,7 @@ run_mavcl <- function(data,
     ## Sample
     est <- parallel::parLapply(cl, seq_along(dat),
                      function (m) {
-                       sampling(
+                       rstan::sampling(
                          stanmodels[[model_type]],
                          data = dat[[m]],
                          pars = pars,
@@ -234,7 +237,7 @@ run_mavcl <- function(data,
     ## Exit parallel computation
     parallel::stopCluster(cl)
   } else {
-    est <- sampling(
+    est <- rstan::sampling(
       stanmodels[[model_type]],
       data = dat[[1]],
       pars = pars,

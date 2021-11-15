@@ -14,17 +14,17 @@ recode_switches <- function(switches,
                             switch_factor,
                             type = c("elections", "party-elections")) {
   `%>%` <- magrittr::`%>%`
-  
+
   ## ---- Preparation ----
   ## No summarize info
   options(dplyr.summarise.inform = FALSE)
-  
+
   ## switch_factor as character
   mappings[[switch_factor]] <-
     as.factor(mappings[[switch_factor]]) %>%
-    dplyr::droplevels() %>%
+    droplevels() %>%
     as.character()
-  
+
   ## Check for missingness in switch_factor
   if (any(is.na(mappings[[switch_factor]]))) {
     warning(
@@ -39,7 +39,7 @@ recode_switches <- function(switches,
              "oth",
              mappings[[switch_factor]])
   }
-  
+
   ## Determine party-level variables in mappings
   if (type == "elections") {
     peid_vars <- mappings %>%
@@ -50,7 +50,7 @@ recode_switches <- function(switches,
       as.matrix()
     peid_vars <- colnames(peid_vars)[peid_vars[1,] != 1]
   }
-  
+
   ## ---- Recoding of switches ----
   ## Augment switching
   switches <- switches %>%
@@ -81,7 +81,7 @@ recode_switches <- function(switches,
         TRUE ~ to
       )
     )
-  
+
   ## ---- Aggregation at chosen level ----
   if (type == "elections") {
     ## Define y_structure and y_names
@@ -106,15 +106,15 @@ recode_switches <- function(switches,
       )) %>%
       dplyr::select(-from, -to) %>%
       dplyr::split(., .$cat) %>%
-      lapply(., function (x) x %>% dplyr::mutate(pos = row_number()))
+      lapply(., function (x) x %>% dplyr::mutate(pos = dplyr::row_number()))
     y_names <- y_structure[[1]]$switch
-    
+
     ## Election-level switches
     elec_switches <- switches %>%
       dplyr::group_by(elec_id) %>%
       dplyr::mutate(switch = paste(from, to, sep = "_")) %>%
       dplyr::group_by(elec_id, switch) %>%
-      dplyr::summarize(weights = if_else(all(is.na(weights)),
+      dplyr::summarize(weights =dplyr::if_else(all(is.na(weights)),
                                          NA_real_,
                                          sum(weights, na.rm = TRUE))) %>%
       dplyr::mutate(weights = ifelse(is.na(weights),-1.0, weights)) %>%
@@ -122,7 +122,7 @@ recode_switches <- function(switches,
                          values_from =  weights) %>%
       dplyr::mutate_if(is.numeric,
                        .funs = ~ ifelse(is.na(.),-1.0, .))
-    
+
     ## Output
     output <- list(
       data = mappings %>%
@@ -133,7 +133,7 @@ recode_switches <- function(switches,
       y_names = y_names,
       y_structure = y_structure
     )
-    
+
   } else if (type == "party-elections") {
     ## Party-election level switches
     peid_switches <- switches %>%
@@ -154,7 +154,7 @@ recode_switches <- function(switches,
       dplyr::summarize(
         from = unique(from),
         to = unique(to),
-        weights = if_else(all(is.na(weights)),
+        weights =dplyr::if_else(all(is.na(weights)),
                           NA_real_,
                           sum(weights, na.rm = TRUE))
       )  %>%
@@ -180,10 +180,10 @@ recode_switches <- function(switches,
       )) %>%
       dplyr::select(-to, -from) %>%
       dplyr::distinct() %>%
-      dplyr::arrange(!(is.na(dyad)), type, dyad) %>% 
-      dplyr::mutate(pos = row_number())
+      dplyr::arrange(!(is.na(dyad)), type, dyad) %>%
+      dplyr::mutate(pos = dplyr::row_number())
     y_names <- y_structure$switch
-    
+
     peid_switches <- peid_switches %>%
       dplyr::select(-to, -from) %>%
       dplyr::distinct() %>%
@@ -191,7 +191,7 @@ recode_switches <- function(switches,
                          values_from =  weights) %>%
       dplyr::mutate_if(is.numeric,
                        .funs = ~ ifelse(is.na(.),-1.0, .))
-    
+
     ## Output
     output <- list(
       data = mappings %>%
@@ -201,7 +201,7 @@ recode_switches <- function(switches,
       y_structure = y_structure
     )
   }
-  
+
   ## ---- Return ----
   return(output)
 }
