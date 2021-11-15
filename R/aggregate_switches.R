@@ -23,7 +23,7 @@ aggregate_switches <- function(
   switch_vars <- c(switch_from, switch_to, subgroup)
 
   switches <- data_file %>%
-    dplyr::select(all_of(all_vars)) %>%
+    dplyr::select(dplyr::all_of(all_vars)) %>%
     dplyr::group_by_at(context_vars) %>%
     dplyr::mutate(weights =
                     !!as.name(weights_var) / mean(!!as.name(weights_var))) %>%
@@ -50,13 +50,13 @@ aggregate_switches <- function(
       switch_from = factor(!!as.name(switch_from), levels = unlist(cats_comb))
     ) %>%
     dplyr::ungroup() %>%
-    dplyr::select(all_of(context_vars),
-                  any_of(subgroup),
+    dplyr::select(dplyr::all_of(context_vars),
+                  dplyr:::any_of(subgroup),
                   switch_from,
                   switch_to,
                   weights,
                   n,
-                  starts_with("cats_"))
+                  dplyr::starts_with("cats_"))
 
   if (is.null(subgroup)) {
     switches_expanded <- switches %>%
@@ -64,7 +64,7 @@ aggregate_switches <- function(
       tidyr::expand(switch_from, switch_to)%>%
       dplyr::left_join(
         switches %>%
-          dplyr::select(-starts_with("cats"), -starts_with("n")),
+          dplyr::select(-dplyr::starts_with("cats"), -dplyr::starts_with("n")),
         by = c(context_vars, "switch_from", "switch_to")
       )
   } else {
@@ -81,8 +81,8 @@ aggregate_switches <- function(
   switches <- switches_expanded %>%
     dplyr::left_join(
       switches %>%
-        dplyr::select(all_of(context_vars),
-                      starts_with("cats"),
+        dplyr::select(dplyr::all_of(context_vars),
+                      dplyr::starts_with("cats"),
                       n) %>%
         dplyr::distinct(),
       by = context_vars
@@ -99,7 +99,7 @@ aggregate_switches <- function(
       )
     ) %>%
     dplyr::ungroup() %>%
-    dplyr::select(-starts_with("cats")) %>%
+    dplyr::select(-dplyr::starts_with("cats")) %>%
     dplyr::mutate_at(
       .vars = dplyr::vars(switch_from, switch_to),
       .funs = ~as.numeric(as.character(.))

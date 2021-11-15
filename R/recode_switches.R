@@ -105,7 +105,7 @@ recode_switches <- function(switches,
         TRUE ~ NA_character_
       )) %>%
       dplyr::select(-from, -to) %>%
-      dplyr::split(., .$cat) %>%
+      split(., .$cat) %>%
       lapply(., function (x) x %>% dplyr::mutate(pos = dplyr::row_number()))
     y_names <- y_structure[[1]]$switch
 
