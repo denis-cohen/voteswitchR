@@ -166,7 +166,7 @@ run_mavcl <- function(data,
   )
 
   ## Type-specific model
-  model_name <- paste0("vclogit_l2_type", type, ".stan")
+  model_type <- paste0("vclogit_l2_type", type)
 
   ## Parameters to sample
   pars <- c("beta", "Sigma", "nu")
