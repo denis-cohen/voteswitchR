@@ -126,7 +126,7 @@ recode_switches <- function(switches,
     ## Output
     output <- list(
       data = mappings %>%
-        dplyr::select(-all_of(peid_vars),-any_of(switch_factor)) %>%
+        dplyr::select(-dplyr::all_of(peid_vars),-dplyr::any_of(switch_factor)) %>%
         dplyr::distinct() %>%
         dplyr::inner_join(elec_switches,
                           by = c("elec_id")),

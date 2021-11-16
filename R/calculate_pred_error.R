@@ -98,7 +98,7 @@ calculate_pred_error <- function(mavcl_object,
   ## ---- Proportional Y ----
   prop <- Y %>%
     apply(1, function(x)
-      if_else(x >= 0, x / sum(x[x >= 0]), NA_real_)) %>%
+      dplyr::if_else(x >= 0, x / sum(x[x >= 0]), NA_real_)) %>%
     t()
 
   if (type == "mae") {

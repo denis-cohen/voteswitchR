@@ -240,7 +240,7 @@ build_infrastructure <- function(folder_location = NULL,
       direction = "long"
     ) %>%
       dplyr::arrange(id) %>%
-      dplyr::select(any_of(
+      dplyr::select(dplyr::any_of(
         c(
           "iso2c",
           "year",
@@ -431,7 +431,7 @@ build_infrastructure <- function(folder_location = NULL,
       ## If applicable: extract recodes
       if (any(grepl("recode", names(recodes_jk)))) {
         recode_values_jk <- recodes_jk %>%
-          dplyr::select(starts_with("recode_"))
+          dplyr::select(dplyr::starts_with("recode_"))
         recode_values_jk <-
           paste0("dplyr::case_when(",
                  paste(
@@ -616,9 +616,9 @@ build_infrastructure <- function(folder_location = NULL,
 
     ## ---- Post-Recode Processing ----
     data_j <- data_j %>%
-      dplyr::select(starts_with("exp_")) %>%
+      dplyr::select(dplyr::starts_with("exp_")) %>%
       dplyr::rename_at(
-        .vars = dplyr::vars(starts_with("exp_")),
+        .vars = dplyr::vars(dplyr::starts_with("exp_")),
         .funs = function(x)
           gsub("^exp_", "", x)
       ) %>%
@@ -635,7 +635,7 @@ build_infrastructure <- function(folder_location = NULL,
       dplyr::mutate(weights = ifelse(is.na(weights), 1, weights)) %>%
       dplyr::mutate(weights = ifelse(weights == 0, 1, weights)) %>%
       dplyr::mutate(weights = weights / mean(weights)) %>%
-      dplyr::select(any_of(core_concepts)) %>%
+      dplyr::select(dplyr::any_of(core_concepts)) %>%
       dplyr::mutate_all(.funs = ~ ifelse(is.nan(.), NA, .))
 
     ## Age filter
@@ -854,7 +854,7 @@ build_infrastructure <- function(folder_location = NULL,
 
           ## Drop old/auxiliary variables
           data_k <- data_k %>%
-            dplyr::select(-any_of(
+            dplyr::select(-dplyr::any_of(
               c(
                 "vote_old",
                 "part",

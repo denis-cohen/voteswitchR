@@ -73,7 +73,7 @@ aggregate_switches <- function(
       tidyr::expand(switch_from, switch_to, !!as.name(subgroup))%>%
       dplyr::left_join(
         switches %>%
-          dplyr::select(-starts_with("cats"), -starts_with("n")),
+          dplyr::select(-dplyr::starts_with("cats"), -dplyr::starts_with("n")),
         by = c(context_vars, "switch_from", "switch_to", subgroup)
       )
   }
