@@ -794,12 +794,6 @@ compute_qoi <- function(mavcl_object,
 
   ## ---- Return output ----
   output <- list()
-  if (posterior_predictions) {
-    output$posterior_predictions <- pi
-  } else {
-    output$posterior_predictions <- NULL
-  }
-
   if (conditional_expectation) {
     output$conditional_expectation <- ce_qois
   } else {
