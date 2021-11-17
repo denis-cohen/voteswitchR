@@ -408,18 +408,14 @@ server <- function(input, output, session) {
         })
 
       # Map numbers for data access to labels
-      data_filtered$data_access <<-
-        ifelse(data_filtered$data_access == 1,
-               "non-restrictive",
-               data_filtered$data_access)
-      data_filtered$data_access <<-
-        ifelse(data_filtered$data_access == 2,
-               "less restrictive",
-               data_filtered$data_access)
-      data_filtered$data_access <<-
-        ifelse(data_filtered$data_access == 3,
-               "very restrictive",
-               data_filtered$data_access)
+      data_filtered <<- data_filtered %>%
+        dplyr::mutate(data_access = dplyr::case_when(
+          data_access == 1 ~ "non-restrictiv",
+          data_access == 2 ~ "less restrictive",
+          data_access == 3 ~ "Specific research proposal required",
+          data_access == 4 ~ "Specific research proposal and signed user agreement required",
+          data_access == 5 ~ "Signed user agreement and payment of provision fee required",
+        ))
 
       data_filtered <<-
         data_filtered %>% dplyr::filter(year %in% unlist(sapply(
