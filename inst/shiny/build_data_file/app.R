@@ -5,6 +5,18 @@ NUM_PAGES <- 3
 ui <- shiny::fluidPage(
   shinyalert::useShinyalert(),
   shinyjs::useShinyjs(),
+  shiny::tags$head(
+    shiny::tags$style(HTML("
+      .error {
+        border: 5px solid red;
+      }
+      .warning {
+        border: 5px solid orange;
+      }
+      .success {
+        border: 5px solid green;
+      }"))
+  ),
   shiny::titlePanel("Vote Switching Data"),
   shinyjs::hidden(lapply(seq(NUM_PAGES), function(i) {
     # Landing Page (Concepts+Contexts Selection)
@@ -19,7 +31,7 @@ ui <- shiny::fluidPage(
         )),
         h4('Contexts:'),
         shiny::actionLink("resetall", "Reset Context Selection"),
-        DT::DTOutput('countries_year')
+        DT::dataTableOutput('countries_year')
       )
       # Data Download/Selection
     } else if (i == 2) {
@@ -31,11 +43,12 @@ ui <- shiny::fluidPage(
           "In case you haven't already done, please download the selected data manually using the provided download links and put the files into the respective folders."
         ),
         shiny::textInput("dir", "Input directory", placeholder = "e.g. ./data"),
+        shiny::actionButton("find_files", "Find files"),
         shiny::actionButton("structure_creation", "Create initial folder structure"),
         h4('Selected Contexts:'),
         h5("Please Note: File format must be either .sav, .dta or .rdata."),
-        shiny::actionLink("refresh_table", "Generate/Update Context Table"),
-        DT::DTOutput('data_selected')
+        shiny::actionLink("refresh_table", "Reset Context Table"),
+        DT::dataTableOutput('data_selected')
       )
       # Parameter Setting for infrastructure function
     } else if (i == 3) {
@@ -93,7 +106,7 @@ ui <- shiny::fluidPage(
 server <- function(input, output, session) {
   # Set up pages (+ navigation)
   rv <- shiny::reactiveValues(page = 1)
-  data_filtered <<- NULL
+  assign("data_filtered_global", data.frame(), envir = .GlobalEnv)
   shiny::observe({
     shinyjs::toggleState(id = "prevBtn", condition = rv$page > 1)
     if (rv$page == 3) {
@@ -110,24 +123,28 @@ server <- function(input, output, session) {
   shiny::observeEvent(input$prevBtn, navPage(-1))
   shiny::observeEvent(input$nextBtn, {
     if (rv$page < 3) {
-      update_selected_table()
-      if (rv$page > 1 && has_missing_file_names()) {
-        shinyalert::shinyalert(
-          "Please download the selected data manually using the provided download links and put the files into the respective folders.",
-          size = "l",
-          animation = "slide-from-top",
-          type = "error"
-        )
-        return()
+      assign("data_filtered_global", update_selected_table(data_filtered_global, FALSE), envir = .GlobalEnv)
+      if (rv$page > 1) {
+        if (has_missing_file_names()) {
+          shinyalert::shinyalert(
+            "Please download the selected data manually using the provided download links and put the files into the respective folders.",
+            size = "l",
+            animation = "slide-from-top",
+            type = "error"
+          )
+          return()
+        } else {
+          assign("data_filtered_global", store_selected_file_names(data_filtered_global), envir = .GlobalEnv)
+        }
       }
       navPage(1)
     } else {
       # Call process function from external source
       voteswitchR:::build_infrastructure(
         folder_location = input$dir,
-        available_data = data_filtered,
+        available_data = data_filtered_global,
         selected_concepts = input$concepts,
-        selected_contexts = data_filtered$elec_id,
+        selected_contexts = data_filtered_global$elec_id,
         map = input$map_par,
         impute = input$impute_par,
         n_imp = as.numeric(input$n_imp_par),
@@ -160,8 +177,8 @@ server <- function(input, output, session) {
     renderUI({
       tags$div(align = 'left',
                shiny::checkboxGroupInput("concepts",
-                                  label = "",
-                                  choices = concepts))
+                                         label = "",
+                                         choices = concepts))
 
     })
 
@@ -171,17 +188,17 @@ server <- function(input, output, session) {
     else if (input$selectall %% 2 == 0)
     {
       shiny::updateCheckboxGroupInput(session,
-                               "concepts",
-                               "",
-                               choices = concepts)
+                                      "concepts",
+                                      "",
+                                      choices = concepts)
     }
     else
     {
       shiny::updateCheckboxGroupInput(session,
-                               "concepts",
-                               "",
-                               choices = concepts,
-                               selected = concepts)
+                                      "concepts",
+                                      "",
+                                      choices = concepts,
+                                      selected = concepts)
     }
   })
 
@@ -363,11 +380,11 @@ server <- function(input, output, session) {
     output$countries_year = DT::renderDT(data_country_year_datatable)
   })
 
-
   ##### Page 2: Choose Directory #####
-  # popup to choose directory
+  # Fill out directory
   shiny::observeEvent(input$dir, {
     shinyjs::toggleState("structure_creation", input$dir != "")
+    shinyjs::toggleState("find_files", input$dir != "")
   })
 
   # Event for creation of initial folder structure (button)
@@ -384,106 +401,148 @@ server <- function(input, output, session) {
     }
   })
 
+  shiny::observeEvent(input$find_files, {
+    assign("data_filtered_global",update_selected_table(data_filtered_global, TRUE), envir = .GlobalEnv)
+  })
+
   # Create Data Table with selected contexts
-  several_files_found_msg <- "Multiple files found! Please check."
+  update_selected_table <- function(data_filtered, forceUpdate = FALSE) {
+    previous_data_filtered <- data_filtered
+    data_filtered <- voteswitchR:::available_data
 
-  update_selected_table <- function() {
-    data_filtered <<- voteswitchR:::available_data
-    selected_context_table <<- {
-      checkbox_names = gsub("-",  " ", input$checkboxes, fixed = TRUE)
-      data_filtered$file_name <<-
-        apply(data_filtered, 1, function(row) {
-          file_path <- paste0(input$dir, "/", row["folder_name"])
-          files <-
-            list.files(path = file_path,
-                       pattern = "\\.(dta|sav|rdata|DTA|SAV|RDATA|Rdata|RData)$",
-                       full.names = FALSE)
-          if (length(files) == 1) {
-            return(files[1])
-          } else if (length(files) > 1) {
-            return(several_files_found_msg)
-          } else {
-            return("")
-          }
-        })
+    # Map numbers for data access to labels
+    data_filtered <- data_filtered %>%
+      dplyr::mutate(data_access = dplyr::case_when(
+        data_access == 1 ~ "Accept terms of use",
+        data_access == 2 ~ "Register and accept terms of use",
+        data_access == 3 ~ "Specific research proposal required",
+        data_access == 4 ~ "Specific research proposal and signed user agreement required",
+        data_access == 5 ~ "Signed user agreement and payment of provision fee required",
+      ))
 
-      # Map numbers for data access to labels
-      data_filtered <<- data_filtered %>%
-        dplyr::mutate(data_access = dplyr::case_when(
-          data_access == 1 ~ "Accept terms of use",
-          data_access == 2 ~ "Register and accept terms of use",
-          data_access == 3 ~ "Specific research proposal required",
-          data_access == 4 ~ "Specific research proposal and signed user agreement required",
-          data_access == 5 ~ "Signed user agreement and payment of provision fee required",
-        ))
+    checkbox_names <- gsub("-",  " ", input$checkboxes, fixed = TRUE)
+    data_filtered <-
+      data_filtered %>% dplyr::filter(year %in% unlist(sapply(
+        stringr::str_split(checkbox_names, "_"), `[`, 1
+      )))
+    data_filtered <-
+      data_filtered %>% dplyr::filter(country_name %in% unlist(sapply(
+        stringr::str_split(checkbox_names, "_"), `[`
+      )))
+    data_filtered <- data_filtered %>%
+      dplyr::mutate(file_name, "") %>%
+      store_selected_file_names()
 
-      data_filtered <<-
-        data_filtered %>% dplyr::filter(year %in% unlist(sapply(
-          stringr::str_split(checkbox_names, "_"), `[`, 1
-        )))
-      data_filtered <<-
-        data_filtered %>% dplyr::filter(country_name %in% unlist(sapply(
-          stringr::str_split(checkbox_names, "_"), `[`
-        )))
-
-      # Define Data Table
-      DT::datatable(
-        dplyr::select(
-          data_filtered,
-          "elec_id",
-          "source",
-          "version_dataset",
-          "download_link",
-          "data_access",
-          "file_name"
-        ),
-        escape = F,
-        rownames = F,
-        class = 'cell-border compact',
-        options = list(
-          ordering = T,
-          autowidth = F,
-          scrollX = TRUE,
-          pageLength = nrow(data_country_year),
-          columnDefs = list(list(
-            className = 'dt-center', targets = "_all"
-          ))
-        ),
-        selection = "none"
-      )
+    if (!forceUpdate & (nrow(previous_data_filtered) > 0)) {
+      if (isTRUE(dplyr::all_equal(dplyr::select(previous_data_filtered, elec_id), dplyr::select(data_filtered, elec_id)))) {
+        return(previous_data_filtered)
+      }
     }
 
-    # Render Data Table
-    output$data_selected <- DT::renderDT(
-      selected_context_table %>% DT::formatStyle(
-        "file_name",
-        target = 'cell',
-        backgroundColor =
-          DT::styleEqual(c("", several_files_found_msg), c('red', 'yellow'))
+    for (i in 1:nrow(data_filtered)) {
+      file_path <- paste0(input$dir, "/", data_filtered$folder_name[i])
+      files <- list.files(path = file_path,
+                          pattern = "\\.(dta|sav|rdata|DTA|SAV|RDATA|Rdata|RData)$",
+                          full.names = FALSE)
+
+      if (length(files) > 1) {
+        files <- c("", files)
+      }
+
+      random_id <- sample(1:10000, 1)
+      data_filtered[i, "random_id"] <- random_id
+      input_id <- paste0("sel", i, "_", random_id)
+      data_filtered[i, "file_name_options"] <-
+        shiny::selectInput(input_id, "", choices = files, width = "100px") %>%
+        as.character
+
+      data_filtered[i, "file_name_options"] <- case_when(
+        length(files) == 1 ~ gsub("<select ", "<select class='success'", data_filtered[i, "file_name_options"]),
+        length(files) > 1 ~ gsub("<select ", "<select class='warning'", data_filtered[i, "file_name_options"]),
+        length(files) == 0 ~ gsub("<select ", "<select class='error'", data_filtered[i, "file_name_options"])
       )
+
+      shinyjs::runjs(
+        paste0("
+          $('body').on('change', '#", input_id, "',
+                  function(event) {
+                    let select_element = document.getElementById(event.target.id);
+                    select_element.classList.remove('error', 'warning', 'success');
+
+                    if (select_element.value == '') {
+                      if (select_element.length > 0) {
+                        select_element.classList.add('warning');
+                      } else {
+                        select_element.classList.add('error');
+                      }
+                    } else {
+                      select_element.classList.add('success');
+                    }
+                  }
+          );"))
+    }
+
+    output$data_selected <- DT::renderDataTable(
+      select(
+        data_filtered,
+        "elec_id",
+        "source",
+        "version_dataset",
+        "download_link",
+        "data_access",
+        "file_name_options"
+      ),
+      escape = FALSE,
+      selection = "none",
+      rownames = FALSE,
+      server = FALSE,
+      options = list(
+        dom='t',
+        ordering = TRUE,
+        autowidth = FALSE,
+        scrollX = TRUE,
+        pageLength = nrow(data_country_year),
+        columnDefs = list(list(
+          className = 'dt-center', targets = "_all"
+        ))
+      ),
+      callback = JS("table.rows().every(function(i, tab, row) {
+            var $this = $(this.node());
+            $this.attr('id', this.data()[0]);
+            $this.addClass('shiny-input-container');
+          });
+          Shiny.unbindAll(table.table().node());
+          Shiny.bindAll(table.table().node());")
     )
+
+    return(data_filtered)
   }
 
-  # Event for updating the selected concepts table (Button)
   shiny::observeEvent(input$refresh_table, {
-    update_selected_table()
+    assign("data_filtered_global", update_selected_table(data_filtered_global, TRUE), envir = .GlobalEnv)
   })
 
-  # Event for updating the selected concepts table on change on UI
-  shiny::observe({
-    update_selected_table()
-  })
-
-  # function to check whether there are file names missing in the
-  # selected concepts list
   has_missing_file_names <- function() {
-    if (!is.null(data_filtered)) {
-      return(nrow(
-        data_filtered %>% dplyr::filter((file_name == "") |
-                                   (file_name == several_files_found_msg))
-      ) > 0)
+    data_filtered <- get('data_filtered_global', envir = .GlobalEnv)
+    if (nrow(data_filtered) > 0) {
+      for (i in 1:nrow(data_filtered)) {
+        file_name <- input[[paste0("sel", i, "_", data_filtered[i, "random_id"])]]
+        if ((is.null(file_name)) || (file_name == "")) {
+          return(TRUE)
+        }
+      }
     }
-    return(TRUE)
+    return(FALSE)
+  }
+
+  store_selected_file_names <- function(data_filtered) {
+    if (nrow(data_filtered) > 0) {
+      for (i in 1:nrow(data_filtered)) {
+        selected_value <- input[[paste0("sel", i, "_", data_filtered[i, "random_id"])]]
+        data_filtered[i, "file_name"] <- ifelse(is.null(selected_value), "", selected_value)
+      }
+    }
+    return(data_filtered)
   }
 
   # Event for updating the selected concepts table on change on UI
