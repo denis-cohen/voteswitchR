@@ -21,7 +21,7 @@ ui <- shiny::fluidPage(
   shinyjs::hidden(lapply(seq(NUM_PAGES), function(i) {
     # Landing Page (Concepts+Contexts Selection)
     if (i == 1) {
-      div(
+      htmltools::div(
         class = "page",
         id = paste0("step", i),
         h4('Concepts:'),
@@ -35,7 +35,7 @@ ui <- shiny::fluidPage(
       )
       # Data Download/Selection
     } else if (i == 2) {
-      div(
+      htmltools::div(
         class = "page",
         id = paste0("step", i),
         h4('Preparation:'),
@@ -52,7 +52,7 @@ ui <- shiny::fluidPage(
       )
       # Parameter Setting for infrastructure function
     } else if (i == 3) {
-      div(
+      htmltools::div(
         class = "page",
         id = paste0("step", i),
         h4('Execution Specification:'),
@@ -97,7 +97,7 @@ ui <- shiny::fluidPage(
       )
     }
   })),
-  br(),
+  htmltools::br(),
   shiny::actionButton("prevBtn", "< Previous"),
   shiny::actionButton("nextBtn", "Next >")
 )
@@ -456,7 +456,7 @@ server <- function(input, output, session) {
         shiny::selectInput(input_id, "", choices = files, width = "100px") %>%
         as.character
 
-      data_filtered[i, "file_name_options"] <- case_when(
+      data_filtered[i, "file_name_options"] <- dplyr::case_when(
         length(files) == 1 ~ gsub("<select ", "<select class='success'", data_filtered[i, "file_name_options"]),
         length(files) > 1 ~ gsub("<select ", "<select class='warning'", data_filtered[i, "file_name_options"]),
         length(files) == 0 ~ gsub("<select ", "<select class='error'", data_filtered[i, "file_name_options"])
@@ -483,15 +483,13 @@ server <- function(input, output, session) {
     }
 
     output$data_selected <- DT::renderDataTable(
-      select(
-        data_filtered,
-        "elec_id",
-        "source",
-        "version_dataset",
-        "download_link",
-        "data_access",
-        "file_name_options"
-      ),
+      data_filtered %>%
+        dplyr::select(elec_id,
+                      source,
+                      version_dataset,
+                      download_link,
+                      data_access,
+                      file_name_options),
       escape = FALSE,
       selection = "none",
       rownames = FALSE,
@@ -506,7 +504,7 @@ server <- function(input, output, session) {
           className = 'dt-center', targets = "_all"
         ))
       ),
-      callback = JS("table.rows().every(function(i, tab, row) {
+      callback = htmlwidgets::JS("table.rows().every(function(i, tab, row) {
             var $this = $(this.node());
             $this.attr('id', this.data()[0]);
             $this.addClass('shiny-input-container');

@@ -57,7 +57,7 @@ Imports:
     shiny (>=	1.7.1),
     shinyalert (>= 2.0.0),
     shinyjs (>= 2.0.0),
-    tidyr (>= 1.1.4),
+    tidyr (>= 1.1.4)
 LinkingTo:
     BH (>= 1.66.0),
     Rcpp (>= 0.12.0),
