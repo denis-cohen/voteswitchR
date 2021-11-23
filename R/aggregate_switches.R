@@ -51,7 +51,7 @@ aggregate_switches <- function(
     ) %>%
     dplyr::ungroup() %>%
     dplyr::select(dplyr::all_of(context_vars),
-                  dplyr:::any_of(subgroup),
+                  dplyr::any_of(subgroup),
                   switch_from,
                   switch_to,
                   weights,
