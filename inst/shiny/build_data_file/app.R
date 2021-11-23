@@ -495,11 +495,10 @@ server <- function(input, output, session) {
       rownames = FALSE,
       server = FALSE,
       options = list(
-        dom='t',
         ordering = TRUE,
         autowidth = FALSE,
         scrollX = TRUE,
-        pageLength = nrow(data_country_year),
+        pageLength = 20,
         columnDefs = list(list(
           className = 'dt-center', targets = "_all"
         ))
