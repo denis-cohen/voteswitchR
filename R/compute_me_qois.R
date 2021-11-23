@@ -14,9 +14,14 @@ compute_me_qois <- function(pr_obj_0,
                             relative) {
   ## Auxiliary
   `%>%` <- magrittr::`%>%`
-  dyad_names_gain_vec <- y_structure$dyad[y_structure$type == "gain"]
-  dyad_names_loss_vec <- y_structure$dyad[y_structure$type == "loss"]
-  dyad_names <- sort(unique(c(dyad_names_gain_vec, dyad_names_loss_vec)))
+  dyad_names_gain_vec <-
+    y_structure$dyad[y_structure$type == "gain"]
+  dyad_names_loss_vec <-
+    y_structure$dyad[y_structure$type == "loss"]
+  dyad_names <-
+    sort(unique(c(
+      dyad_names_gain_vec, dyad_names_loss_vec
+    )))
   gain_vec <- y_structure$pos[y_structure$type == "gain"]
   gain <- tapply(gain_vec, dyad_names_gain_vec, unique)
   loss_vec <- y_structure$pos[y_structure$type == "loss"]
@@ -44,33 +49,43 @@ compute_me_qois <- function(pr_obj_0,
 
   ## ---- Overall quantities ---
   losses <-
-    (((pr_obj_1[, loss_vec] - pr_obj_0[, loss_vec]) %>%
+    (((pr_obj_1[, loss_vec, drop = FALSE] -
+         pr_obj_0[, loss_vec, drop = FALSE]) %>%
         apply(1, sum)) / denom) %>%
     quantile(posterior_quantiles) %>%
     `/`(predictor_shift)
 
   gains <-
-    (((pr_obj_1[, gain_vec] - pr_obj_0[, gain_vec]) %>%
+    (((pr_obj_1[, gain_vec, drop = FALSE] -
+         pr_obj_0[, gain_vec, drop = FALSE]) %>%
         apply(1, sum)) / denom) %>%
     quantile(posterior_quantiles) %>%
     `/`(predictor_shift)
 
-  balance <- ((((pr_obj_1[, gain_vec] - pr_obj_1[, loss_vec]) -
-                  (pr_obj_0[, gain_vec] - pr_obj_0[, loss_vec])
+  balance <- ((((pr_obj_1[, drop = FALSE] -
+                   pr_obj_1[, loss_vec, drop = FALSE]) -
+                  (pr_obj_0[, gain_vec, drop = FALSE] -
+                     pr_obj_0[, loss_vec, drop = FALSE])
   ) %>%
     apply(1, sum)) / denom) %>%
     quantile(posterior_quantiles) %>%
     `/`(predictor_shift)
 
-  volume <- ((((pr_obj_1[, gain_vec] + pr_obj_1[, loss_vec]) -
-                 (pr_obj_0[, gain_vec] + pr_obj_0[, loss_vec])
+  volume <- ((((pr_obj_1[, gain_vec, drop = FALSE] +
+                  pr_obj_1[, loss_vec, drop = FALSE]) -
+                 (pr_obj_0[, gain_vec, drop = FALSE] +
+                    pr_obj_0[, loss_vec, drop = FALSE])
   ) %>%
     apply(1, sum)) / denom) %>%
     quantile(posterior_quantiles) %>%
     `/`(predictor_shift)
 
   retention <-
-    ((pr_obj_1[, retain] - pr_obj_0[, retain]) / denom) %>%
+    ((((
+      pr_obj_1[, retain, drop = FALSE] -
+        r_obj_0[, retain, drop = FALSE]
+    ) / denom) %>%
+      apply(1, sum)) / denom) %>%
     quantile(posterior_quantiles) %>%
     `/`(predictor_shift)
 
