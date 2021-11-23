@@ -499,7 +499,7 @@ server <- function(input, output, session) {
         ordering = TRUE,
         autowidth = FALSE,
         scrollX = TRUE,
-        pageLength = 20,
+        pageLength = nrow(data_filtered),
         columnDefs = list(list(
           className = 'dt-center', targets = "_all"
         ))
