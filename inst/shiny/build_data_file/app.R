@@ -489,6 +489,7 @@ server <- function(input, output, session) {
                       version_dataset,
                       download_link,
                       data_access,
+                      folder_name,
                       file_name_options),
       escape = FALSE,
       selection = "none",
