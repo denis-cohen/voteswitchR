@@ -62,7 +62,7 @@ compute_me_qois <- function(pr_obj_0,
     quantile(posterior_quantiles) %>%
     `/`(predictor_shift)
 
-  balance <- ((((pr_obj_1[, drop = FALSE] -
+  balance <- ((((pr_obj_1[, gain_vec, drop = FALSE] -
                    pr_obj_1[, loss_vec, drop = FALSE]) -
                   (pr_obj_0[, gain_vec, drop = FALSE] -
                      pr_obj_0[, loss_vec, drop = FALSE])
