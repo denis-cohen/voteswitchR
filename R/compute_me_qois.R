@@ -83,7 +83,7 @@ compute_me_qois <- function(pr_obj_0,
   retention <-
     ((((
       pr_obj_1[, retain, drop = FALSE] -
-        r_obj_0[, retain, drop = FALSE]
+        pr_obj_0[, retain, drop = FALSE]
     ) / denom) %>%
       apply(1, sum)) / denom) %>%
     quantile(posterior_quantiles) %>%
