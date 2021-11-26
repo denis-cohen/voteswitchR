@@ -279,7 +279,7 @@ build_infrastructure <- function(folder_location = NULL,
       data_file$data_imp <- NULL
       data_file$info_imp <- NULL
     }
-    data_file$info_aux <- args$args
+    data_file$info_aux <- args
   } else {
     warning(
       paste(
@@ -872,6 +872,7 @@ build_infrastructure <- function(folder_location = NULL,
       }
 
       ## ---- Imputation ----
+      set.seed(seed)
       if (impute & !(no_map) & !(no_l_vote)) {
         paste0(
           "Imputing context ",
