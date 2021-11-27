@@ -29,9 +29,7 @@ run_mavcl <- function(data,
                       adapt_delta = 0.8,
                       seed,
                       parallelize = FALSE,
-                      savename = "mavcl",
-                      savepath = NULL,
-                      outfile = TRUE) {
+                      savename = "mavcl") {
   `%>%` <- magrittr::`%>%`
 
   ## ---- Imputed data ----
@@ -153,13 +151,10 @@ run_mavcl <- function(data,
   ## Type
   type <- dplyr::case_when(
     !re_parties & !re_elections & !re_countries ~ 1L,
-    re_parties & !re_elections & !re_countries ~ 2L,
-    !re_parties &
-      re_elections & !re_countries ~ 3L,
-    !re_parties &
+    re_parties & !re_elections & !re_countries ~ 2L,!re_parties &
+      re_elections & !re_countries ~ 3L,!re_parties &
       !re_elections & re_countries ~ 4L,
-    re_parties & re_elections & !re_countries ~ 5L,
-    !re_parties &
+    re_parties & re_elections & !re_countries ~ 5L,!re_parties &
       re_elections & re_countries ~ 6L,
     re_parties & !re_elections & re_countries ~ 7L,
     re_parties & re_elections & re_countries ~ 8L
@@ -182,12 +177,12 @@ run_mavcl <- function(data,
   cat("Performing Full Bayesian Inference")
   cat("\n")
 
-  if (parallelize) {
+  if (is_imputed & parallelize) {
     ## Set up for parallel estimation
     if (Sys.info()["sysname"] == "Windows") {
       cl <- parallel::makeCluster(length(dat),
-                        outfile = paste0("est/", savename, ".txt"),
-                        type = "PSOCK")
+                                  outfile = paste0(savename, ".txt"),
+                                  type = "PSOCK")
       parallel::clusterEvalQ(cl, library(rstan))
       parallel::clusterExport(
         cl,
@@ -208,35 +203,57 @@ run_mavcl <- function(data,
       )
     } else {
       cl <- parallel::makeCluster(length(dat),
-                        outfile = paste0("est/", savename, ".txt"),
-                        type = "FORK")
+                                  outfile = paste0(savename, ".txt"),
+                                  type = "FORK")
     }
+
 
     ## Sample
     est <- parallel::parLapply(cl, seq_along(dat),
-                     function (m) {
-                       rstan::sampling(
-                         stanmodels[[model_type]],
-                         data = dat[[m]],
-                         pars = pars,
-                         algorithm = "NUTS",
-                         control = list(max_treedepth = max_treedepth,
-                                        adapt_delta = adapt_delta),
-                         save_warmup = FALSE,
-                         sample_file = NULL,
-                         init_r = .25,
-                         iter = n_iter,
-                         warmup = n_warm,
-                         thin = n_thin,
-                         chains = n_chains,
-                         cores = min(n_cores, n_chains),
-                         seed = seed
-                       )
-                     })
+                               function (m) {
+                                 rstan::sampling(
+                                   stanmodels[[model_type]],
+                                   data = dat[[m]],
+                                   pars = pars,
+                                   algorithm = "NUTS",
+                                   control = list(max_treedepth = max_treedepth,
+                                                  adapt_delta = adapt_delta),
+                                   save_warmup = FALSE,
+                                   sample_file = NULL,
+                                   init_r = .25,
+                                   iter = n_iter,
+                                   warmup = n_warm,
+                                   thin = n_thin,
+                                   chains = n_chains,
+                                   cores = min(n_cores, n_chains),
+                                   seed = seed
+                                 )
+                               })
 
     ## Exit parallel computation
     parallel::stopCluster(cl)
-  } else {
+  } else if (is_imputed & !parallelize) {
+    est <- list()
+    for (m in seq_along(dat)) {
+      est <- rstan::sampling(
+        stanmodels[[model_type]],
+        data = dat[[m]],
+        pars = pars,
+        algorithm = "NUTS",
+        control = list(max_treedepth = max_treedepth,
+                       adapt_delta = adapt_delta),
+        save_warmup = FALSE,
+        sample_file = NULL,
+        init_r = .25,
+        iter = n_iter,
+        warmup = n_warm,
+        thin = n_thin,
+        chains = n_chains,
+        cores = min(n_cores, n_chains),
+        seed = seed
+      )
+    }
+  } else if (!is_imputed) {
     est <- rstan::sampling(
       stanmodels[[model_type]],
       data = dat[[1]],
@@ -260,11 +277,13 @@ run_mavcl <- function(data,
   cat("Returning output")
   cat("\n")
   if (null_model) {
-    output <- list(data = dat,
-                   estimates = est,
-                   is_imputed = is_imputed,
-                   type = type,
-                   pars = pars)
+    output <- list(
+      data = dat,
+      estimates = est,
+      is_imputed = is_imputed,
+      type = type,
+      pars = pars
+    )
   } else {
     output <- list(
       main_predictor = main_predictor,
@@ -286,13 +305,6 @@ run_mavcl <- function(data,
       output$moderator_levels <- cats_moderator
     }
   }
-
+  class(output) <- "mavcl_est"
   return(output)
-
-  ## Optionally: Save to file
-  if (!is.null(savepath)) {
-    save_to <- paste0(savepath, "/", svnm, ".RData")
-    save(output, file = paste0(savepath, "/", svnm, ".RData"))
-    cat(paste0("Output saved at ", save_to, "."))
-  }
 }
