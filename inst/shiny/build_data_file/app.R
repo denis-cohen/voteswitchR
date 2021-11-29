@@ -446,7 +446,7 @@ server <- function(input, output, session) {
     }
 
     data_filtered <- data_filtered %>%
-      add_column(random_id = NA)
+      tibble::add_column(random_id = NA)
     for (i in 1:nrow(data_filtered)) {
       file_path <- paste0(input$dir, "/", data_filtered$folder_name[i])
       files <- list.files(path = file_path,
