@@ -204,8 +204,10 @@ server <- function(input, output, session) {
     dplyr::ungroup() %>%
     dplyr::mutate(year = ifelse(n > 1, stringr::str_replace(elec_id, paste0(iso2c, "-"), ""), as.character(year))) %>%
     dplyr::group_by(country_name, year) %>%
+    dplyr::mutate(n = dplyr::n()) %>%
+    dplyr::ungroup() %>%
     dplyr::mutate(year = ifelse(n > 1, paste0(year, stringr::str_sub(iso2c, start=-3)), as.character(year))) %>%
-    dplyr::ungroup()
+    dplyr::select(-n)
 
   # Build country/year matrix
   data_country_year <-
