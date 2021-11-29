@@ -165,7 +165,7 @@ server <- function(input, output, session) {
   # select concepts from input data
   concepts <-
     unique(voteswitchR:::concepts_df[!(voteswitchR:::concepts_df$base_concept %in%
-                                         c("drop", "region", "vote", "l_vote")), ]$description)
+                                            c("drop", "region", "vote", "l_vote")), ]$description)
   output$variables_concepts <-
     renderUI({
       tags$div(align = 'left',
@@ -195,35 +195,35 @@ server <- function(input, output, session) {
     }
   })
 
-  # # Change year to unique value if there are more
-  # # than one elections in one year for one country
-  # voteswitchR:::available_data <- voteswitchR:::available_data %>%
-  #   dplyr::group_by(country_name, year) %>%
-  #   dplyr::mutate(n = dplyr::n()) %>%
-  #   dplyr::ungroup() %>%
-  #   dplyr::mutate(year = ifelse(n > 1, stringr::str_replace(elec_id, paste0(iso2c, "-"), ""), as.character(year))) %>%
-  #   dplyr::group_by(country_name, year) %>%
-  #   dplyr::mutate(n = dplyr::n()) %>%
-  #   dplyr::ungroup() %>%
-  #   dplyr::mutate(year = ifelse(n > 1, paste0(year, stringr::str_sub(iso2c, start=-3)), as.character(year))) %>%
-  #   dplyr::select(-n)
+  assign("available_data",
+         as.data.frame(
+           voteswitchR:::available_data %>%
+             dplyr::group_by(country_name, year) %>%
+             dplyr::mutate(n = dplyr::n()) %>%
+             dplyr::ungroup() %>%
+             dplyr::mutate(year = ifelse(n > 1, stringr::str_replace(elec_id, paste0(iso2c, "-"), ""), as.character(year))) %>%
+             dplyr::group_by(country_name, year) %>%
+             dplyr::mutate(n = dplyr::n()) %>%
+             dplyr::ungroup() %>%
+             dplyr::mutate(year = ifelse(n > 1, paste0(year, stringr::str_sub(iso2c, start=-3)), as.character(year))) %>%
+             dplyr::select(-n)), envir = .GlobalEnv)
 
   # Build country/year matrix
   data_country_year <-
     data.frame(matrix(ncol = nrow(unique(
-      voteswitchR:::available_data["year"]
+      available_data["year"]
     )),
     nrow = nrow(unique(
-      voteswitchR:::available_data["country_name"]
+      available_data["country_name"]
     ))))
   # set unique years as colnames
   colnames(data_country_year) <-
     as.vector(unique(as.character(sort(
-      voteswitchR:::available_data[["year"]]
+      available_data[["year"]]
     ))))
   # Write unique country values to new column
   data_country_year["Country"] <-
-    unique(voteswitchR:::available_data["country_name"])
+    unique(available_data["country_name"])
   data_country_year <- data_country_year %>%
     dplyr::select("Country", everything())
   # select Country as first column
@@ -231,10 +231,11 @@ server <- function(input, output, session) {
 
   # functon to set available (TRUE) combinations of country/year
   set_values_year <- function(row) {
+    available_data <- as.data.frame(get('available_data', envir = .GlobalEnv))
     current_years <-
-      list(as.character(voteswitchR:::available_data[voteswitchR:::available_data$country_name == row["Country"], ]$year))
+      list(as.character(available_data[available_data$country_name == row["Country"], ]$year))
     for (year in current_years) {
-      row[year] <- paste(year, "_", row["Country"], sep = "")
+      row[year] <- paste0(year, "_", row["Country"])
     }
     return(row)
   }
@@ -272,7 +273,7 @@ server <- function(input, output, session) {
           return(glue::glue(
             paste(
               '<input type="checkbox" class=contexts id=',
-              toString(gsub(" ",  "-", x, fixed = TRUE)),
+              toString(gsub(" ",  "_", x, fixed = TRUE)),
               '>'
             )
           ))
@@ -396,11 +397,14 @@ server <- function(input, output, session) {
   # Event for creation of initial folder structure (button)
   shiny::observeEvent(input$structure_creation, {
     input_dir <- input$dir
+    available_data <- as.data.frame(get('available_data', envir = .GlobalEnv))
 
-    checkbox_names = gsub("-",  " ", input$checkboxes, fixed = TRUE)
-    data <- voteswitchR:::available_data %>%
-      dplyr::filter(year %in% unlist(sapply(stringr::str_split(checkbox_names, "_"), `[`, 1))) %>%
-      dplyr::filter(country_name %in% unlist(sapply(stringr::str_split(checkbox_names, "_"), `[`)))
+    checkbox_names <- gsub("_",  " ", input$checkboxes, fixed = TRUE)
+    checkbox_names_year <- sub(" .*", "", checkbox_names)
+    checkbox_names_country <- sub(".*? ", "", checkbox_names)
+    data <- available_data %>%
+      dplyr::filter(year %in% checkbox_names_year) %>%
+      dplyr::filter(country_name %in% checkbox_names_country)
 
     for (context in 1:nrow(data)) {
       dir.create(file.path(paste0(input_dir, "/"), paste0(data[context, "folder_name"], "/")), showWarnings = FALSE)
@@ -414,7 +418,7 @@ server <- function(input, output, session) {
   # Create Data Table with selected contexts
   update_selected_table <- function(data_filtered, forceUpdate = FALSE) {
     previous_data_filtered <- data_filtered
-    data_filtered <- voteswitchR:::available_data
+    data_filtered <- as.data.frame(get('available_data', envir = .GlobalEnv))
 
     # Map numbers for data access to labels
     data_filtered <- data_filtered %>%
@@ -426,15 +430,13 @@ server <- function(input, output, session) {
         data_access == 5 ~ "Signed user agreement and payment of provision fee required",
       ))
 
-    checkbox_names <- gsub("-",  " ", input$checkboxes, fixed = TRUE)
+    checkbox_names <- gsub("_",  " ", input$checkboxes, fixed = TRUE)
+    checkbox_names_year <- sub(" .*", "", checkbox_names)
+    checkbox_names_country <- sub(".*? ", "", checkbox_names)
     data_filtered <-
-      data_filtered %>% dplyr::filter(year %in% unlist(sapply(
-        stringr::str_split(checkbox_names, "_"), `[`, 1
-      )))
+      data_filtered %>% dplyr::filter(year %in% checkbox_names_year)
     data_filtered <-
-      data_filtered %>% dplyr::filter(country_name %in% unlist(sapply(
-        stringr::str_split(checkbox_names, "_"), `[`
-      )))
+      data_filtered %>% dplyr::filter(country_name %in% checkbox_names_country)
     data_filtered <- data_filtered %>%
       dplyr::mutate(file_name, "") %>%
       store_selected_file_names()
@@ -527,7 +529,7 @@ server <- function(input, output, session) {
   })
 
   has_missing_file_names <- function() {
-    data_filtered <- get('data_filtered_global', envir = .GlobalEnv)
+    data_filtered <- as.data.frame(get('data_filtered_global', envir = .GlobalEnv))
     if (nrow(data_filtered) > 0) {
       for (i in 1:nrow(data_filtered)) {
         file_name <- input[[paste0("sel", i, "_", data_filtered[i, "random_id"])]]
