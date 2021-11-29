@@ -1,11 +1,11 @@
 #' @title build_infrastructure
 #'
 #' @description Internal function called via the GUI of
-#' \code{shiny/run_data_file/app.R} that performs data recoding and,
+#' \code{shiny/run_data_file/app.R} that performs data harmonization and,
 #' upon request, data mapping, imputation, and reshaping within each
 #' selected electoral context.
 #'
-#' @return Returns and/or stores and object called data_file which contains
+#' @return Returns and/or stores and object \code{data_file} which which contains
 #' a list of data for all requested electoral contexts.
 #'
 #' @noRd
@@ -265,42 +265,20 @@ build_infrastructure <- function(folder_location = NULL,
   }
 
   ## ---- Initialize containers ----
-  if (is.null(existing_data_file)) {
-    data_file <- list()
-    data_file$data <- list()
-    if (impute) {
-      data_file$data_imp <- list()
-      if (return_info_imp) {
-        data_file$info_imp <- list()
-      } else {
-        data_file$info_imp <- NULL
-      }
+  data_file <- list()
+  data_file$info_aux <- args
+  data_file$data <- list()
+  if (impute) {
+    data_file$data_imp <- list()
+    if (return_info_imp) {
+      data_file$info_imp <- list()
     } else {
-      data_file$data_imp <- NULL
       data_file$info_imp <- NULL
     }
-    data_file$info_aux <- args
   } else {
-    warning(
-      paste(
-        "You are updating 'selected_contexts' in an existing data file.",
-        "Your arguments suppied arguments",
-        "will be overwritten with those stored in the existing data file.\n",
-        sep = " "
-      ) %>%
-        cat()
-    )
-
-    ## Load and attach existing file
-    cat("Importing existing_data_file. \n")
-    data_file <- rio::import(existing_data_file)
-
-    ## Overwrite arguments
-    for (arg in names(data_file$info_aux)) {
-      assign(arg, data_file$info_aux[[arg]])
-    }
+    data_file$data_imp <- NULL
+    data_file$info_imp <- NULL
   }
-
 
   ## ---- Start loop through selected contexts ----
   counter <- 0L

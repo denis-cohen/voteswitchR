@@ -1,15 +1,52 @@
-#' @title run_mavcl
+#' @title Run the MAVCL model
 #'
 #' @description Runs the Mixed Aggregate Varying Choice Set Logit (MAVCL)
-#' model via \code{rstan}.
+#' model via \code{rstan}. By default, the model includes election-cell-specific
+#' intercepts (i.e., random intercepts that for each cell of an election-specific
+#' voter transition matrix).
 #'
-#' @return Returns an object of class \code{mavcl_estimation}: A list that
+#' @param data A data object generated via \code{\link{voteswitchR::build_data_file()}}
+#' and processed via \code{\link{voteswitchR::recode_switches()}}. Can be a single
+#' \code{tbl_df}/\code{tbl}/\code{data.frame} or, in the case multiply imputed vote
+#' switching counts, a list thereof.
+#' @param y_names A vector of column names for vote switching counts, as generated
+#' by \code{\link{voteswitchR::recode_switches}}.
+#' @param null_model Logical; if \code{TRUE}, the function runs a null model without any
+#' right-hand side variables.
+#' @param main_predictor Column name of the main predictor of interest.
+#' @param predictor_continuous Logical; if \code{TRUE}, the predictor is treated
+#' as continuous; if \code{FALSE}, it is treated as a factor.
+#' @param moderator Column name of a moderator to be interacted with the main
+#' predictor or \code{NULL} if there is no moderator.
+#' @param moderator_continuous Logical; if \code{TRUE}, the moderator is treated
+#' as continuous; if \code{FALSE}, it is treated as a factor.
+#' @param other_covariates Character vector that specifies the column name of
+#' background covariates. Note: Categorical variables must be passed as factors
+#' via \code{data}.
+#' @param random_slopes Logical; if \code{TRUE}, the slopes for the main predictor
+#' are allows to vary by cell.
+#' @param re_parties Logical; if \code{TRUE}, higher-level outcome-specific
+#' intercepts at the level of \code{voteswitchR::mappings$party_harmonized}
+#' are added.
+#' @param re_elections Logical; if \code{TRUE}, higher-level outcome-specific
+#' intercepts at the level of \code{voteswitchR::mappings$elec_id}
+#' are added.
+#' @param re_countries Logical; if \code{TRUE}, higher-level outcome-specific
+#' intercepts at the level of \code{voteswitchR::mappings$iso2c}
+#' are added.
+#' @param parallelize Logical; if \code{TRUE}, estimation is not only parallelized
+#' within imputations but concurrently across imputations. Note: This initializes
+#' many processes and is only recommended if sufficient cores are available.
+#' @param savename A character that specifies the file name of a log file.
+#' @inheritParams rstan::sampling
+#'
+#' @return Returns an object of class \code{mavcl_est}: A list that
 #' includes estimates and auxiliary information.
 #'
 #' @export
 
 run_mavcl <- function(data,
-                      Y_names,
+                      y_names,
                       null_model = FALSE,
                       main_predictor,
                       predictor_continuous = TRUE,
@@ -20,11 +57,11 @@ run_mavcl <- function(data,
                       re_parties = FALSE,
                       re_elections = FALSE,
                       re_countries = FALSE,
-                      n_iter = 2000L,
-                      n_warm = 1000L,
-                      n_thin = 2L,
-                      n_chains = 2L,
-                      n_cores = parallel::detectCores(),
+                      iter = 2000L,
+                      warmup = 1000L,
+                      thin = 2L,
+                      chains = 2L,
+                      cores = parallel::detectCores(),
                       max_treedepth = 15,
                       adapt_delta = 0.8,
                       seed,
@@ -102,7 +139,7 @@ run_mavcl <- function(data,
 
     ## Data
     dat[[m]]$X <- model.matrix(as.formula(rhs), data = data[[m]])
-    dat[[m]]$Y <- as.matrix(data[[m]][Y_names])
+    dat[[m]]$Y <- as.matrix(data[[m]][y_names])
     dat[[m]]$ncat <- ncol(dat[[m]]$Y)
     dat[[m]]$J <- nrow(dat[[m]]$X)
     dat[[m]]$K = ncol(dat[[m]]$X)
@@ -189,11 +226,11 @@ run_mavcl <- function(data,
         c(
           "mod",
           "dat",
-          "n_iter",
-          "n_warm",
-          "n_thin",
-          "n_chains",
-          "n_cores",
+          "iter",
+          "warmup",
+          "thin",
+          "chains",
+          "cores",
           "seed",
           "max_treedepth",
           "adapt_delta",
@@ -221,11 +258,11 @@ run_mavcl <- function(data,
                                    save_warmup = FALSE,
                                    sample_file = NULL,
                                    init_r = .25,
-                                   iter = n_iter,
-                                   warmup = n_warm,
-                                   thin = n_thin,
-                                   chains = n_chains,
-                                   cores = min(n_cores, n_chains),
+                                   iter = iter,
+                                   warmup = warmup,
+                                   thin = thin,
+                                   chains = chains,
+                                   cores = min(cores, chains),
                                    seed = seed
                                  )
                                })
@@ -245,11 +282,11 @@ run_mavcl <- function(data,
         save_warmup = FALSE,
         sample_file = NULL,
         init_r = .25,
-        iter = n_iter,
-        warmup = n_warm,
-        thin = n_thin,
-        chains = n_chains,
-        cores = min(n_cores, n_chains),
+        iter = iter,
+        warmup = warmup,
+        thin = thin,
+        chains = chains,
+        cores = min(cores, chains),
         seed = seed
       )
     }
@@ -264,11 +301,11 @@ run_mavcl <- function(data,
       save_warmup = FALSE,
       sample_file = NULL,
       init_r = .25,
-      iter = n_iter,
-      warmup = n_warm,
-      thin = n_thin,
-      chains = n_chains,
-      cores = min(n_cores, n_chains),
+      iter = iter,
+      warmup = warmup,
+      thin = thin,
+      chains = chains,
+      cores = min(cores, chains),
       seed = seed
     )
   }

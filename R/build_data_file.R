@@ -1,9 +1,9 @@
-#' @title build_data_file
+#' @title Harmonize, impute, map, rake, and aggregate vote switching data
 #'
 #' @description Runs a ShinyApp that guides users through the steps
 #' required for data download, recoding, mapping, and imputation.
 #'
-#' @return Returns and/or stores and object called data_file which contains
+#' @return Returns and/or stores an object named \code{data_file} which contains
 #' a list of data for all requested electoral contexts.
 #'
 #' @export
