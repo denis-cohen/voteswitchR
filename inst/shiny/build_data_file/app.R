@@ -85,11 +85,6 @@ ui <- shiny::fluidPage(
         shiny::checkboxInput("return_agg_data_imp_par", "return_agg_data_imp", value = TRUE),
         shiny::checkboxInput("return_info_imp_par", "return_info_imp", value = TRUE),
         shiny::textInput(
-          "existing_data_file_par",
-          "existing_data_file",
-          placeholder = "e.g. path/to/data/existing_data_file.csv"
-        ),
-        shiny::textInput(
           "output_file_path_par",
           "output_file_path (If empty, the output file is stored in the R Environment)",
           placeholder = "e.g. path/to/data/data_file.RData"
@@ -157,8 +152,6 @@ server <- function(input, output, session) {
         return_agg_data = input$return_agg_data_par,
         return_agg_data_imp = input$return_agg_data_imp_par,
         return_info_imp = input$return_info_imp_par,
-        existing_data_file = if (input$existing_data_file_par != "")
-          input$existing_data_file_par,
         output_file_path = if (input$output_file_path_par != "")
           input$output_file_path_par
         else
@@ -202,34 +195,34 @@ server <- function(input, output, session) {
     }
   })
 
+  available_data <- voteswitchR:::available_data
   # Change year to unique value if there are more
   # than one elections in one year for one country
-  voteswitchR:::available_data <- voteswitchR:::available_data %>%
+  available_data <- available_data %>%
     dplyr::group_by(country_name, year) %>%
     dplyr::mutate(n = dplyr::n()) %>%
     dplyr::ungroup() %>%
     dplyr::mutate(year = ifelse(n > 1, stringr::str_replace(elec_id, paste0(iso2c, "-"), ""), as.character(year))) %>%
     dplyr::group_by(country_name, year) %>%
-    dplyr::mutate(n = dplyr::n()) %>%
     dplyr::mutate(year = ifelse(n > 1, paste0(year, stringr::str_sub(iso2c, start=-3)), as.character(year))) %>%
     dplyr::ungroup()
 
   # Build country/year matrix
   data_country_year <-
     data.frame(matrix(ncol = nrow(unique(
-      voteswitchR:::available_data["year"]
+      available_data["year"]
     )),
     nrow = nrow(unique(
-      voteswitchR:::available_data["country_name"]
+      available_data["country_name"]
     ))))
   # set unique years as colnames
   colnames(data_country_year) <-
     as.vector(unique(as.character(sort(
-      voteswitchR:::available_data[["year"]]
+      available_data[["year"]]
     ))))
   # Write unique country values to new column
   data_country_year["Country"] <-
-    unique(voteswitchR:::available_data["country_name"])
+    unique(available_data["country_name"])
   data_country_year <- data_country_year %>%
     dplyr::select("Country", everything())
   # select Country as first column
@@ -238,7 +231,7 @@ server <- function(input, output, session) {
   # functon to set available (TRUE) combinations of country/year
   set_values_year <- function(row) {
     current_years <-
-      list(as.character(voteswitchR:::available_data[voteswitchR:::available_data$country_name == row["Country"], ]$year))
+      list(as.character(available_data[available_data$country_name == row["Country"], ]$year))
     for (year in current_years) {
       row[year] <- paste(year, "_", row["Country"], sep = "")
     }
@@ -404,7 +397,7 @@ server <- function(input, output, session) {
     input_dir <- input$dir
 
     checkbox_names = gsub("-",  " ", input$checkboxes, fixed = TRUE)
-    data <- voteswitchR:::available_data %>%
+    data <- available_data %>%
       dplyr::filter(year %in% unlist(sapply(stringr::str_split(checkbox_names, "_"), `[`, 1))) %>%
       dplyr::filter(country_name %in% unlist(sapply(stringr::str_split(checkbox_names, "_"), `[`)))
 
@@ -420,7 +413,7 @@ server <- function(input, output, session) {
   # Create Data Table with selected contexts
   update_selected_table <- function(data_filtered, forceUpdate = FALSE) {
     previous_data_filtered <- data_filtered
-    data_filtered <- voteswitchR:::available_data
+    data_filtered <- available_data
 
     # Map numbers for data access to labels
     data_filtered <- data_filtered %>%
