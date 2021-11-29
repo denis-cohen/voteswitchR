@@ -345,7 +345,7 @@ server <- function(input, output, session) {
                   let firstCells = document.querySelectorAll('td:nth-child(' + event.target.id + ')');
                   firstCells.forEach(function(singleCell) {
                     if(singleCell.hasChildNodes() && !singleCell.childNodes[0].classList.contains('select_column')) {
-                      $('#' + singleCell.childNodes[0].id).attr('checked', event.target.checked)
+                      $('#' + String(singleCell.childNodes[0].id)).attr('checked', event.target.checked)
                     }
                   });
 
@@ -361,7 +361,7 @@ server <- function(input, output, session) {
                   let nextSibling = document.getElementById(event.target.id).parentElement.nextElementSibling;
                   while(nextSibling) {
                     if(nextSibling.hasChildNodes()) {
-                      $('#' + nextSibling.childNodes[0].id).attr('checked', event.target.checked)
+                      $('#' + String(nextSibling.childNodes[0].id)).attr('checked', event.target.checked)
                     }
                     nextSibling = nextSibling.nextElementSibling;
                   }
