@@ -195,10 +195,9 @@ server <- function(input, output, session) {
     }
   })
 
-  available_data <- voteswitchR:::available_data
   # Change year to unique value if there are more
   # than one elections in one year for one country
-  available_data <- available_data %>%
+  assign("available_data", voteswitchR:::available_data %>%
     dplyr::group_by(country_name, year) %>%
     dplyr::mutate(n = dplyr::n()) %>%
     dplyr::ungroup() %>%
@@ -207,7 +206,7 @@ server <- function(input, output, session) {
     dplyr::mutate(n = dplyr::n()) %>%
     dplyr::ungroup() %>%
     dplyr::mutate(year = ifelse(n > 1, paste0(year, stringr::str_sub(iso2c, start=-3)), as.character(year))) %>%
-    dplyr::select(-n)
+    dplyr::select(-n), envir = .GlobalEnv)
 
   # Build country/year matrix
   data_country_year <-
