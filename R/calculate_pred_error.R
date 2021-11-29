@@ -1,11 +1,11 @@
 #' @title calculate_pred_error
 #'
-#' @description Uses an object of class \code{mavcl_estimation} and calculates
+#' @description Uses an object of class \code{mavcl_est} and calculates
 #' prediction errors of posterior means or medians.
 #'
-#' @param mavcl_object An object of class \code{mavcl_estimation}.
+#' @param mavcl_object An object of class \code{mavcl_est}.
 #' @param posterior \code{"mean"} or \code{"median"}, depending on whether posterior
-#' means or medians should be evaluate against the observed proportions of the
+#' means or medians should be evaluated against the observed proportions of the
 #' outcome variable.
 #' @param type \code{"mae"} or \code{"rmse"}, depending on whether (mean) average
 #' errors or the root mean squared standard error should be reported

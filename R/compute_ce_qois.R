@@ -9,6 +9,7 @@ compute_ce_qois <- function(ce_obj,
                             y_structure,
                             base,
                             posterior_quantiles,
+                            full_posterior,
                             relative) {
   ## Auxiliary
   `%>%` <- magrittr::`%>%`
@@ -41,26 +42,21 @@ compute_ce_qois <- function(ce_obj,
 
   ## ---- Overall quantities ---
   losses <-
-    ((ce_obj[, loss_vec, , drop = FALSE] %>% apply(c(1, 3), sum)) / denom) %>%
-    apply(2, quantile, posterior_quantiles)
+    ((ce_obj[, loss_vec, , drop = FALSE] %>% apply(c(1, 3), sum)) / denom)
 
   gains <-
-    ((ce_obj[, gain_vec, , drop = FALSE] %>% apply(c(1, 3), sum)) / denom) %>%
-    apply(2, quantile, posterior_quantiles)
+    ((ce_obj[, gain_vec, , drop = FALSE] %>% apply(c(1, 3), sum)) / denom)
 
   balance <-
     (((ce_obj[, gain_vec, , drop = FALSE] - ce_obj[, loss_vec,]) %>%
-        apply(c(1, 3), sum)) / denom) %>%
-    apply(2, quantile, posterior_quantiles)
+        apply(c(1, 3), sum)) / denom)
 
   volume <-
     (((ce_obj[, gain_vec, , drop = FALSE] + ce_obj[, loss_vec,]) %>%
-        apply(c(1, 3), sum)) / denom) %>%
-    apply(2, quantile, posterior_quantiles)
+        apply(c(1, 3), sum)) / denom)
 
   retention <-
-    ((ce_obj[, retain, , drop = FALSE]  %>% apply(c(1, 3), sum)) / denom) %>%
-    apply(2, quantile, posterior_quantiles)
+    ((ce_obj[, retain, , drop = FALSE]  %>% apply(c(1, 3), sum)) / denom)
 
   ## Dyadic quantities
   dyadic_losses <-
@@ -68,38 +64,58 @@ compute_ce_qois <- function(ce_obj,
   for (d in dyad_names) {
     dyadic_losses[[d]] <-
       ((ce_obj[, loss[[d]], , drop = FALSE] %>%
-          apply(c(1, 3), sum)) / denom) %>%
-      apply(2, quantile, posterior_quantiles)
+          apply(c(1, 3), sum)) / denom)
 
     dyadic_gains[[d]] <-
       ((ce_obj[, gain[[d]], , drop = FALSE] %>%
-          apply(c(1, 3), sum)) / denom) %>%
-      apply(2, quantile, posterior_quantiles)
+          apply(c(1, 3), sum)) / denom)
 
     dyadic_balances[[d]] <-
       (((ce_obj[, gain[[d]], , drop = FALSE] -
            ce_obj[, loss[[d]], , drop = FALSE]) %>%
-          apply(c(1, 3), sum)) / denom) %>%
-      apply(2, quantile, posterior_quantiles)
+          apply(c(1, 3), sum)) / denom)
 
     dyadic_volumes[[d]] <-
       (((ce_obj[, gain[[d]], , drop = FALSE] +
            ce_obj[, loss[[d]], , drop = FALSE]) %>%
-          apply(c(1, 3), sum)) / denom) %>%
-      apply(2, quantile, posterior_quantiles)
+          apply(c(1, 3), sum)) / denom)
   }
 
   ## Return
   ce_qois <- list(
-    losses = losses,
-    gains = gains,
-    balance = balance,
-    volume = volume,
-    retention = retention,
-    dyadic_losses = dyadic_losses,
-    dyadic_gains = dyadic_gains,
-    dyadic_balances = dyadic_balances,
-    dyadic_volumes = dyadic_volumes
+    losses = losses %>%
+      apply(2, quantile, posterior_quantiles),
+    gains = gains %>%
+      apply(2, quantile, posterior_quantiles),
+    balance = balance %>%
+      apply(2, quantile, posterior_quantiles),
+    volume = volume %>%
+      apply(2, quantile, posterior_quantiles),
+    retention = retention %>%
+      apply(2, quantile, posterior_quantiles),
+    dyadic_losses = dyadic_losses %>%
+      lapply(apply, 2, quantile, posterior_quantiles),
+    dyadic_gains = dyadic_gains %>%
+      lapply(apply, 2, quantile, posterior_quantiles),
+    dyadic_balances = dyadic_balances %>%
+      lapply(apply, 2, quantile, posterior_quantiles),
+    dyadic_volumes = dyadic_volumes %>%
+      lapply(apply, 2, quantile, posterior_quantiles)
   )
+
+  if (full_posterior) {
+    ce_qois$posterior_draws <- list(
+      losses = losses,
+      gains = gains,
+      balance = balance,
+      volume = volume,
+      retention = retention,
+      dyadic_losses = dyadic_losses,
+      dyadic_gains = dyadic_gains,
+      dyadic_balances = dyadic_balances,
+      dyadic_volumes = dyadic_volumes
+    )
+  }
+
   return(ce_qois)
 }

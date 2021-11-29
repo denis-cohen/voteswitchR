@@ -10,6 +10,7 @@ compute_me_qois <- function(pr_obj_0,
                             y_structure,
                             base,
                             posterior_quantiles,
+                            full_posterior,
                             predictor_shift,
                             relative) {
   ## Auxiliary
@@ -52,14 +53,12 @@ compute_me_qois <- function(pr_obj_0,
     (((pr_obj_1[, loss_vec, drop = FALSE] -
          pr_obj_0[, loss_vec, drop = FALSE]) %>%
         apply(1, sum)) / denom) %>%
-    quantile(posterior_quantiles) %>%
     `/`(predictor_shift)
 
   gains <-
     (((pr_obj_1[, gain_vec, drop = FALSE] -
          pr_obj_0[, gain_vec, drop = FALSE]) %>%
         apply(1, sum)) / denom) %>%
-    quantile(posterior_quantiles) %>%
     `/`(predictor_shift)
 
   balance <- ((((pr_obj_1[, gain_vec, drop = FALSE] -
@@ -68,7 +67,6 @@ compute_me_qois <- function(pr_obj_0,
                      pr_obj_0[, loss_vec, drop = FALSE])
   ) %>%
     apply(1, sum)) / denom) %>%
-    quantile(posterior_quantiles) %>%
     `/`(predictor_shift)
 
   volume <- ((((pr_obj_1[, gain_vec, drop = FALSE] +
@@ -77,7 +75,6 @@ compute_me_qois <- function(pr_obj_0,
                     pr_obj_0[, loss_vec, drop = FALSE])
   ) %>%
     apply(1, sum)) / denom) %>%
-    quantile(posterior_quantiles) %>%
     `/`(predictor_shift)
 
   retention <-
@@ -86,7 +83,6 @@ compute_me_qois <- function(pr_obj_0,
         pr_obj_0[, retain, drop = FALSE]
     ) / denom) %>%
       apply(1, sum)) / denom) %>%
-    quantile(posterior_quantiles) %>%
     `/`(predictor_shift)
 
   ## Dyadic quantities
@@ -97,14 +93,12 @@ compute_me_qois <- function(pr_obj_0,
       (((pr_obj_1[, loss[[d]], drop = FALSE] -
            pr_obj_0[, loss[[d]], drop = FALSE])  %>%
           apply(1, sum)) / denom) %>%
-      quantile(posterior_quantiles) %>%
       `/`(predictor_shift)
 
     dyadic_gains[[d]] <-
       (((pr_obj_1[, gain[[d]], drop = FALSE] -
            pr_obj_0[, gain[[d]], drop = FALSE])  %>%
           apply(1, sum)) / denom) %>%
-      quantile(posterior_quantiles) %>%
       `/`(predictor_shift)
 
     dyadic_balances[[d]] <-
@@ -114,7 +108,6 @@ compute_me_qois <- function(pr_obj_0,
               pr_obj_0[, loss[[d]], drop = FALSE])
       )  %>%
         apply(1, sum)) / denom) %>%
-      quantile(posterior_quantiles) %>%
       `/`(predictor_shift)
 
     dyadic_volumes[[d]] <-
@@ -124,21 +117,44 @@ compute_me_qois <- function(pr_obj_0,
               pr_obj_0[, loss[[d]], drop = FALSE])
       ) %>%
         apply(1, sum)) / denom) %>%
-      quantile(posterior_quantiles) %>%
       `/`(predictor_shift)
   }
 
   ## Return
   me_qois <- list(
-    losses = losses,
-    gains = gains,
-    balance = balance,
-    volume = volume,
-    retention = retention,
-    dyadic_losses = dyadic_losses,
-    dyadic_gains = dyadic_gains,
-    dyadic_balances = dyadic_balances,
-    dyadic_volumes = dyadic_volumes
+    losses = losses %>%
+      quantile(posterior_quantiles),
+    gains = gains %>%
+      quantile(posterior_quantiles),
+    balance = balance %>%
+      quantile(posterior_quantiles),
+    volume = volume %>%
+      quantile(posterior_quantiles),
+    retention = retention %>%
+      quantile(posterior_quantiles),
+    dyadic_losses = dyadic_losses %>%
+      quantile(posterior_quantiles),
+    dyadic_gains = dyadic_gains %>%
+      quantile(posterior_quantiles),
+    dyadic_balances = dyadic_balances %>%
+      quantile(posterior_quantiles),
+    dyadic_volumes = dyadic_volumes %>%
+      quantile(posterior_quantiles)
   )
+
+  if (full_posterior) {
+    me_qois$posterior_draws <- list(
+      losses = losses,
+      gains = gains,
+      balance = balance,
+      volume = volume,
+      retention = retention,
+      dyadic_losses = dyadic_losses,
+      dyadic_gains = dyadic_gains,
+      dyadic_balances = dyadic_balances,
+      dyadic_volumes = dyadic_volumes
+    )
+  }
+
   return(me_qois)
 }

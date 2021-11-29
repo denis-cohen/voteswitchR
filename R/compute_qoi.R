@@ -4,22 +4,49 @@
 #' and average marginal effects/first differences from a MAVCL estimation
 #' object.
 #'
+#' @param mavcl_object An estimation object of class \code{mavcl_est}.
+#' @param y_structure Structure of switching patterns, as generated
+#' by \code{\link{voteswitchR::recode_switches()}}.
+#' @param posterior_quantiles A numeric vector of quantile values for the
+#' posterior quantile summaries.
+#' @param full_posterior Logical; if \code{TRUE}, the full posterior draws
+#' will be return alongside the posterior quantile summaries.
+#' @param len_continuous_sequence Suggested length of the value sequence for
+#' continuous predictors and/or moderators.
+#' @param conditional_expectation Logical; if \code{TRUE}, conditional
+#' expectations (a.k.a. "expected values" or "predicitions") will be returned.
+#' @param average_marginal_effect Logical; if \code{TRUE}, average marginal
+#' effects (continuous main predictor) or average first difference (categorical
+#' main predictor) will be returned.
+#' @param relative Logical; if \code{TRUE}, the returned quantities of interest
+#' are normalized by \code{base}.
+#' @param base Specifies whether the denominator for the normalization of
+#' relative quantities of interest. Can be \code{"t"} for parties' electorates
+#' at t, \code{"tm1"} for parties' electorates at t - 1, or \code{"avg"} for
+#' parties' average inter-election electorates.
+#' @param atmeans Logical; if \code{TRUE}, quantities of interest will be
+#' calculated for an average observation. If \code{FALSE}, quantities will be
+#' calculated at the observed values of all observations and then averaged.
+#' @param re_null Logical; if \code{TRUE},only the "fixed" portion of the model
+#' coefficients will be used and the "random" portion discarded.
+#'
 #' @return Returns a nested list of class \code{voteswitchR_qoi} that contains
 #' the requested quantities.
 #'
 #' @export
 
 compute_qoi <- function(mavcl_object,
-                          y_structure,
-                          posterior_quantiles = c(.5, .025, .975),
-                          len_continuous_sequence = 21L,
-                          conditional_expectation = TRUE,
-                          average_marginal_effect = TRUE,
-                          ame_shift = "tiny",
-                          base = c("t", "tm1", "avg"),
-                          relative = TRUE,
-                          atmeans = FALSE,
-                          re_null = FALSE) {
+                        y_structure,
+                        posterior_quantiles = c(.5, .025, .975),
+                        full_posterior = FALSE,
+                        len_continuous_sequence = 21L,
+                        conditional_expectation = TRUE,
+                        average_marginal_effect = TRUE,
+                        ame_shift = "tiny",
+                        base = c("t", "tm1", "avg"),
+                        relative = TRUE,
+                        atmeans = FALSE,
+                        re_null = FALSE) {
   `%>%` <- magrittr::`%>%`
 
   ## ---- Warnings ----
@@ -71,7 +98,6 @@ compute_qoi <- function(mavcl_object,
   x_names <- colnames(X)
   y_names <- colnames(Y)
 
-  ## Estimates
   ## Estimates
   start <- seq(1, by = D, length = num_cat - 1L)
   if (class(mavcl_object$estimates) == "stanfit") {
@@ -266,6 +292,7 @@ compute_qoi <- function(mavcl_object,
                                    y_structure = y_structure,
                                    base = base,
                                    posterior_quantiles = posterior_quantiles,
+                                   full_posterior = full_posterior,
                                    relative = relative)
       } else {
         ## Initialize container
@@ -303,6 +330,7 @@ compute_qoi <- function(mavcl_object,
                                    y_structure = y_structure,
                                    base = base,
                                    posterior_quantiles = posterior_quantiles,
+                                   full_posterior = full_posterior,
                                    relative = relative)
 
         ## Add predictor levels
@@ -367,6 +395,7 @@ compute_qoi <- function(mavcl_object,
                          y_structure = y_structure,
                          base = base,
                          posterior_quantiles = posterior_quantiles,
+                         full_posterior = full_posterior,
                          relative = relative) %>%
           reorder_qoi()
 
@@ -418,6 +447,7 @@ compute_qoi <- function(mavcl_object,
                          y_structure = y_structure,
                          base = base,
                          posterior_quantiles = posterior_quantiles,
+                         full_posterior = full_posterior,
                          relative = relative) %>%
           reorder_qoi()
       }
@@ -525,6 +555,7 @@ compute_qoi <- function(mavcl_object,
                        y_structure = y_structure,
                        base = base,
                        posterior_quantiles = posterior_quantiles,
+                       full_posterior = full_posterior,
                        relative = relative) %>%
         reorder_qoi()
     }
@@ -575,6 +606,7 @@ compute_qoi <- function(mavcl_object,
                                    y_structure = y_structure,
                                    base = base,
                                    posterior_quantiles = posterior_quantiles,
+                                   full_posterior = full_posterior,
                                    predictor_shift = predictor_shift,
                                    relative = relative)
       } else {
@@ -593,6 +625,7 @@ compute_qoi <- function(mavcl_object,
                   y_structure = y_structure,
                   base = base,
                   posterior_quantiles = posterior_quantiles,
+                  full_posterior = full_posterior,
                   predictor_shift = 1,
                   relative = relative
                 )
@@ -659,6 +692,7 @@ compute_qoi <- function(mavcl_object,
                             y_structure = y_structure,
                             base = base,
                             posterior_quantiles = posterior_quantiles,
+                            full_posterior = full_posterior,
                             predictor_shift = predictor_shift,
                             relative = relative)
         }
@@ -679,6 +713,7 @@ compute_qoi <- function(mavcl_object,
                                   y_structure = y_structure,
                                   base = base,
                                   posterior_quantiles = posterior_quantiles,
+                                  full_posterior = full_posterior,
                                   predictor_shift = 1,
                                   relative = relative)
               }
@@ -749,6 +784,7 @@ compute_qoi <- function(mavcl_object,
                             y_structure = y_structure,
                             base = base,
                             posterior_quantiles = posterior_quantiles,
+                            full_posterior = full_posterior,
                             predictor_shift = predictor_shift,
                             relative = relative)
         }
@@ -774,6 +810,7 @@ compute_qoi <- function(mavcl_object,
                                   y_structure = y_structure,
                                   base = base,
                                   posterior_quantiles = posterior_quantiles,
+                                  full_posterior = full_posterior,
                                   predictor_shift = 1,
                                   relative = relative)
               }
