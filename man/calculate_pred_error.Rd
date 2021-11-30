@@ -12,10 +12,10 @@ calculate_pred_error(
 )
 }
 \arguments{
-\item{mavcl_object}{An object of class \code{mavcl_estimation}.}
+\item{mavcl_object}{An object of class \code{mavcl_est}.}
 
 \item{posterior}{\code{"mean"} or \code{"median"}, depending on whether posterior
-means or medians should be evaluate against the observed proportions of the
+means or medians should be evaluated against the observed proportions of the
 outcome variable.}
 
 \item{type}{\code{"mae"} or \code{"rmse"}, depending on whether (mean) average
@@ -30,6 +30,6 @@ the overall mean absolute error (if \code{type == "mae"}) or the overall
 root mean squared error (if \code{type == "rmse"})
 }
 \description{
-Uses an object of class \code{mavcl_estimation} and calculates
+Uses an object of class \code{mavcl_est} and calculates
 prediction errors of posterior means or medians.
 }

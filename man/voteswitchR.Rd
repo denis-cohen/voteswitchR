@@ -3,7 +3,7 @@
 \docType{package}
 \name{voteswitchR}
 \alias{voteswitchR}
-\title{voteswitchR: Build, Map, and Analyze Vote Switching Data in R}
+\title{voteswitchR: Data and Methods for Analyzing Comparative Vote Switching Data}
 \description{
 The \code{voteswitchR} package is...
 }

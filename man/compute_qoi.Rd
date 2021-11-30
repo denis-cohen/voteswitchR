@@ -8,6 +8,7 @@ compute_qoi(
   mavcl_object,
   y_structure,
   posterior_quantiles = c(0.5, 0.025, 0.975),
+  full_posterior = FALSE,
   len_continuous_sequence = 21L,
   conditional_expectation = TRUE,
   average_marginal_effect = TRUE,
@@ -17,6 +18,43 @@ compute_qoi(
   atmeans = FALSE,
   re_null = FALSE
 )
+}
+\arguments{
+\item{mavcl_object}{An estimation object of class \code{mavcl_est}.}
+
+\item{y_structure}{Structure of switching patterns, as generated
+by \code{\link{voteswitchR::recode_switches()}}.}
+
+\item{posterior_quantiles}{A numeric vector of quantile values for the
+posterior quantile summaries.}
+
+\item{full_posterior}{Logical; if \code{TRUE}, the full posterior draws
+will be return alongside the posterior quantile summaries.}
+
+\item{len_continuous_sequence}{Suggested length of the value sequence for
+continuous predictors and/or moderators.}
+
+\item{conditional_expectation}{Logical; if \code{TRUE}, conditional
+expectations (a.k.a. "expected values" or "predicitions") will be returned.}
+
+\item{average_marginal_effect}{Logical; if \code{TRUE}, average marginal
+effects (continuous main predictor) or average first difference (categorical
+main predictor) will be returned.}
+
+\item{base}{Specifies whether the denominator for the normalization of
+relative quantities of interest. Can be \code{"t"} for parties' electorates
+at t, \code{"tm1"} for parties' electorates at t - 1, or \code{"avg"} for
+parties' average inter-election electorates.}
+
+\item{relative}{Logical; if \code{TRUE}, the returned quantities of interest
+are normalized by \code{base}.}
+
+\item{atmeans}{Logical; if \code{TRUE}, quantities of interest will be
+calculated for an average observation. If \code{FALSE}, quantities will be
+calculated at the observed values of all observations and then averaged.}
+
+\item{re_null}{Logical; if \code{TRUE},only the "fixed" portion of the model
+coefficients will be used and the "random" portion discarded.}
 }
 \value{
 Returns a nested list of class \code{voteswitchR_qoi} that contains

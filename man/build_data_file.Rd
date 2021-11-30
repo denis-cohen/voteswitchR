@@ -2,12 +2,12 @@
 % Please edit documentation in R/build_data_file.R
 \name{build_data_file}
 \alias{build_data_file}
-\title{build_data_file}
+\title{Harmonize, impute, map, rake, and aggregate vote switching data}
 \usage{
 build_data_file()
 }
 \value{
-Returns and/or stores and object called data_file which contains
+Returns and/or stores an object named \code{data_file} which contains
 a list of data for all requested electoral contexts.
 }
 \description{

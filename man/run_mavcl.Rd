@@ -2,11 +2,11 @@
 % Please edit documentation in R/run_mavcl.R
 \name{run_mavcl}
 \alias{run_mavcl}
-\title{run_mavcl}
+\title{Run the MAVCL model}
 \usage{
 run_mavcl(
   data,
-  Y_names,
+  y_names,
   null_model = FALSE,
   main_predictor,
   predictor_continuous = TRUE,
@@ -17,25 +17,103 @@ run_mavcl(
   re_parties = FALSE,
   re_elections = FALSE,
   re_countries = FALSE,
-  n_iter = 2000L,
-  n_warm = 1000L,
-  n_thin = 2L,
-  n_chains = 2L,
-  n_cores = parallel::detectCores(),
+  iter = 2000L,
+  warmup = 1000L,
+  thin = 2L,
+  chains = 2L,
+  cores = parallel::detectCores(),
   max_treedepth = 15,
   adapt_delta = 0.8,
   seed,
   parallelize = FALSE,
-  savename = "mavcl",
-  savepath = NULL,
-  outfile = TRUE
+  savename = "mavcl"
 )
 }
+\arguments{
+\item{data}{A data object generated via \code{\link{voteswitchR::build_data_file()}}
+and processed via \code{\link{voteswitchR::recode_switches()}}. Can be a single
+\code{tbl_df}/\code{tbl}/\code{data.frame} or, in the case multiply imputed vote
+switching counts, a list thereof.}
+
+\item{y_names}{A vector of column names for vote switching counts, as generated
+by \code{\link{voteswitchR::recode_switches}}.}
+
+\item{null_model}{Logical; if \code{TRUE}, the function runs a null model without any
+right-hand side variables.}
+
+\item{main_predictor}{Column name of the main predictor of interest.}
+
+\item{predictor_continuous}{Logical; if \code{TRUE}, the predictor is treated
+as continuous; if \code{FALSE}, it is treated as a factor.}
+
+\item{moderator}{Column name of a moderator to be interacted with the main
+predictor or \code{NULL} if there is no moderator.}
+
+\item{moderator_continuous}{Logical; if \code{TRUE}, the moderator is treated
+as continuous; if \code{FALSE}, it is treated as a factor.}
+
+\item{other_covariates}{Character vector that specifies the column name of
+background covariates. Note: Categorical variables must be passed as factors
+via \code{data}.}
+
+\item{random_slopes}{Logical; if \code{TRUE}, the slopes for the main predictor
+are allows to vary by cell.}
+
+\item{re_parties}{Logical; if \code{TRUE}, higher-level outcome-specific
+intercepts at the level of \code{voteswitchR::mappings$party_harmonized}
+are added.}
+
+\item{re_elections}{Logical; if \code{TRUE}, higher-level outcome-specific
+intercepts at the level of \code{voteswitchR::mappings$elec_id}
+are added.}
+
+\item{re_countries}{Logical; if \code{TRUE}, higher-level outcome-specific
+intercepts at the level of \code{voteswitchR::mappings$iso2c}
+are added.}
+
+\item{iter}{A positive integer specifying the number of iterations for each 
+    chain (including warmup). The default is 2000.}
+
+\item{warmup}{A positive integer specifying the number of warmup (aka burnin)
+    iterations per chain. If step-size adaptation is on (which it is by default), 
+    this also controls the number of iterations for which adaptation is run (and
+    hence these warmup samples should not be used for inference). The number of 
+    warmup iterations should be smaller than \code{iter} and the default is
+    \code{iter/2}.}
+
+\item{thin}{A positive integer specifying the period for saving samples. 
+    The default is 1, which is usually the recommended value.}
+
+\item{chains}{A positive integer specifying the number of Markov chains. 
+    The default is 4.}
+
+\item{cores}{Number of cores to use when executing the chains in parallel,
+    which defaults to 1 but we recommend setting the \code{mc.cores} option 
+    to be as many processors as the hardware and RAM allow (up to the 
+    number of chains).}
+
+\item{seed}{The seed for random number generation. The default is generated 
+    from 1 to the maximum integer supported by \R on the machine. Even if 
+    multiple chains are used, only one seed is needed, with other chains having 
+    seeds derived from that of the first chain to avoid dependent samples.
+    When a seed is specified by a number, \code{as.integer} will be applied to it. 
+    If \code{as.integer} produces \code{NA}, the seed is generated randomly. 
+    The seed can also be specified as a character string of digits, such as
+    \code{"12345"}, which is converted to integer.}
+
+\item{parallelize}{Logical; if \code{TRUE}, estimation is not only parallelized
+within imputations but concurrently across imputations. Note: This initializes
+many processes and is only recommended if sufficient cores are available.}
+
+\item{savename}{A character that specifies the file name of a log file.}
+}
 \value{
-Returns an object of class \code{mavcl_estimation}: A list that
+Returns an object of class \code{mavcl_est}: A list that
 includes estimates and auxiliary information.
 }
 \description{
 Runs the Mixed Aggregate Varying Choice Set Logit (MAVCL)
-model via \code{rstan}.
+model via \code{rstan}. By default, the model includes election-cell-specific
+intercepts (i.e., random intercepts that for each cell of an election-specific
+voter transition matrix).
 }
