@@ -272,7 +272,7 @@ run_mavcl <- function(data,
   } else if (is_imputed & !parallelize) {
     est <- list()
     for (m in seq_along(dat)) {
-      est <- rstan::sampling(
+      est[[m]] <- rstan::sampling(
         stanmodels[[model_type]],
         data = dat[[m]],
         pars = pars,
