@@ -72,13 +72,6 @@ ui <- shiny::fluidPage(
         ),
         shiny::checkboxInput("rake_par", "rake", value = TRUE),
         shiny::checkboxInput("aggregate_par", "aggregate", value = TRUE),
-        shiny::radioButtons(
-          "format_par",
-          selected = "long",
-          "format",
-          c("long" = "long",
-            "wide" = "wide")
-        ),
         shiny::checkboxInput("return_data_par", "return_data", value = TRUE),
         shiny::checkboxInput("return_data_imp_par", "return_data_imp", value = TRUE),
         shiny::checkboxInput("return_agg_data_par", "return_agg_data", value = TRUE),
@@ -146,7 +139,7 @@ server <- function(input, output, session) {
         seed = as.numeric(input$seed_par),
         rake = input$rake_par,
         aggregate = input$aggregate_par,
-        format = input$format_par,
+        format = "wide",
         return_data = input$return_data_par,
         return_data_imp = input$return_data_imp_par,
         return_agg_data = input$return_agg_data_par,
@@ -560,8 +553,6 @@ server <- function(input, output, session) {
       shinyjs::disable("rake_par")
       shiny::updateCheckboxInput(session, "aggregate_par", value = FALSE)
       shinyjs::disable("aggregate_par")
-      updateRadioButtons(session, "format_par", selected = "wide")
-      shinyjs::disable("format_par")
       shiny::updateCheckboxInput(session, "return_data_imp_par", value = FALSE)
       shinyjs::disable("return_data_imp_par")
       shiny::updateCheckboxInput(session, "return_agg_data_par", value = FALSE)
@@ -574,7 +565,6 @@ server <- function(input, output, session) {
       shinyjs::enable("impute_par")
       shinyjs::enable("rake_par")
       shinyjs::enable("aggregate_par")
-      shinyjs::enable("format_par")
       shinyjs::enable("return_data_imp_par")
       shinyjs::enable("return_agg_data_par")
       shinyjs::enable("return_agg_data_imp_par")
