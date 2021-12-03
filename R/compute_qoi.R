@@ -111,7 +111,7 @@ compute_qoi <- function(mavcl_object,
              class(mavcl_object$estimates[[1]]) == "stanfit") {
     est <- list()
     for (p in pars_all) {
-      est[[p]] <- do.call(abind, c(
+      est[[p]] <- do.call(abind::abind, c(
         sapply(mavcl_object$estimates,
                rstan::extract, pars = p),
         along = 1L
