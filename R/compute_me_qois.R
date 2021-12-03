@@ -121,29 +121,8 @@ compute_me_qois <- function(pr_obj_0,
   }
 
   ## Return
-  me_qois <- list(
-    losses = losses %>%
-      quantile(posterior_quantiles),
-    gains = gains %>%
-      quantile(posterior_quantiles),
-    balance = balance %>%
-      quantile(posterior_quantiles),
-    volume = volume %>%
-      quantile(posterior_quantiles),
-    retention = retention %>%
-      quantile(posterior_quantiles),
-    dyadic_losses = dyadic_losses %>%
-      quantile(posterior_quantiles),
-    dyadic_gains = dyadic_gains %>%
-      quantile(posterior_quantiles),
-    dyadic_balances = dyadic_balances %>%
-      quantile(posterior_quantiles),
-    dyadic_volumes = dyadic_volumes %>%
-      quantile(posterior_quantiles)
-  )
-
   if (full_posterior) {
-    me_qois$posterior_draws <- list(
+    me_qois <- list(
       losses = losses,
       gains = gains,
       balance = balance,
@@ -153,6 +132,27 @@ compute_me_qois <- function(pr_obj_0,
       dyadic_gains = dyadic_gains,
       dyadic_balances = dyadic_balances,
       dyadic_volumes = dyadic_volumes
+    )
+  } else {
+    me_qois <- list(
+      losses = losses %>%
+        quantile(posterior_quantiles),
+      gains = gains %>%
+        quantile(posterior_quantiles),
+      balance = balance %>%
+        quantile(posterior_quantiles),
+      volume = volume %>%
+        quantile(posterior_quantiles),
+      retention = retention %>%
+        quantile(posterior_quantiles),
+      dyadic_losses = dyadic_losses %>%
+        quantile(posterior_quantiles),
+      dyadic_gains = dyadic_gains %>%
+        quantile(posterior_quantiles),
+      dyadic_balances = dyadic_balances %>%
+        quantile(posterior_quantiles),
+      dyadic_volumes = dyadic_volumes %>%
+        quantile(posterior_quantiles)
     )
   }
 

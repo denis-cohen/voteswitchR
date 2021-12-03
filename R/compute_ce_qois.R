@@ -82,29 +82,8 @@ compute_ce_qois <- function(ce_obj,
   }
 
   ## Return
-  ce_qois <- list(
-    losses = losses %>%
-      apply(2, quantile, posterior_quantiles),
-    gains = gains %>%
-      apply(2, quantile, posterior_quantiles),
-    balance = balance %>%
-      apply(2, quantile, posterior_quantiles),
-    volume = volume %>%
-      apply(2, quantile, posterior_quantiles),
-    retention = retention %>%
-      apply(2, quantile, posterior_quantiles),
-    dyadic_losses = dyadic_losses %>%
-      lapply(apply, 2, quantile, posterior_quantiles),
-    dyadic_gains = dyadic_gains %>%
-      lapply(apply, 2, quantile, posterior_quantiles),
-    dyadic_balances = dyadic_balances %>%
-      lapply(apply, 2, quantile, posterior_quantiles),
-    dyadic_volumes = dyadic_volumes %>%
-      lapply(apply, 2, quantile, posterior_quantiles)
-  )
-
   if (full_posterior) {
-    ce_qois$posterior_draws <- list(
+    ce_qois <- list(
       losses = losses,
       gains = gains,
       balance = balance,
@@ -114,6 +93,27 @@ compute_ce_qois <- function(ce_obj,
       dyadic_gains = dyadic_gains,
       dyadic_balances = dyadic_balances,
       dyadic_volumes = dyadic_volumes
+    )
+  } else {
+    ce_qois <- list(
+      losses = losses %>%
+        apply(2, quantile, posterior_quantiles),
+      gains = gains %>%
+        apply(2, quantile, posterior_quantiles),
+      balance = balance %>%
+        apply(2, quantile, posterior_quantiles),
+      volume = volume %>%
+        apply(2, quantile, posterior_quantiles),
+      retention = retention %>%
+        apply(2, quantile, posterior_quantiles),
+      dyadic_losses = dyadic_losses %>%
+        lapply(apply, 2, quantile, posterior_quantiles),
+      dyadic_gains = dyadic_gains %>%
+        lapply(apply, 2, quantile, posterior_quantiles),
+      dyadic_balances = dyadic_balances %>%
+        lapply(apply, 2, quantile, posterior_quantiles),
+      dyadic_volumes = dyadic_volumes %>%
+        lapply(apply, 2, quantile, posterior_quantiles)
     )
   }
 
