@@ -55,7 +55,7 @@ recode_switches <- function(switches,
   if (type == "elections") {
     peid_vars <- mappings %>%
       dplyr::group_by(elec_id) %>%
-      dplyr::summarize_all(.funs = ~ length(na.omit(unique(.)))) %>%
+      dplyr::summarize_all(.funs = ~ length(unique(.))) %>%
       dplyr::ungroup() %>%
       dplyr::summarize_if(is.numeric, .funs = ~ max(., na.rm = T)) %>%
       as.matrix()
