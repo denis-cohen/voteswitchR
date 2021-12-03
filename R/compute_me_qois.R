@@ -146,13 +146,13 @@ compute_me_qois <- function(pr_obj_0,
       retention = retention %>%
         quantile(posterior_quantiles),
       dyadic_losses = dyadic_losses %>%
-        lapply(apply, 2, quantile, posterior_quantiles),
+        lapply(quantile, posterior_quantiles),
       dyadic_gains = dyadic_gains %>%
-        lapply(apply, 2, quantile, posterior_quantiles),
+        lapply(quantile, posterior_quantiles),
       dyadic_balances = dyadic_balances %>%
-        lapply(apply, 2, quantile, posterior_quantiles),
+        lapply(quantile, posterior_quantiles),
       dyadic_volumes = dyadic_volumes %>%
-        lapply(apply, 2, quantile, posterior_quantiles)
+        lapply(quantile, posterior_quantiles)
     )
   }
 
