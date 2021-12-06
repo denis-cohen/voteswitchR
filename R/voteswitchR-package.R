@@ -2,9 +2,11 @@
 #'
 #' @title Data and Methods for Analyzing Comparative Vote Switching Data
 #'
-#' @description The \code{voteswitchR} package is...
+#' @description The \code{voteswitchR} package offers functions for data
+#' management and statistical analyses to implement the conceptual
+#' framework presented in Cohen, Krause and Abou-Chadi (2021).
 #'
-#' @section Functions:
+#' @section Functions
 #'
 #' \code{voteswichR} (development version 0.1.0) consists of the following
 #' functions:
@@ -26,7 +28,7 @@
 #' \enumerate{
 #'   \item \code{\link{mappings}}: Mapping of vote choices from surveys to ParlGov and MARPOR IDs.
 #'   \item \code{\link{codebook}}: Documentations of \code{\link{mappings}}.
-#'   \item \code{\link{data_guide}}: Versions, download links, and access details for suvey data.
+#'   \item \code{\link{data_guide}}: Versions, download links, and access details for survey data.
 #' }
 #'
 #' @docType package
