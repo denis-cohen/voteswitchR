@@ -2,7 +2,7 @@
 % Please edit documentation in R/calculate_pred_error.R
 \name{calculate_pred_error}
 \alias{calculate_pred_error}
-\title{calculate_pred_error}
+\title{Calculate the MAEs and RMSEs of MAVCL Predictions}
 \usage{
 calculate_pred_error(
   mavcl_object,

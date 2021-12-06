@@ -1,4 +1,4 @@
-#' @title calculate_pred_error
+#' @title Calculate the MAEs and RMSEs of MAVCL Predictions
 #'
 #' @description Uses an object of class \code{mavcl_est} and calculates
 #' prediction errors of posterior means or medians.

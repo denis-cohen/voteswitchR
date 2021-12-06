@@ -3,6 +3,7 @@
 \docType{package}
 \name{voteswitchR-package}
 \alias{voteswitchR-package}
+\alias{_PACKAGE}
 \alias{voteswitchR}
 \title{Data and Methods for Analyzing Comparative Vote Switching Data}
 \description{
@@ -14,12 +15,52 @@ The 'voteswitchR' package.
 \section{Functions}{
 
 
-\code{voteswichR} (development version 0.1.0) consists of ... functions:
+\code{voteswichR} (development version 0.1.0) consists of the following
+functions:
+
+For data processing:
 \enumerate{
-\item \code{...}: ...
+\item \code{\link{build_data_file}}: Harmonize, impute, map, rake, and aggregate vote switching data
+\item \code{\link{recode_switches}}: Recode aggregate switching patterns
+}
+
+For model estimation and post-estimation:
+\enumerate{
+\item \code{\link{run_mavcl}}: Run the MAVCL model
+\item \code{\link{calculate_pred_error}}: Calculate the MAEs and RMSEs of MAVCL Predictions
+\item \code{\link{compute_qoi}}: Compute MAVCL quantities of interest
+}
+
+Package-specific data:
+\enumerate{
+\item \code{\link{mappings}}: Mapping of vote choices from surveys to ParlGov and MARPOR IDs.
+\item \code{\link{codebook}}: Documentations of \code{\link{mappings}}.
+\item \code{\link{data_guide}}: Versions, download links, and access details for suvey data.
 }
 }
 
 \references{
+Cohen, Denis, Krause, Werner and Abou-Chadi, Tarik (2021). Getting the most out of comparative vote-switching data: A new framework for studying dynamic multiparty competition. Conference Paper. Unpublished manuscript.
 Stan Development Team (2020). RStan: the R interface to Stan. R package version 2.21.2. https://mc-stan.org
 }
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://github.com/denis-cohen/voteswitchR}
+  \item Report bugs at \url{https://github.com/denis-cohen/voteswitchR/issues}
+}
+
+}
+\author{
+\strong{Maintainer}: Denis Cohen \email{denis.cohen@mzes.uni-mannheim.de}
+
+Other contributors:
+\itemize{
+  \item Andreas Küpfer \email{akuepfer@mail.uni-mannheim.de} [contributor]
+  \item Tim Allinger \email{tialling@mail.uni-mannheim.de} [contributor]
+  \item Nick Baumann \email{nbaumann@mail.uni-mannheim.de} [contributor]
+  \item Werner Krause \email{werner.krause@hu-berlin.de} [contributor]
+}
+
+}
+\keyword{internal}
