@@ -57,17 +57,17 @@ background covariates. Note: Categorical variables must be passed as factors
 via \code{data}.}
 
 \item{random_slopes}{Logical; if \code{TRUE}, the slopes for the main predictor
-are allows to vary by cell.}
+are allowed to vary by cell.}
 
-\item{re_parties}{Logical; if \code{TRUE}, higher-level outcome-specific
+\item{re_parties}{Logical; if \code{TRUE}, higher-level cell-specific
 intercepts at the level of \code{voteswitchR::mappings$party_harmonized}
 are added.}
 
-\item{re_elections}{Logical; if \code{TRUE}, higher-level outcome-specific
+\item{re_elections}{Logical; if \code{TRUE}, higher-level cell-specific
 intercepts at the level of \code{voteswitchR::mappings$elec_id}
-are added.}
+are added. Note: Should only be used when studying party-electorates.}
 
-\item{re_countries}{Logical; if \code{TRUE}, higher-level outcome-specific
+\item{re_countries}{Logical; if \code{TRUE}, higher-level cell-specific
 intercepts at the level of \code{voteswitchR::mappings$iso2c}
 are added.}
 
@@ -114,6 +114,6 @@ includes estimates and auxiliary information.
 \description{
 Runs the Mixed Aggregate Varying Choice Set Logit (MAVCL)
 model via \code{rstan}. By default, the model includes election-cell-specific
-intercepts (i.e., random intercepts that for each cell of an election-specific
+intercepts (i.e., random intercepts for each cell of an election-specific
 voter transition matrix).
 }

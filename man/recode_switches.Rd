@@ -32,6 +32,6 @@ for each switching pattern detected in the data.
 }
 \description{
 Recodes raw aggregate switching patterns according to a
-user-supplied factor variable included in a (possibly user-supplied version
-of) \code{mappings}.
+user-supplied factor variable included in a (possibly user-supplied) version
+of \code{mappings}.
 }

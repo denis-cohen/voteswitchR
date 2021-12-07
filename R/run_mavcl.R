@@ -2,7 +2,7 @@
 #'
 #' @description Runs the Mixed Aggregate Varying Choice Set Logit (MAVCL)
 #' model via \code{rstan}. By default, the model includes election-cell-specific
-#' intercepts (i.e., random intercepts that for each cell of an election-specific
+#' intercepts (i.e., random intercepts for each cell of an election-specific
 #' voter transition matrix).
 #'
 #' @param data A data object generated via \code{\link{voteswitchR::build_data_file()}}
@@ -24,14 +24,14 @@
 #' background covariates. Note: Categorical variables must be passed as factors
 #' via \code{data}.
 #' @param random_slopes Logical; if \code{TRUE}, the slopes for the main predictor
-#' are allows to vary by cell.
-#' @param re_parties Logical; if \code{TRUE}, higher-level outcome-specific
+#' are allowed to vary by cell.
+#' @param re_parties Logical; if \code{TRUE}, higher-level cell-specific
 #' intercepts at the level of \code{voteswitchR::mappings$party_harmonized}
 #' are added.
-#' @param re_elections Logical; if \code{TRUE}, higher-level outcome-specific
+#' @param re_elections Logical; if \code{TRUE}, higher-level cell-specific
 #' intercepts at the level of \code{voteswitchR::mappings$elec_id}
-#' are added.
-#' @param re_countries Logical; if \code{TRUE}, higher-level outcome-specific
+#' are added. Note: Should only be used when studying party-electorates.
+#' @param re_countries Logical; if \code{TRUE}, higher-level cell-specific
 #' intercepts at the level of \code{voteswitchR::mappings$iso2c}
 #' are added.
 #' @param parallelize Logical; if \code{TRUE}, estimation is not only parallelized
