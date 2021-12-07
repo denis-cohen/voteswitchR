@@ -6,8 +6,6 @@
 #' management and statistical analyses to implement the conceptual
 #' framework presented in Cohen, Krause and Abou-Chadi (2021).
 #'
-#' @section Functions
-#'
 #' \code{voteswichR} (development version 0.1.0) consists of the following
 #' functions:
 #'
