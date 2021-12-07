@@ -40,8 +40,10 @@
 #' @importFrom rstan sampling
 #'
 #' @references
-#' Cohen, Denis, Krause, Werner and Abou-Chadi, Tarik (2021). Getting the most out of comparative vote-switching data: A new framework for studying dynamic multiparty competition. Conference Paper. Unpublished manuscript.
-#' Stan Development Team (2020). RStan: the R interface to Stan. R package version 2.21.2. https://mc-stan.org
+#' #' \enumerate{
+#'   \item Cohen, Denis, Krause, Werner and Abou-Chadi, Tarik (2021). Getting the most out of comparative vote-switching data: A new framework for studying dynamic multiparty competition. Conference Paper. Unpublished manuscript.
+#'   \item Stan Development Team (2020). RStan: the R interface to Stan. R package version 2.21.2. https://mc-stan.org
+#' }
 #'
 #' @keywords internal
 "_PACKAGE"
