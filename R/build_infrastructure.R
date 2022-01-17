@@ -202,6 +202,8 @@ build_infrastructure <- function(folder_location = NULL,
     "l_vote",
     "l_part",
     "pid",
+    "strength1",
+    "strength2",
     "lr_self",
     "stfdem",
     "male",
@@ -252,6 +254,8 @@ build_infrastructure <- function(folder_location = NULL,
           "vote",
           "l_vote",
           "pid",
+          "strength1",
+          "strength2",
           "lr_self",
           "lr",
           "like",
@@ -801,7 +805,7 @@ build_infrastructure <- function(folder_location = NULL,
           )
           ids <- ids[ids %in% names(data_k)]
 
-          noms <- c("vote", "l_vote", "pid", "male")
+          noms <- c("vote", "l_vote", "pid", "male", "strength1", "strength2")
           noms <- noms[noms %in% names(data_k)]
           imp_vars <- c(noms,
                         "lr_self",
@@ -838,6 +842,7 @@ build_infrastructure <- function(folder_location = NULL,
                 "part",
                 "l_vote_old",
                 "l_part",
+                "pid_old",
                 survey_p_vars_k
               )
             ))
