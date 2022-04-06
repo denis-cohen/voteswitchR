@@ -3,7 +3,7 @@
 #### UI PART ####
 NUM_PAGES <- 3
 ui <- shiny::fluidPage(
-  shinyalert::useShinyalert(),
+  shinyalert::useShinyalert(force = TRUE),
   shinyjs::useShinyjs(),
   shiny::tags$head(
     shiny::tags$style(HTML("
@@ -420,7 +420,8 @@ server <- function(input, output, session) {
         data_access == 2 ~ "Register and accept terms of use",
         data_access == 3 ~ "Specific research proposal required",
         data_access == 4 ~ "Specific research proposal and signed user agreement required",
-        data_access == 5 ~ "Signed user agreement and payment of provision fee required",
+        data_access == 5 ~ "Request access from data provider",
+        data_access == 6 ~ "Request access from data provider and pay a provision fee"
       ))
 
     checkbox_names <- gsub("_",  " ", input$checkboxes, fixed = TRUE)
