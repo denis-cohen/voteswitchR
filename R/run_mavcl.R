@@ -67,7 +67,6 @@ run_mavcl <- function(data,
                       seed,
                       parallelize = FALSE,
                       savename = "mavcl") {
-  `%>%` <- magrittr::`%>%`
 
   ## ---- Imputed data ----
   if (any(class(data) %in% c("tbl_df", "tbl", "data.frame"))) {

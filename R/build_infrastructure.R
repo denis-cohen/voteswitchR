@@ -34,9 +34,6 @@ build_infrastructure <- function(folder_location = NULL,
   args <- as.list(environment())
   print(c(args))
 
-  ## magrittr functions
-  `%>%` <- magrittr::`%>%`
-
   ## ---- Initial checks ----
   if (impute & !(map)) {
     stop(

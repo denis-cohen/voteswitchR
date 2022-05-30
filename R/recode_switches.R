@@ -36,7 +36,6 @@ recode_switches <- function(switches,
                             mappings = NULL,
                             switch_factor,
                             type = c("elections", "party-elections")) {
-  `%>%` <- magrittr::`%>%`
 
   ## ---- Preparation ----
   ## No summarize info

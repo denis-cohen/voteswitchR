@@ -47,7 +47,6 @@ compute_qoi <- function(mavcl_object,
                         relative = TRUE,
                         atmeans = FALSE,
                         re_null = FALSE) {
-  `%>%` <- magrittr::`%>%`
 
   ## ---- Warnings ----
   if (base == "tm1") {

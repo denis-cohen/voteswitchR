@@ -12,7 +12,6 @@ compute_ce_qois <- function(ce_obj,
                             full_posterior,
                             relative) {
   ## Auxiliary
-  `%>%` <- magrittr::`%>%`
   dyad_names_gain_vec <- y_structure$dyad[y_structure$type == "gain"]
   dyad_names_loss_vec <- y_structure$dyad[y_structure$type == "loss"]
   dyad_names <- sort(unique(c(dyad_names_gain_vec, dyad_names_loss_vec)))

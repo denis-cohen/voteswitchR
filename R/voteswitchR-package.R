@@ -36,6 +36,7 @@
 #' @import methods
 #' @import Rcpp
 #' @importFrom rstan sampling
+#' @importFrom magrittr "%>%"
 #'
 #' @references
 #' \enumerate{

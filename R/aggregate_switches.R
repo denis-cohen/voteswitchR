@@ -16,8 +16,6 @@ aggregate_switches <- function(
   subgroup = NULL
 ) {
 
-  `%>%` <- magrittr::`%>%`
-
   # Input vectors
   all_vars <- c(context_vars, weights_var, switch_from, switch_to, subgroup)
   switch_vars <- c(switch_from, switch_to, subgroup)

@@ -6,7 +6,6 @@
 #' @noRd
 
 reorder_qoi <- function(qoi) {
-  `%>%` <- magrittr::`%>%`
 
   ## Auxiliary objects
   num_conditions <- length(qoi)

@@ -14,7 +14,6 @@ compute_me_qois <- function(pr_obj_0,
                             predictor_shift,
                             relative) {
   ## Auxiliary
-  `%>%` <- magrittr::`%>%`
   dyad_names_gain_vec <-
     y_structure$dyad[y_structure$type == "gain"]
   dyad_names_loss_vec <-
