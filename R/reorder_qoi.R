@@ -20,8 +20,9 @@ reorder_qoi <- function(qoi) {
 
   ## Non-dyadic quantities
   for (q in non_dyadic_quantities) {
-    reordered_qoi[[q]] <- lapply(qoi, function(x)
-      x[[q]]) %>%
+    reordered_qoi[[q]] <- lapply(qoi, function(x) {
+      x[[q]]
+    }) %>%
       simplify2array()
   }
 
@@ -30,8 +31,9 @@ reorder_qoi <- function(qoi) {
     reordered_qoi[[q]] <- list()
     for (n in dyad_names) {
       reordered_qoi[[q]][[n]] <-
-        lapply(qoi, function(x)
-          x[[q]][[n]]) %>%
+        lapply(qoi, function(x) {
+          x[[q]][[n]]
+        }) %>%
         simplify2array()
     }
   }

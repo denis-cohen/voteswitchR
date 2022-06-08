@@ -40,7 +40,7 @@ compute_me_qois <- function(pr_obj_0,
         apply(1, sum)
     } else if (base == "avg") {
       denom <- .25 * (pr_obj_0[, sup_t] + pr_obj_0[, sup_tm1] +
-                        pr_obj_1[, sup_t] + pr_obj_1[, sup_tm1]) %>%
+        pr_obj_1[, sup_t] + pr_obj_1[, sup_tm1]) %>%
         apply(1, sum)
     }
   } else {
@@ -50,28 +50,28 @@ compute_me_qois <- function(pr_obj_0,
   ## ---- Overall quantities ---
   losses <-
     (((pr_obj_1[, loss_vec, drop = FALSE] -
-         pr_obj_0[, loss_vec, drop = FALSE]) %>%
-        apply(1, sum)) / denom) %>%
+      pr_obj_0[, loss_vec, drop = FALSE]) %>%
+      apply(1, sum)) / denom) %>%
     `/`(predictor_shift)
 
   gains <-
     (((pr_obj_1[, gain_vec, drop = FALSE] -
-         pr_obj_0[, gain_vec, drop = FALSE]) %>%
-        apply(1, sum)) / denom) %>%
+      pr_obj_0[, gain_vec, drop = FALSE]) %>%
+      apply(1, sum)) / denom) %>%
     `/`(predictor_shift)
 
   balance <- ((((pr_obj_1[, gain_vec, drop = FALSE] -
-                   pr_obj_1[, loss_vec, drop = FALSE]) -
-                  (pr_obj_0[, gain_vec, drop = FALSE] -
-                     pr_obj_0[, loss_vec, drop = FALSE])
+    pr_obj_1[, loss_vec, drop = FALSE]) -
+    (pr_obj_0[, gain_vec, drop = FALSE] -
+      pr_obj_0[, loss_vec, drop = FALSE])
   ) %>%
     apply(1, sum)) / denom) %>%
     `/`(predictor_shift)
 
   volume <- ((((pr_obj_1[, gain_vec, drop = FALSE] +
-                  pr_obj_1[, loss_vec, drop = FALSE]) -
-                 (pr_obj_0[, gain_vec, drop = FALSE] +
-                    pr_obj_0[, loss_vec, drop = FALSE])
+    pr_obj_1[, loss_vec, drop = FALSE]) -
+    (pr_obj_0[, gain_vec, drop = FALSE] +
+      pr_obj_0[, loss_vec, drop = FALSE])
   ) %>%
     apply(1, sum)) / denom) %>%
     `/`(predictor_shift)
@@ -90,30 +90,30 @@ compute_me_qois <- function(pr_obj_0,
   for (d in dyad_names) {
     dyadic_losses[[d]] <-
       (((pr_obj_1[, loss[[d]], drop = FALSE] -
-           pr_obj_0[, loss[[d]], drop = FALSE])  %>%
-          apply(1, sum)) / denom) %>%
+        pr_obj_0[, loss[[d]], drop = FALSE]) %>%
+        apply(1, sum)) / denom) %>%
       `/`(predictor_shift)
 
     dyadic_gains[[d]] <-
       (((pr_obj_1[, gain[[d]], drop = FALSE] -
-           pr_obj_0[, gain[[d]], drop = FALSE])  %>%
-          apply(1, sum)) / denom) %>%
+        pr_obj_0[, gain[[d]], drop = FALSE]) %>%
+        apply(1, sum)) / denom) %>%
       `/`(predictor_shift)
 
     dyadic_balances[[d]] <-
       ((((pr_obj_1[, gain[[d]], drop = FALSE] -
-            pr_obj_1[, loss[[d]], drop = FALSE]) -
-           (pr_obj_0[, gain[[d]], drop = FALSE] -
-              pr_obj_0[, loss[[d]], drop = FALSE])
-      )  %>%
+        pr_obj_1[, loss[[d]], drop = FALSE]) -
+        (pr_obj_0[, gain[[d]], drop = FALSE] -
+          pr_obj_0[, loss[[d]], drop = FALSE])
+      ) %>%
         apply(1, sum)) / denom) %>%
       `/`(predictor_shift)
 
     dyadic_volumes[[d]] <-
       ((((pr_obj_1[, gain[[d]], drop = FALSE] +
-            pr_obj_1[, loss[[d]], drop = FALSE]) -
-           (pr_obj_0[, gain[[d]], drop = FALSE] +
-              pr_obj_0[, loss[[d]], drop = FALSE])
+        pr_obj_1[, loss[[d]], drop = FALSE]) -
+        (pr_obj_0[, gain[[d]], drop = FALSE] +
+          pr_obj_0[, loss[[d]], drop = FALSE])
       ) %>%
         apply(1, sum)) / denom) %>%
       `/`(predictor_shift)

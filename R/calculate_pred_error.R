@@ -4,11 +4,11 @@
 #' prediction errors of posterior means or medians.
 #'
 #' @param mavcl_object An object of class \code{mavcl_est}.
-#' @param posterior \code{"mean"} or \code{"median"}, depending on whether posterior
-#' means or medians should be evaluated against the observed proportions of the
-#' outcome variable.
-#' @param type \code{"mae"} or \code{"rmse"}, depending on whether (mean) average
-#' errors or the root mean squared standard error should be reported
+#' @param posterior \code{"mean"} or \code{"median"}, depending on whether
+#' posterior means or medians should be evaluated against the observed
+#' proportions of the outcome variable.
+#' @param type \code{"mae"} or \code{"rmse"}, depending on whether (mean)
+#' average errors or the root mean squared standard error should be reported
 #' @param re_null logical, specifies whether the prediction should be calculated
 #' with (\code{FALSE}) or without (\code{TRUE}) random effects
 #'
@@ -43,24 +43,30 @@ calculate_pred_error <- function(mavcl_object,
   if (class(mavcl_object$estimates) == "stanfit") {
     est <- rstan::extract(mavcl_object$estimates, pars = pars_all)
     if (D > 1) {
-      est$nu <- lapply(start, function(i, array, D)
-        array[, , i:(i + D - 1)],
-        array = est$nu, D = D)
+      est$nu <- lapply(start, function(i, array, D) {
+        array[, , i:(i + D - 1)]
+      },
+      array = est$nu, D = D
+      )
     }
   } else if (class(mavcl_object$estimates) == "list" &
-             class(mavcl_object$estimates[[1]]) == "stanfit") {
+    class(mavcl_object$estimates[[1]]) == "stanfit") {
     est <- list()
     for (p in pars_all) {
       est[[p]] <- do.call(abind, c(
-        sapply(mavcl_object$estimates,
-               rstan::extract, pars = p),
+        vapply(mavcl_object$estimates,
+          rstan::extract,
+          pars = p
+        ),
         along = 1L
       ))
     }
     if (D > 1) {
-      est$nu <- lapply(start, function(i, array, D)
-        array[, , i:(i + D - 1)],
-        array = est$nu, D = D)
+      est$nu <- lapply(start, function(i, array, D) {
+        array[, , i:(i + D - 1)]
+      },
+      array = est$nu, D = D
+      )
     }
   }
   num_sim <- dim(est$beta)[1]
@@ -70,20 +76,23 @@ calculate_pred_error <- function(mavcl_object,
   num_replic <- num_obs
 
   ## ---- Posterior means/medians ----
-  eta <- compute_eta(est,
-                     num_cat,
-                     num_catm1,
-                     x_default,
-                     re_null,
-                     num_sim,
-                     num_replic,
-                     D,
-                     pars_ext,
-                     V)
+  eta <- compute_eta(
+    est,
+    num_cat,
+    num_catm1,
+    x_default,
+    re_null,
+    num_sim,
+    num_replic,
+    D,
+    pars_ext,
+    V
+  )
   pi <- array(NA, c(num_sim, num_replic, num_cat))
   for (s in seq_len(num_sim)) {
-    pi[s, , ] <- sapply(eta, function (c)
-      c[s, ]) %>%
+    pi[s, , ] <- vapply(eta, function(c) {
+      c[s, ]
+    }) %>%
       softmax_vcl(which_empty)
   }
 
@@ -97,8 +106,9 @@ calculate_pred_error <- function(mavcl_object,
 
   ## ---- Proportional Y ----
   prop <- Y %>%
-    apply(1, function(x)
-      dplyr::if_else(x >= 0, x / sum(x[x >= 0]), NA_real_)) %>%
+    apply(1, function(x) {
+      dplyr::if_else(x >= 0, x / sum(x[x >= 0]), NA_real_)
+    }) %>%
     t()
 
   if (type == "mae") {
@@ -114,7 +124,7 @@ calculate_pred_error <- function(mavcl_object,
   }
 
   if (type == "rmse") {
-    se <- pi[!(is.na(pi))] - prop[!(is.na(prop))] ^ 2
+    se <- pi[!(is.na(pi))] - prop[!(is.na(prop))]^2
     rmse <- sqrt(mean(se, na.rm = TRUE))
     return(rmse)
   }

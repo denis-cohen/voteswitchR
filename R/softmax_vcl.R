@@ -10,7 +10,8 @@ softmax_vcl <- function(eta, which_empty) {
   if (is.vector(eta)) {
     exp(eta) / sum(exp(eta), na.rm = TRUE)
   } else if (is.matrix(eta)) {
-    t(apply(eta, 1, function(x)
-      exp(x) / sum(exp(x), na.rm = TRUE)))
+    t(apply(eta, 1, function(x) {
+      exp(x) / sum(exp(x), na.rm = TRUE)
+    }))
   }
 }

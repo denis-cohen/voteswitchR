@@ -26,13 +26,13 @@ compute_ce_qois <- function(ce_obj,
   ## Denominator
   if (relative) {
     if (base == "t") {
-      denom <- ce_obj[, sup_t,] %>%
+      denom <- ce_obj[, sup_t, ] %>%
         apply(c(1, 3), sum)
     } else if (base == "tm1") {
-      denom <- ce_obj[, sup_tm1,] %>%
+      denom <- ce_obj[, sup_tm1, ] %>%
         apply(c(1, 3), sum)
     } else if (base == "avg") {
-      denom <- 0.5 * (ce_obj[, sup_t,] + ce_obj[, sup_tm1,]) %>%
+      denom <- 0.5 * (ce_obj[, sup_t, ] + ce_obj[, sup_tm1, ]) %>%
         apply(c(1, 3), sum)
     }
   } else {
@@ -47,15 +47,15 @@ compute_ce_qois <- function(ce_obj,
     ((ce_obj[, gain_vec, , drop = FALSE] %>% apply(c(1, 3), sum)) / denom)
 
   balance <-
-    (((ce_obj[, gain_vec, , drop = FALSE] - ce_obj[, loss_vec,]) %>%
-        apply(c(1, 3), sum)) / denom)
+    (((ce_obj[, gain_vec, , drop = FALSE] - ce_obj[, loss_vec, ]) %>%
+      apply(c(1, 3), sum)) / denom)
 
   volume <-
-    (((ce_obj[, gain_vec, , drop = FALSE] + ce_obj[, loss_vec,]) %>%
-        apply(c(1, 3), sum)) / denom)
+    (((ce_obj[, gain_vec, , drop = FALSE] + ce_obj[, loss_vec, ]) %>%
+      apply(c(1, 3), sum)) / denom)
 
   retention <-
-    ((ce_obj[, retain, , drop = FALSE]  %>% apply(c(1, 3), sum)) / denom)
+    ((ce_obj[, retain, , drop = FALSE] %>% apply(c(1, 3), sum)) / denom)
 
   ## Dyadic quantities
   dyadic_losses <-
@@ -63,21 +63,21 @@ compute_ce_qois <- function(ce_obj,
   for (d in dyad_names) {
     dyadic_losses[[d]] <-
       ((ce_obj[, loss[[d]], , drop = FALSE] %>%
-          apply(c(1, 3), sum)) / denom)
+        apply(c(1, 3), sum)) / denom)
 
     dyadic_gains[[d]] <-
       ((ce_obj[, gain[[d]], , drop = FALSE] %>%
-          apply(c(1, 3), sum)) / denom)
+        apply(c(1, 3), sum)) / denom)
 
     dyadic_balances[[d]] <-
       (((ce_obj[, gain[[d]], , drop = FALSE] -
-           ce_obj[, loss[[d]], , drop = FALSE]) %>%
-          apply(c(1, 3), sum)) / denom)
+        ce_obj[, loss[[d]], , drop = FALSE]) %>%
+        apply(c(1, 3), sum)) / denom)
 
     dyadic_volumes[[d]] <-
       (((ce_obj[, gain[[d]], , drop = FALSE] +
-           ce_obj[, loss[[d]], , drop = FALSE]) %>%
-          apply(c(1, 3), sum)) / denom)
+        ce_obj[, loss[[d]], , drop = FALSE]) %>%
+        apply(c(1, 3), sum)) / denom)
   }
 
   ## Return

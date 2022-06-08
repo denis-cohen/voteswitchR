@@ -6,7 +6,7 @@
 #'
 #' @param mavcl_object An estimation object of class \code{mavcl_est}.
 #' @param y_structure Structure of switching patterns, as generated
-#' by [voteswitchR::recode_switches()].
+#' by [recode_switches()].
 #' @param posterior_quantiles A numeric vector of quantile values for the
 #' posterior quantile summaries.
 #' @param full_posterior Logical; if \code{TRUE}, the full posterior draws
@@ -20,7 +20,8 @@
 #' main predictor) will be returned.
 #' @param relative Logical; if \code{TRUE}, the returned quantities of interest
 #' are normalized by \code{base}.
-#' @param ame_shift Specifies type of (\code{tiny} or numerical) AME shift in predictor.
+#' @param ame_shift Specifies type of (\code{tiny} or numerical) AME shift in
+#' predictor.
 #' @param base Specifies whether the denominator for the normalization of
 #' relative quantities of interest. Can be \code{"t"} for parties' electorates
 #' at t, \code{"tm1"} for parties' electorates at t - 1, or \code{"avg"} for
@@ -58,7 +59,8 @@ compute_qoi <- function(mavcl_object,
     warning("Option 'atmeans = TRUE' ist only available with 're_null = TRUE'")
     cat("\n")
     prompt_text <-
-      paste0("Set 're_null = TRUE'? Press ENTER to accept, type something to decline.")
+      paste0("Set 're_null = TRUE'?
+             Press ENTER to accept, type something to decline.")
     accept <- is.null(readline(prompt = prompt_text))
     if (accept) {
       re_null <- TRUE
@@ -103,24 +105,30 @@ compute_qoi <- function(mavcl_object,
   if (class(mavcl_object$estimates) == "stanfit") {
     est <- rstan::extract(mavcl_object$estimates, pars = pars_all)
     if (D > 1) {
-      est$nu <- lapply(start, function(i, array, D)
-        array[, , i:(i + D - 1)],
-        array = est$nu, D = D)
+      est$nu <- lapply(start, function(i, array, D) {
+        array[, , i:(i + D - 1)]
+      },
+      array = est$nu, D = D
+      )
     }
   } else if (class(mavcl_object$estimates) == "list" &
-             class(mavcl_object$estimates[[1]]) == "stanfit") {
+    class(mavcl_object$estimates[[1]]) == "stanfit") {
     est <- list()
     for (p in pars_all) {
       est[[p]] <- do.call(abind::abind, c(
-        sapply(mavcl_object$estimates,
-               rstan::extract, pars = p),
+        vapply(mavcl_object$estimates,
+          rstan::extract,
+          pars = p
+        ),
         along = 1L
       ))
     }
     if (D > 1) {
-      est$nu <- lapply(start, function(i, array, D)
-        array[, , i:(i + D - 1)],
-        array = est$nu, D = D)
+      est$nu <- lapply(start, function(i, array, D) {
+        array[, , i:(i + D - 1)]
+      },
+      array = est$nu, D = D
+      )
     }
   }
   num_sim <- dim(est$beta)[1]
@@ -150,9 +158,12 @@ compute_qoi <- function(mavcl_object,
     pred_x_names <-
       c("(Intercept)", paste0(main_predictor, predictor_levels[-1]))
     which_predictor <-
-      sapply(pred_x_names,
-             function(x)
-               which(x_names == x))
+      vapply(
+        pred_x_names,
+        function(x) {
+          which(x_names == x)
+        }
+      )
     num_cat_predictor <- length(which_predictor)
     predictor_shift <- 1L
   }
@@ -175,31 +186,41 @@ compute_qoi <- function(mavcl_object,
 
       ## Product term position
       which_prod_term <- which(x_names == paste(main_predictor,
-                                                moderator,
-                                                sep = ":"))
-      which_predictors <- c(which_predictor,
-                            which_moderator,
-                            which_prod_term)
+        moderator,
+        sep = ":"
+      ))
+      which_predictors <- c(
+        which_predictor,
+        which_moderator,
+        which_prod_term
+      )
     } else {
       num_cat_moderator <- length(moderator_levels)
       mod_x_names <-
         c("(Intercept)", paste0(moderator, moderator_levels[-1]))
       which_moderator <-
-        sapply(mod_x_names, function(x)
-          which(x_names == x))
+        vapply(mod_x_names, function(x) {
+          which(x_names == x)
+        })
 
       if (predictor_continuous) {
         ## Product term positions
         which_prod_term <-
-          sapply(x_names[startsWith(x_names, main_predictor) &
-                           grepl(moderator, x_names)],
-                 function(x)
-                   which(x_names == x))
-        which_predictors <- c(which_predictor,
-                              which_prod_term)
+          vapply(
+            x_names[startsWith(x_names, main_predictor) &
+              grepl(moderator, x_names)],
+            function(x) {
+              which(x_names == x)
+            }
+          )
+        which_predictors <- c(
+          which_predictor,
+          which_prod_term
+        )
       } else {
         pred_mod_names_tmp <-
-          c(mod_x_names,
+          c(
+            mod_x_names,
             paste0(main_predictor, predictor_levels[-1]),
             paste(
               rep(
@@ -207,25 +228,29 @@ compute_qoi <- function(mavcl_object,
                 num_cat_predictor - 1L
               ),
               rep(paste0(moderator, moderator_levels[-1]),
-                  each = num_cat_predictor - 1L),
+                each = num_cat_predictor - 1L
+              ),
               sep = ":"
-            ))
+            )
+          )
         pred_mod_names <-
           matrix(NA_character_, num_cat_predictor, num_cat_moderator)
         rownames(pred_mod_names) <- predictor_levels
         colnames(pred_mod_names) <- moderator_levels
         for (j in seq_len(num_cat_predictor)) {
           if (j == 1) {
-            pred_mod_names[j,] <-
+            pred_mod_names[j, ] <-
               pred_mod_names_tmp[pred_mod_names_tmp %in% mod_x_names]
           } else {
-            pred_mod_names[j,] <-
-              pred_mod_names_tmp[startsWith(pred_mod_names_tmp, pred_x_names[j])]
+            pred_mod_names[j, ] <-
+              pred_mod_names_tmp[startsWith(pred_mod_names_tmp,
+                                            pred_x_names[j])]
           }
         }
 
-        which_predictors <- apply(pred_mod_names, 1:2, function(x)
-          which(x_names == x))
+        which_predictors <- apply(pred_mod_names, 1:2, function(x) {
+          which(x_names == x)
+        })
       }
     }
   }
@@ -242,20 +267,22 @@ compute_qoi <- function(mavcl_object,
   }
 
   ## ---- Linear predictor ----
-  eta <- compute_eta(est,
-                     num_cat,
-                     num_catm1,
-                     x_default,
-                     re_null,
-                     num_sim,
-                     num_replic,
-                     D,
-                     pars_ext,
-                     V)
+  eta <- compute_eta(
+    est,
+    num_cat,
+    num_catm1,
+    x_default,
+    re_null,
+    num_sim,
+    num_replic,
+    D,
+    pars_ext,
+    V
+  )
 
   ## ---- Conditional expectations ----
   if (conditional_expectation |
-      (average_marginal_effect & !predictor_continuous)) {
+    (average_marginal_effect & !predictor_continuous)) {
     ## Copy of x_default
     x_tmp <- x_default
 
@@ -267,19 +294,21 @@ compute_qoi <- function(mavcl_object,
 
         for (t in seq_along(predictor_sequence)) {
           ## Adjust matrix
-          x_tmp[which_predictor,] <- predictor_sequence[t]
+          x_tmp[which_predictor, ] <- predictor_sequence[t]
 
           ## Compute eta
-          eta <- compute_eta(est,
-                             num_cat,
-                             num_catm1,
-                             x_tmp,
-                             re_null,
-                             num_sim,
-                             num_replic,
-                             D,
-                             pars_ext,
-                             V)
+          eta <- compute_eta(
+            est,
+            num_cat,
+            num_catm1,
+            x_tmp,
+            re_null,
+            num_sim,
+            num_replic,
+            D,
+            pars_ext,
+            V
+          )
 
           ## Compute conditional expectation
           for (s in seq_len(num_sim)) {
@@ -288,12 +317,14 @@ compute_qoi <- function(mavcl_object,
         }
 
         ## Compute conditional expectation QOIs
-        ce_qois <- compute_ce_qois(ce_obj = ce_est,
-                                   y_structure = y_structure,
-                                   base = base,
-                                   posterior_quantiles = posterior_quantiles,
-                                   full_posterior = full_posterior,
-                                   relative = relative)
+        ce_qois <- compute_ce_qois(
+          ce_obj = ce_est,
+          y_structure = y_structure,
+          base = base,
+          posterior_quantiles = posterior_quantiles,
+          full_posterior = full_posterior,
+          relative = relative
+        )
       } else {
         ## Initialize container
         ce_est <-
@@ -308,16 +339,18 @@ compute_qoi <- function(mavcl_object,
             t()
 
           ## Compute eta
-          eta <- compute_eta(est,
-                             num_cat,
-                             num_catm1,
-                             x_tmp[, , t],
-                             re_null,
-                             num_sim,
-                             num_replic,
-                             D,
-                             pars_ext,
-                             V)
+          eta <- compute_eta(
+            est,
+            num_cat,
+            num_catm1,
+            x_tmp[, , t],
+            re_null,
+            num_sim,
+            num_replic,
+            D,
+            pars_ext,
+            V
+          )
 
           ## Compute conditional expectation
           for (s in seq_len(num_sim)) {
@@ -326,12 +359,14 @@ compute_qoi <- function(mavcl_object,
         }
 
         ## Compute conditional expectation QOIs
-        ce_qois <- compute_ce_qois(ce_obj = ce_est,
-                                   y_structure = y_structure,
-                                   base = base,
-                                   posterior_quantiles = posterior_quantiles,
-                                   full_posterior = full_posterior,
-                                   relative = relative)
+        ce_qois <- compute_ce_qois(
+          ce_obj = ce_est,
+          y_structure = y_structure,
+          base = base,
+          posterior_quantiles = posterior_quantiles,
+          full_posterior = full_posterior,
+          relative = relative
+        )
 
         ## Add predictor levels
         for (i in seq_along(ce_qois)) {
@@ -348,13 +383,15 @@ compute_qoi <- function(mavcl_object,
       if (predictor_continuous) {
         ## Initialize container
         ce_est <-
-          array(NA,
-                c(
-                  num_sim,
-                  num_cat,
-                  len_predictor_sequence,
-                  len_moderator_sequence
-                ))
+          array(
+            NA,
+            c(
+              num_sim,
+              num_cat,
+              len_predictor_sequence,
+              len_moderator_sequence
+            )
+          )
 
         for (t in seq_along(predictor_sequence)) {
           for (u in seq_along(moderator_sequence)) {
@@ -367,16 +404,18 @@ compute_qoi <- function(mavcl_object,
             )
 
             ## Compute eta
-            eta <- compute_eta(est,
-                               num_cat,
-                               num_catm1,
-                               x_tmp,
-                               re_null,
-                               num_sim,
-                               num_replic,
-                               D,
-                               pars_ext,
-                               V)
+            eta <- compute_eta(
+              est,
+              num_cat,
+              num_catm1,
+              x_tmp,
+              re_null,
+              num_sim,
+              num_replic,
+              D,
+              pars_ext,
+              V
+            )
 
             ## Compute conditional expectation
             for (s in seq_len(num_sim)) {
@@ -390,19 +429,21 @@ compute_qoi <- function(mavcl_object,
           list(NULL, y_names, predictor_sequence, moderator_sequence)
 
         ce_qois <- apply(ce_est,
-                         4,
-                         compute_ce_qois,
-                         y_structure = y_structure,
-                         base = base,
-                         posterior_quantiles = posterior_quantiles,
-                         full_posterior = full_posterior,
-                         relative = relative) %>%
+          4,
+          compute_ce_qois,
+          y_structure = y_structure,
+          base = base,
+          posterior_quantiles = posterior_quantiles,
+          full_posterior = full_posterior,
+          relative = relative
+        ) %>%
           reorder_qoi()
-
       } else {
         ## Initialize container
-        ce_est <- array(NA, c(num_sim, num_cat, num_cat_predictor,
-                              len_moderator_sequence))
+        ce_est <- array(NA, c(
+          num_sim, num_cat, num_cat_predictor,
+          len_moderator_sequence
+        ))
 
         ## Adjust matrices
         x_tmp <- replicate(num_cat_predictor, x_tmp)
@@ -419,16 +460,18 @@ compute_qoi <- function(mavcl_object,
               replicate(num_obs, .)
 
             ## Compute eta
-            eta <- compute_eta(est,
-                               num_cat,
-                               num_catm1,
-                               x_tmp[, , t],
-                               re_null,
-                               num_sim,
-                               num_replic,
-                               D,
-                               pars_ext,
-                               V)
+            eta <- compute_eta(
+              est,
+              num_cat,
+              num_catm1,
+              x_tmp[, , t],
+              re_null,
+              num_sim,
+              num_replic,
+              D,
+              pars_ext,
+              V
+            )
 
             ## Compute conditional expectation
             for (s in seq_len(num_sim)) {
@@ -442,26 +485,29 @@ compute_qoi <- function(mavcl_object,
           list(NULL, y_names, predictor_levels, moderator_sequence)
 
         ce_qois <- apply(ce_est,
-                         4,
-                         compute_ce_qois,
-                         y_structure = y_structure,
-                         base = base,
-                         posterior_quantiles = posterior_quantiles,
-                         full_posterior = full_posterior,
-                         relative = relative) %>%
+          4,
+          compute_ce_qois,
+          y_structure = y_structure,
+          base = base,
+          posterior_quantiles = posterior_quantiles,
+          full_posterior = full_posterior,
+          relative = relative
+        ) %>%
           reorder_qoi()
       }
     } else if (!is.null(moderator) &
-               !moderator_continuous) {
+      !moderator_continuous) {
       if (predictor_continuous) {
         ## Initialize containers
-        ce_est <- array(NA,
-                        c(
-                          num_sim,
-                          num_cat,
-                          len_predictor_sequence,
-                          num_cat_moderator
-                        ))
+        ce_est <- array(
+          NA,
+          c(
+            num_sim,
+            num_cat,
+            len_predictor_sequence,
+            num_cat_moderator
+          )
+        )
 
         for (k in seq_along(predictor_sequence)) {
           for (t in seq_len(num_cat_moderator)) {
@@ -472,20 +518,22 @@ compute_qoi <- function(mavcl_object,
               replicate(num_replic, .)
             x_tmp[which_predictors, ] <-
               (as.numeric(seq_len(num_cat_moderator) %in% c(1, t)) *
-                 predictor_sequence[k]) %>%
+                predictor_sequence[k]) %>%
               replicate(num_replic, .)
 
             ## Compute eta
-            eta <- compute_eta(est,
-                               num_cat,
-                               num_catm1,
-                               x_tmp,
-                               re_null,
-                               num_sim,
-                               num_replic,
-                               D,
-                               pars_ext,
-                               V)
+            eta <- compute_eta(
+              est,
+              num_cat,
+              num_catm1,
+              x_tmp,
+              re_null,
+              num_sim,
+              num_replic,
+              D,
+              pars_ext,
+              V
+            )
 
             ## Compute conditional expectation and cumulative expectations
             for (s in seq_len(num_sim)) {
@@ -495,42 +543,46 @@ compute_qoi <- function(mavcl_object,
         }
       } else {
         ## Initialize containers
-        ce_est <- array(NA,
-                        c(
-                          num_sim,
-                          num_cat,
-                          num_cat_predictor,
-                          num_cat_moderator
-                        ))
+        ce_est <- array(
+          NA,
+          c(
+            num_sim,
+            num_cat,
+            num_cat_predictor,
+            num_cat_moderator
+          )
+        )
 
         for (k in seq_len(num_cat_predictor)) {
           for (t in seq_len(num_cat_moderator)) {
             ## Adjust matrix
             x_tmp <- x_default
-            x_tmp[which_predictors[, 1],] <-
+            x_tmp[which_predictors[, 1], ] <-
               as.numeric(which_predictors[, 1] %in% c(1, k)) %>%
               replicate(num_replic, .)
-            x_tmp[which_predictors[1,],] <-
-              as.numeric(which_predictors[1,] %in%
-                           c(1, which_predictors[, t])) %>%
+            x_tmp[which_predictors[1, ], ] <-
+              as.numeric(which_predictors[1, ] %in%
+                c(1, which_predictors[, t])) %>%
               replicate(num_replic, .)
-            x_tmp[as.vector(which_predictors[2:num_cat_predictor, 2:num_cat_moderator]),] <-
-              0L
+            x_tmp[as.vector(which_predictors[2:num_cat_predictor,
+                                             2:num_cat_moderator]), ] <- 0L
             if (k >= 2 & t >= 2) {
-              x_tmp[which_predictors[k, t],] <- 1L
+              x_tmp[which_predictors[k, t], ] <- 1L
             }
 
             ## Compute eta
-            eta <- compute_eta(est,
-                               num_cat,
-                               num_catm1,
-                               x_tmp,
-                               re_null,
-                               num_sim,
-                               num_replic,
-                               D,
-                               pars_ext,
-                               V)
+            eta <- compute_eta(
+              est,
+              num_cat,
+              num_catm1,
+              x_tmp,
+              re_null,
+              num_sim,
+              num_replic,
+              D,
+              pars_ext,
+              V
+            )
 
             ## Compute conditional expectation and cumulative expectations
             for (s in seq_len(num_sim)) {
@@ -550,13 +602,14 @@ compute_qoi <- function(mavcl_object,
       }
 
       ce_qois <- apply(ce_est,
-                       4,
-                       compute_ce_qois,
-                       y_structure = y_structure,
-                       base = base,
-                       posterior_quantiles = posterior_quantiles,
-                       full_posterior = full_posterior,
-                       relative = relative) %>%
+        4,
+        compute_ce_qois,
+        y_structure = y_structure,
+        base = base,
+        posterior_quantiles = posterior_quantiles,
+        full_posterior = full_posterior,
+        relative = relative
+      ) %>%
         reorder_qoi()
     }
   }
@@ -573,26 +626,30 @@ compute_qoi <- function(mavcl_object,
     if (is.null(moderator)) {
       if (predictor_continuous) {
         ## Counterfactual outcome-specific estimates
-        eta_1 <- compute_eta(est,
-                             num_cat,
-                             num_catm1,
-                             x_tmp_1,
-                             re_null,
-                             num_sim,
-                             num_replic,
-                             D,
-                             pars_ext,
-                             V)
-        eta_0 <- compute_eta(est,
-                             num_cat,
-                             num_catm1,
-                             x_tmp_0,
-                             re_null,
-                             num_sim,
-                             num_replic,
-                             D,
-                             pars_ext,
-                             V)
+        eta_1 <- compute_eta(
+          est,
+          num_cat,
+          num_catm1,
+          x_tmp_1,
+          re_null,
+          num_sim,
+          num_replic,
+          D,
+          pars_ext,
+          V
+        )
+        eta_0 <- compute_eta(
+          est,
+          num_cat,
+          num_catm1,
+          x_tmp_0,
+          re_null,
+          num_sim,
+          num_replic,
+          D,
+          pars_ext,
+          V
+        )
 
         pi_1 <- pi_0 <- array(NA, c(num_sim, num_cat))
         for (s in seq_len(num_sim)) {
@@ -602,22 +659,24 @@ compute_qoi <- function(mavcl_object,
 
         ## Average marginal effects
         me_qois <- compute_me_qois(pi_0,
-                                   pi_1,
-                                   y_structure = y_structure,
-                                   base = base,
-                                   posterior_quantiles = posterior_quantiles,
-                                   full_posterior = full_posterior,
-                                   predictor_shift = predictor_shift,
-                                   relative = relative)
+          pi_1,
+          y_structure = y_structure,
+          base = base,
+          posterior_quantiles = posterior_quantiles,
+          full_posterior = full_posterior,
+          predictor_shift = predictor_shift,
+          relative = relative
+        )
       } else {
         me_qois <- list()
 
         for (i in seq_along(predictor_levels)) {
-          for(j in seq_along(predictor_levels)) {
-            if ( i != j) {
+          for (j in seq_along(predictor_levels)) {
+            if (i != j) {
               pair_name <- paste(predictor_levels[i],
-                                 predictor_levels[j],
-                                 sep = " - ")
+                predictor_levels[j],
+                sep = " - "
+              )
               me_qois[[pair_name]] <-
                 compute_me_qois(
                   ce_est[, , i],
@@ -639,7 +698,7 @@ compute_qoi <- function(mavcl_object,
         x_tmp_1 <- x_tmp_0 <- x_default
 
         ## Predictor columns
-        pred_0 <- x_default[which_predictor,]
+        pred_0 <- x_default[which_predictor, ]
         pred_1 <- pred_0 + predictor_shift
 
         ## Initialize container
@@ -650,51 +709,60 @@ compute_qoi <- function(mavcl_object,
           u_char <- as.character(moderator_sequence[u])
 
           ## Adjust matrices
-          x_tmp_0[which_predictors,] <- rbind(pred_0,
-                                              moderator_sequence[u],
-                                              pred_0 * moderator_sequence[u])
-          x_tmp_1[which_predictors,] <- rbind(pred_1,
-                                              moderator_sequence[u],
-                                              pred_1 * moderator_sequence[u])
+          x_tmp_0[which_predictors, ] <- rbind(
+            pred_0,
+            moderator_sequence[u],
+            pred_0 * moderator_sequence[u]
+          )
+          x_tmp_1[which_predictors, ] <- rbind(
+            pred_1,
+            moderator_sequence[u],
+            pred_1 * moderator_sequence[u]
+          )
 
           ## Counterfactual outcome-specific estimates
-          eta_1 <- compute_eta(est,
-                               num_cat,
-                               num_catm1,
-                               x_tmp_1,
-                               re_null,
-                               num_sim,
-                               num_replic,
-                               D,
-                               pars_ext,
-                               V)
-          eta_0 <- compute_eta(est,
-                               num_cat,
-                               num_catm1,
-                               x_tmp_0,
-                               re_null,
-                               num_sim,
-                               num_replic,
-                               D,
-                               pars_ext,
-                               V)
+          eta_1 <- compute_eta(
+            est,
+            num_cat,
+            num_catm1,
+            x_tmp_1,
+            re_null,
+            num_sim,
+            num_replic,
+            D,
+            pars_ext,
+            V
+          )
+          eta_0 <- compute_eta(
+            est,
+            num_cat,
+            num_catm1,
+            x_tmp_0,
+            re_null,
+            num_sim,
+            num_replic,
+            D,
+            pars_ext,
+            V
+          )
 
           pi_1 <- pi_0 <- array(NA, c(num_sim, num_cat))
           for (s in seq_len(num_sim)) {
-            pi_1[s,] <- compute_ce(eta_1, which_empty, s)
-            pi_0[s,] <- compute_ce(eta_0, which_empty, s)
+            pi_1[s, ] <- compute_ce(eta_1, which_empty, s)
+            pi_0[s, ] <- compute_ce(eta_0, which_empty, s)
           }
 
           ## Average marginal effects
           me_qois[[u_char]] <-
             compute_me_qois(pi_0,
-                            pi_1,
-                            y_structure = y_structure,
-                            base = base,
-                            posterior_quantiles = posterior_quantiles,
-                            full_posterior = full_posterior,
-                            predictor_shift = predictor_shift,
-                            relative = relative)
+              pi_1,
+              y_structure = y_structure,
+              base = base,
+              posterior_quantiles = posterior_quantiles,
+              full_posterior = full_posterior,
+              predictor_shift = predictor_shift,
+              relative = relative
+            )
         }
         me_qois <- me_qois %>% reorder_qoi()
       } else {
@@ -703,19 +771,21 @@ compute_qoi <- function(mavcl_object,
             if (i != j) {
               me_qois[[pair_name]] <- list()
               pair_name <- paste(predictor_levels[i],
-                                 predictor_levels[j],
-                                 sep = " - ")
+                predictor_levels[j],
+                sep = " - "
+              )
 
               for (u in moderator_sequence) {
                 me_qois[[pair_name]][[u]] <-
                   compute_me_qois(ce_est[, , i, u],
-                                  ce_est[, , j, u],
-                                  y_structure = y_structure,
-                                  base = base,
-                                  posterior_quantiles = posterior_quantiles,
-                                  full_posterior = full_posterior,
-                                  predictor_shift = 1,
-                                  relative = relative)
+                    ce_est[, , j, u],
+                    y_structure = y_structure,
+                    base = base,
+                    posterior_quantiles = posterior_quantiles,
+                    full_posterior = full_posterior,
+                    predictor_shift = 1,
+                    relative = relative
+                  )
               }
               me_qois[[pair_name]] <- me_qois[[pair_name]] %>%
                 reorder_qoi()
@@ -723,9 +793,8 @@ compute_qoi <- function(mavcl_object,
           }
         }
       }
-
     } else if (!is.null(moderator) &
-               !moderator_continuous) {
+      !moderator_continuous) {
       if (predictor_continuous) {
         ## Compute average marginal effect
         pi_1 <-
@@ -737,40 +806,44 @@ compute_qoi <- function(mavcl_object,
           x_tmp_1 <- x_tmp_0 <- x_default
           t_0 <- x_default[which_predictor, ]
           t_1 <- t_0 + predictor_shift
-          x_tmp_0[which_moderator,] <-
+          x_tmp_0[which_moderator, ] <-
             as.numeric(seq_len(num_cat_moderator) %in% c(1, k)) %>%
             replicate(num_replic, .)
-          x_tmp_0[which_predictors,] <-
+          x_tmp_0[which_predictors, ] <-
             as.matrix(as.numeric(1:length(which_predictors) %in% c(1, k))) %*%
             t_0
-          x_tmp_1[which_moderator,] <-
+          x_tmp_1[which_moderator, ] <-
             as.numeric(seq_len(num_cat_moderator) %in% c(1, k)) %>%
             replicate(num_replic, .)
-          x_tmp_1[which_predictors,] <-
+          x_tmp_1[which_predictors, ] <-
             as.matrix(as.numeric(1:length(which_predictors) %in% c(1, k))) %*%
             t_1
 
           ## Counterfactual outcome-specific estimates
-          eta_1 <- compute_eta(est,
-                               num_cat,
-                               num_catm1,
-                               x_tmp_1,
-                               re_null,
-                               num_sim,
-                               num_replic,
-                               D,
-                               pars_ext,
-                               V)
-          eta_0 <- compute_eta(est,
-                               num_cat,
-                               num_catm1,
-                               x_tmp_0,
-                               re_null,
-                               num_sim,
-                               num_replic,
-                               D,
-                               pars_ext,
-                               V)
+          eta_1 <- compute_eta(
+            est,
+            num_cat,
+            num_catm1,
+            x_tmp_1,
+            re_null,
+            num_sim,
+            num_replic,
+            D,
+            pars_ext,
+            V
+          )
+          eta_0 <- compute_eta(
+            est,
+            num_cat,
+            num_catm1,
+            x_tmp_0,
+            re_null,
+            num_sim,
+            num_replic,
+            D,
+            pars_ext,
+            V
+          )
 
           for (s in seq_len(num_sim)) {
             pi_1[s, , k] <- compute_ce(eta_1, which_empty, s)
@@ -780,18 +853,18 @@ compute_qoi <- function(mavcl_object,
           ## Average marginal effects
           me_qois[[moderator_levels[k]]] <-
             compute_me_qois(pi_0[, , k],
-                            pi_1[, , k],
-                            y_structure = y_structure,
-                            base = base,
-                            posterior_quantiles = posterior_quantiles,
-                            full_posterior = full_posterior,
-                            predictor_shift = predictor_shift,
-                            relative = relative)
+              pi_1[, , k],
+              y_structure = y_structure,
+              base = base,
+              posterior_quantiles = posterior_quantiles,
+              full_posterior = full_posterior,
+              predictor_shift = predictor_shift,
+              relative = relative
+            )
         }
 
         ## Reorder qoi
         me_qois <- me_qois %>% reorder_qoi()
-
       } else {
         me_qois_tmp <- list()
         pair_names <- c()
@@ -801,18 +874,20 @@ compute_qoi <- function(mavcl_object,
             for (j in seq_along(predictor_levels)) {
               if (i != j) {
                 pair_name <- paste(predictor_levels[i],
-                                   predictor_levels[j],
-                                   sep = " - ")
+                  predictor_levels[j],
+                  sep = " - "
+                )
                 pair_names <- c(pair_names, pair_name)
                 me_qois_tmp[[moderator_levels[k]]][[pair_name]] <-
                   compute_me_qois(ce_est[, , i, k],
-                                  ce_est[, , j, k],
-                                  y_structure = y_structure,
-                                  base = base,
-                                  posterior_quantiles = posterior_quantiles,
-                                  full_posterior = full_posterior,
-                                  predictor_shift = 1,
-                                  relative = relative)
+                    ce_est[, , j, k],
+                    y_structure = y_structure,
+                    base = base,
+                    posterior_quantiles = posterior_quantiles,
+                    full_posterior = full_posterior,
+                    predictor_shift = 1,
+                    relative = relative
+                  )
               }
             }
           }
@@ -821,8 +896,9 @@ compute_qoi <- function(mavcl_object,
         ## Reorder qoi
         me_qois <- list()
         for (n in unique(pair_names)) {
-          me_qois[[n]] <- lapply(me_qois_tmp, function (x)
-            x[[n]]) %>%
+          me_qois[[n]] <- lapply(me_qois_tmp, function(x) {
+            x[[n]]
+          }) %>%
             reorder_qoi()
         }
       }

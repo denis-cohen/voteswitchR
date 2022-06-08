@@ -5,7 +5,7 @@
 #' upon request, data mapping, imputation, and reshaping within each
 #' selected electoral context.
 #'
-#' @return Returns and/or stores and object \code{data_file} which which contains
+#' @return Returns and/or stores and object \code{data_file} which contains
 #' a list of data for all requested electoral contexts.
 #'
 #' @noRd
@@ -56,7 +56,7 @@ build_infrastructure <- function(folder_location = NULL,
   if (aggregate & !(map)) {
     stop(
       paste(
-        'Aggregation requires mapped data.',
+        "Aggregation requires mapped data.",
         'Please set format = "long" and map = TRUE.',
         sep = " "
       )
@@ -74,7 +74,7 @@ build_infrastructure <- function(folder_location = NULL,
   }
 
   ## ---- Input files ----
-  mappings <- voteswitchR::mappings %>%
+  mappings <- mappings %>%
     dplyr::select(
       elec_id,
       stack,
@@ -90,30 +90,36 @@ build_infrastructure <- function(folder_location = NULL,
     ) %>%
     dplyr::mutate(
       vote_share = dplyr::if_else(vote_share == 0.0,
-                                  0.005,
-                                  vote_share),
+        0.005,
+        vote_share
+      ),
       vote_share_lag = dplyr::if_else(vote_share_lag == 0.0,
-                                      0.005,
-                                      vote_share_lag),
+        0.005,
+        vote_share_lag
+      ),
     )
 
   # ---- Selections ----
   ## Select concepts
   if (is.null(selected_concepts)) {
     selected_concepts <-
-      voteswitchR::concepts_df$concept[voteswitchR::concepts_df$description %in%
-                                          c("drop",
-                                            "region",
-                                            "Vote choice (t)",
-                                            "Vote choice (t - 1)")]
+      concepts_df$concept[concepts_df$description %in%
+        c(
+          "drop",
+          "region",
+          "Vote choice (t)",
+          "Vote choice (t - 1)"
+        )]
   } else {
     selected_concepts <-
-      voteswitchR::concepts_df$concept[voteswitchR::concepts_df$description %in%
-                                          c("drop",
-                                            "region",
-                                            "Vote choice (t)",
-                                            "Vote choice (t - 1)",
-                                            selected_concepts)]
+      concepts_df$concept[concepts_df$description %in%
+        c(
+          "drop",
+          "region",
+          "Vote choice (t)",
+          "Vote choice (t - 1)",
+          selected_concepts
+        )]
   }
 
   ## Select contexts
@@ -208,26 +214,33 @@ build_infrastructure <- function(folder_location = NULL,
     paste0("lr_", LETTERS),
     paste0("like_", LETTERS)
   )
-  survey_p_vars <- c(paste("lr", LETTERS, sep = "_"),
-                     paste("like", LETTERS, sep = "_"))
+  survey_p_vars <- c(
+    paste("lr", LETTERS, sep = "_"),
+    paste("like", LETTERS, sep = "_")
+  )
   mappings_p_vars <- names(mappings)[names(mappings) != "elec_id"]
 
 
   ## ---- Define sub-functions ----
-  reshape_k <- function (x) {
+  reshape_k <- function(x) {
     varying_x <-
       paste0(rep(paste0(
         c(mappings_p_vars, survey_p_vars_k_stubs), "_"
       ),
-      each = n_prty), 1:n_prty)
+      each = n_prty
+      ), 1:n_prty)
     varying_na <- varying_x[!(varying_x %in% names(x))]
     for (v in varying_na) {
       x <- within(x, assign(v, NA_real_))
     }
-    varying <- tibble::tibble(var = varying_x,
-                      stubs = gsub(paste(paste0("_", 1:99), collapse = "|"),
-                                   "",
-                                   varying_x))
+    varying <- tibble::tibble(
+      var = varying_x,
+      stubs = gsub(
+        paste(paste0("_", 1:99), collapse = "|"),
+        "",
+        varying_x
+      )
+    )
     varying <- split(varying$var, varying$stubs)
     fix <- names(x)[!(names(x) %in% varying_x)]
     long_data <- stats::reshape(
@@ -312,22 +325,27 @@ build_infrastructure <- function(folder_location = NULL,
       dplyr::mutate_if(is.factor, as.character)
 
     ## Select recodes
-    recodes_j <- voteswitchR::recodes %>%
+    recodes_j <- recodes %>%
       dplyr::filter(elec_id == j) %>%
-      dplyr::select(-country_name,
-                    -year,
-                    -election_date,
-                    -iso2c,
-                    -elec_id,
-                    -source)
+      dplyr::select(
+        -country_name,
+        -year,
+        -election_date,
+        -iso2c,
+        -elec_id,
+        -source
+      )
 
     ## Select concepts
     names_selected_concepts_j <-
-      c(selected_concepts[!(is.na(available_data_j[selected_concepts]))],
-        recodes_j$concept[recodes_j$concept %in% selected_concepts]) %>%
+      c(
+        selected_concepts[!(is.na(available_data_j[selected_concepts]))],
+        recodes_j$concept[recodes_j$concept %in% selected_concepts]
+      ) %>%
       unique()
 
-    selected_concepts_j <- as.data.frame(available_data_j[names_selected_concepts_j])
+    selected_concepts_j <-
+      as.data.frame(available_data_j[names_selected_concepts_j])
 
     ## Adjust recodes_j
     recodes_j <- recodes_j %>%
@@ -345,7 +363,7 @@ build_infrastructure <- function(folder_location = NULL,
     }
 
     if ("drop" %in% names_selected_concepts_j) {
-      ##Subset
+      ## Subset
       data_j <- paste0("subset(data_j, !(", drop_if, "))") %>%
         str2lang() %>%
         eval()
@@ -373,14 +391,17 @@ build_infrastructure <- function(folder_location = NULL,
 
     ## Rename selected concepts
     rename_concepts <-
-      paste0("dplyr::mutate(data_j, ",
-             paste(
-               paste(names_selected_concepts_j[!(is.na(selected_concepts_j))],
-                     selected_concepts_j[!(is.na(selected_concepts_j))],
-                     sep = " = "),
-               collapse = ", "
-             ),
-             ")")
+      paste0(
+        "dplyr::mutate(data_j, ",
+        paste(
+          paste(names_selected_concepts_j[!(is.na(selected_concepts_j))],
+            selected_concepts_j[!(is.na(selected_concepts_j))],
+            sep = " = "
+          ),
+          collapse = ", "
+        ),
+        ")"
+      )
     data_j <- rename_concepts %>%
       str2lang() %>%
       eval()
@@ -412,17 +433,19 @@ build_infrastructure <- function(folder_location = NULL,
         recode_values_jk <- recodes_jk %>%
           dplyr::select(dplyr::starts_with("recode_"))
         recode_values_jk <-
-          paste0("dplyr::case_when(",
-                 paste(
-                   paste0(
-                     "data_j[[expname_jk]] == ",
-                     recode_values_jk$recode_from,
-                     " ~ ",
-                     recode_values_jk$recode_to
-                   ),
-                   collapse = ", "
-                 ),
-                 ", TRUE ~ data_j[[expname_jk]])")
+          paste0(
+            "dplyr::case_when(",
+            paste(
+              paste0(
+                "data_j[[expname_jk]] == ",
+                recode_values_jk$recode_from,
+                " ~ ",
+                recode_values_jk$recode_to
+              ),
+              collapse = ", "
+            ),
+            ", TRUE ~ data_j[[expname_jk]])"
+          )
       }
 
       ## Other operations are single-row
@@ -448,14 +471,16 @@ build_infrastructure <- function(folder_location = NULL,
       if ("valid_range_min" %in% names(recodes_jk)) {
         data_j[[expname_jk]] <-
           ifelse(data_j[[expname_jk]] < recodes_jk[["valid_range_min"]],
-                 NA,
-                 data_j[[expname_jk]])
+            NA,
+            data_j[[expname_jk]]
+          )
       }
       if ("valid_range_max" %in% names(recodes_jk)) {
         data_j[[expname_jk]] <-
           ifelse(data_j[[expname_jk]] > recodes_jk[["valid_range_max"]],
-                 NA,
-                 data_j[[expname_jk]])
+            NA,
+            data_j[[expname_jk]]
+          )
       }
 
       ## recode
@@ -480,8 +505,9 @@ build_infrastructure <- function(folder_location = NULL,
 
       ## replace (by numeric/original variable)
       is_replace <-
-        sapply(names(recodes_jk), function(x)
-          grepl("replace", x))
+        vapply(names(recodes_jk), function(x) {
+          grepl("replace", x)
+        })
       if (any(is_replace)) {
         replace_jk <- recodes_jk[which(is_replace)]
         replace_if <-
@@ -489,9 +515,10 @@ build_infrastructure <- function(folder_location = NULL,
         replace_by <-
           t(replace_jk[startsWith(names(replace_jk), "replace_by")])
         replace_type <- ifelse(grepl("exp_", replace_if) |
-                                 grepl("exp_", replace_by),
-                               "deriv",
-                               "orig")
+          grepl("exp_", replace_by),
+        "deriv",
+        "orig"
+        )
         replace_jk <- data.frame(
           concept_jk,
           conname_jk,
@@ -544,7 +571,7 @@ build_infrastructure <- function(folder_location = NULL,
         if (any(replace_jk$replace_type == "deriv")) {
           replace_j_deriv <- replace_j_deriv %>%
             dplyr::bind_rows(replace_jk %>%
-                        dplyr::filter(replace_type == "deriv"))
+              dplyr::filter(replace_type == "deriv"))
         }
       }
     } ## End loop through selected concepts
@@ -598,15 +625,16 @@ build_infrastructure <- function(folder_location = NULL,
       dplyr::select(dplyr::starts_with("exp_")) %>%
       dplyr::rename_at(
         .vars = dplyr::vars(dplyr::starts_with("exp_")),
-        .funs = function(x)
+        .funs = function(x) {
           gsub("^exp_", "", x)
+        }
       ) %>%
       dplyr::select_if(~ sum(!is.na(.)) > 0) %>%
-      dplyr::mutate(weights = if (exists('dwght', where = .)) {
+      dplyr::mutate(weights = if (exists("dwght", where = .)) {
         dwght
-      } else if (exists('swght', where = .)) {
+      } else if (exists("swght", where = .)) {
         swght
-      } else if (exists('pwght', where = .)) {
+      } else if (exists("pwght", where = .)) {
         pwght
       } else {
         1
@@ -618,7 +646,7 @@ build_infrastructure <- function(folder_location = NULL,
       dplyr::mutate_all(.funs = ~ ifelse(is.nan(.), NA, .))
 
     ## Age filter
-    if (exists('age', where = data_j)) {
+    if (exists("age", where = data_j)) {
       data_j <- data_j %>%
         dplyr::filter(is.na(age) | (age >= 18 & age <= 130))
     }
@@ -642,8 +670,10 @@ build_infrastructure <- function(folder_location = NULL,
               id = gsub("BE", "BE-WA", id)
             )
         )
-      kk <- c(gsub("BE", "BE-VL", j),
-              gsub("BE", "BE-WA", j))
+      kk <- c(
+        gsub("BE", "BE-VL", j),
+        gsub("BE", "BE-WA", j)
+      )
     } else {
       data_j <- list(data_j)
       kk <- j
@@ -653,7 +683,8 @@ build_infrastructure <- function(folder_location = NULL,
     for (k in kk) {
       ## Get data
       data_k <- as.data.frame(data_j[[k]]) %>%
-        labelled::remove_attributes(c("groups", "label", "labels", "format.stata"))
+        labelled::remove_attributes(
+          c("groups", "label", "labels", "format.stata"))
 
       ## ---- Mapping ----
       if (map) {
@@ -672,18 +703,21 @@ build_infrastructure <- function(folder_location = NULL,
         survey_p_vars_k <-
           survey_p_vars[survey_p_vars %in% names(data_k)]
         survey_p_vars_k_stubs <-
-          unique(sapply(survey_p_vars_k, function (x)
-            gsub("(.+?)(\\_.*)", "\\1", x)))
+          unique(vapply(survey_p_vars_k, function(x) {
+            gsub("(.+?)(\\_.*)", "\\1", x)
+          }))
 
         ## Context data
         mappings_k <- mappings %>%
           dplyr::filter(elec_id == k) %>%
-          dplyr::filter(map_vote %in% c(sort(unique(
-            data_k$vote
-          )),
-          sort(unique(
-            data_k$l_vote
-          )))) %>%
+          dplyr::filter(map_vote %in% c(
+            sort(unique(
+              data_k$vote
+            )),
+            sort(unique(
+              data_k$l_vote
+            ))
+          )) %>%
           dplyr::select(-elec_id) %>%
           as.data.frame()
 
@@ -698,18 +732,22 @@ build_infrastructure <- function(folder_location = NULL,
         if (no_map | no_l_vote) {
           ## Warnings
           if (no_map == 0) {
-            warning("Context not mapped: No contextual information on parties.\n") %>%
+            warning("Context not mapped:
+                    No contextual information on parties.\n") %>%
               cat()
           }
           if (is.null(no_l_vote)) {
-            warning("Context not mapped: No vote recall data for previous election.\n") %>%
+            warning("Context not mapped:
+                    No vote recall data for previous election.\n") %>%
               cat()
           }
         } else {
           ## Initialize containers
           data_k <- data_k %>%
-            dplyr::mutate(vote_new = NA_integer_,
-                          l_vote_new = NA_integer_)
+            dplyr::mutate(
+              vote_new = NA_integer_,
+              l_vote_new = NA_integer_
+            )
 
           if ("pid" %in% names(data_k)) {
             data_k <- data_k %>%
@@ -722,44 +760,59 @@ build_infrastructure <- function(folder_location = NULL,
             p_alph <- mappings_k$map_lr[p]
             data_k$vote_new <-
               ifelse(mappings_k$map_vote[p] == data_k$vote,
-                     p_num,
-                     data_k$vote_new)
+                p_num,
+                data_k$vote_new
+              )
             data_k$l_vote_new <-
               ifelse(mappings_k$map_vote[p] == data_k$l_vote,
-                     p_num,
-                     data_k$l_vote_new)
+                p_num,
+                data_k$l_vote_new
+              )
 
             if ("pid" %in% names(data_k)) {
               data_k$pid_new <-
                 ifelse(mappings_k$map_vote[p] == data_k$pid,
-                       p_num,
-                       data_k$pid_new) # new PID ID
+                  p_num,
+                  data_k$pid_new
+                ) # new PID ID
             }
 
             for (v in mappings_p_vars) {
               # assign mappings party vars
-              data_k <- within(data_k,
-                               assign(paste(v, p_num , sep = "_"),
-                                      mappings_k[p, v]))
+              data_k <- within(
+                data_k,
+                assign(
+                  paste(v, p_num, sep = "_"),
+                  mappings_k[p, v]
+                )
+              )
             }
             if (nchar(p_alph) > 0 & !(is.na(p_alph))) {
               # assign survey party vars
               for (v in survey_p_vars_k_stubs) {
                 if (paste(v, p_alph, sep = "_") %in% survey_p_vars_k) {
                   data_k <-
-                    within(data_k,
-                           assign(paste(v, p_num, sep = "_"),
-                                  data_k[, paste(v, p_alph, sep = "_")]))
+                    within(
+                      data_k,
+                      assign(
+                        paste(v, p_num, sep = "_"),
+                        data_k[, paste(v, p_alph, sep = "_")]
+                      )
+                    )
                 }
               }
             }
           }
           ## Recode numerical format
           data_k <- data_k %>%
-            dplyr::rename(vote_old = vote,
-                          l_vote_old = l_vote) %>%
-            dplyr::rename(vote = vote_new,
-                          l_vote = l_vote_new) %>%
+            dplyr::rename(
+              vote_old = vote,
+              l_vote_old = l_vote
+            ) %>%
+            dplyr::rename(
+              vote = vote_new,
+              l_vote = l_vote_new
+            ) %>%
             dplyr::mutate(
               vote = dplyr::case_when(
                 is.na(vote) & part == 0 ~ 99L,
@@ -804,19 +857,22 @@ build_infrastructure <- function(folder_location = NULL,
 
           noms <- c("vote", "l_vote", "pid", "male", "strength1", "strength2")
           noms <- noms[noms %in% names(data_k)]
-          imp_vars <- c(noms,
-                        "lr_self",
-                        "age",
-                        "stfdem",
-                        paste(rep(c(
-                          "lr", "like"
-                        ), each = n_prty), 1:n_prty, sep = "_"))
+          imp_vars <- c(
+            noms,
+            "lr_self",
+            "age",
+            "stfdem",
+            paste(rep(c(
+              "lr", "like"
+            ), each = n_prty), 1:n_prty, sep = "_")
+          )
           imp_vars <- imp_vars[imp_vars %in% names(data_k)]
           vars <- c(ids, imp_vars)
 
           ## Remove all-missing rows
           all_na <-
-            which(rowSums(is.na(data_k[, imp_vars])) == ncol(data_k[, imp_vars]))
+            which(rowSums(
+              is.na(data_k[, imp_vars])) == ncol(data_k[, imp_vars]))
 
           if (length(all_na) >= 1) {
             warning(
@@ -867,8 +923,9 @@ build_infrastructure <- function(folder_location = NULL,
 
         ## Maximum number of categories in discrete variables
         max_cats <- data_k[noms] %>%
-          sapply(function(var)
-            length(unique(var))) %>%
+          vapply(function(var) {
+            length(unique(var))
+          }) %>%
           max()
 
         data_k_imp <- hot.deck::hot.deck(
@@ -909,14 +966,18 @@ build_infrastructure <- function(folder_location = NULL,
         mappings_k_vote <- mappings_k %>%
           dplyr::select(stack, vote_share, turnout) %>%
           dplyr::filter(stack %in% levels_vote) %>%
-          dplyr::mutate(vote_share =
-                          ifelse(is.na(vote_share), 0.005, vote_share)) %>%
+          dplyr::mutate(
+            vote_share =
+              ifelse(is.na(vote_share), 0.005, vote_share)
+          ) %>%
           na.omit()
         mappings_k_l_vote <- mappings_k %>%
           dplyr::select(stack, vote_share_lag, turnout_lag) %>%
-          dplyr::filter(stack %in% levels_l_vote)  %>%
-          dplyr::mutate(vote_share_lag =
-                          ifelse(is.na(vote_share_lag), 0.005, vote_share_lag)) %>%
+          dplyr::filter(stack %in% levels_l_vote) %>%
+          dplyr::mutate(
+            vote_share_lag =
+              ifelse(is.na(vote_share_lag), 0.005, vote_share_lag)
+          ) %>%
           na.omit()
         vote <- mappings_k_vote$vote_share
         turnout <- unique(mappings_k_vote$turnout)
@@ -941,23 +1002,24 @@ build_infrastructure <- function(folder_location = NULL,
             cat()
         } else {
           ## Check vote shares
-          sum_vote <- sum(vote, na.rm = T)
-          sum_l_vote <- sum(l_vote, na.rm = T)
+          sum_vote <- sum(vote, na.rm = TRUE)
+          sum_l_vote <- sum(l_vote, na.rm = TRUE)
 
           if (sum_vote >= 1 & oth_exist) {
-            if (sum_vote >= 1.005)
+            if (sum_vote >= 1.005) {
               warning("Combined vote shares exceed 1. Please check.")
+            }
             oth_vote <- 0.005
           } else if (!oth_exist) {
             oth_vote <- NULL
-          }
-          else {
+          } else {
             oth_vote <- 1 - sum_vote
           }
 
           if (sum_l_vote >= 1 & l_oth_exist) {
-            if (sum_l_vote >= 1.005)
+            if (sum_l_vote >= 1.005) {
               warning("Combined vote shares exceed 1. Please check.")
+            }
             oth_l_vote <- 0.005
           } else if (!l_oth_exist) {
             oth_l_vote <- NULL
@@ -1005,11 +1067,15 @@ build_infrastructure <- function(folder_location = NULL,
           if (impute) {
             for (m in seq_len(n_imp)) {
               data_k_imp$data[[m]]$raked_weights <- anesrake::anesrake(
-                inputter = list(vote = vote,
-                                l_vote = l_vote),
+                inputter = list(
+                  vote = vote,
+                  l_vote = l_vote
+                ),
                 dataframe = data_k_imp$data[[m]] %>%
-                  dplyr::mutate_at(.vars = dplyr::vars(vote, l_vote),
-                                   .funs = as.factor),
+                  dplyr::mutate_at(
+                    .vars = dplyr::vars(vote, l_vote),
+                    .funs = as.factor
+                  ),
                 caseid = data_k_imp$data[[m]]$id,
                 weightvec = data_k_imp$data[[m]]$weights,
                 pctlim = 0.005
@@ -1020,11 +1086,15 @@ build_infrastructure <- function(folder_location = NULL,
 
           # original data
           data_k$raked_weights <- anesrake::anesrake(
-            inputter = list(vote = vote,
-                            l_vote = l_vote),
+            inputter = list(
+              vote = vote,
+              l_vote = l_vote
+            ),
             dataframe = data_k %>%
-              dplyr::mutate_at(.vars = dplyr::vars(vote, l_vote),
-                               .funs = as.factor),
+              dplyr::mutate_at(
+                .vars = dplyr::vars(vote, l_vote),
+                .funs = as.factor
+              ),
             caseid = seq_along(data_k$id),
             weightvec = data_k$weights,
             pctlim = 0.005
@@ -1067,9 +1137,11 @@ build_infrastructure <- function(folder_location = NULL,
     dplyr::ungroup()
   if (impute) {
     data_file$data_imp <-
-      lapply(seq_len(n_imp), function(m)
-        lapply(data_file$data_imp, function(dat)
-          dat[[m]]))
+      lapply(seq_len(n_imp), function(m) {
+        lapply(data_file$data_imp, function(dat) {
+          dat[[m]]
+        })
+      })
     for (m in seq_len(n_imp)) {
       data_file$data_imp[[m]] <-
         dplyr::bind_rows(data_file$data_imp[[m]]) %>%

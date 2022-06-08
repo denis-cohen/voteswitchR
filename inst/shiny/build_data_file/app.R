@@ -40,11 +40,14 @@ ui <- shiny::fluidPage(
         id = paste0("step", i),
         h4('Preparation:'),
         h5(
-          "In case you haven't already done, please download the selected data manually using the provided download links and put the files into the respective folders."
+          "In case you haven't already done, please download the
+          selected data manually using the provided download links
+          and put the files into the respective folders."
         ),
         shiny::textInput("dir", "Input directory", placeholder = "e.g. ./data"),
         shiny::actionButton("find_files", "Find files"),
-        shiny::actionButton("structure_creation", "Create initial folder structure"),
+        shiny::actionButton("structure_creation",
+                            "Create initial folder structure"),
         h4('Selected Contexts:'),
         h5("Please Note: File format must be either .sav, .dta or .rdata."),
         shiny::actionLink("refresh_table", "Reset Context Table"),
@@ -70,16 +73,24 @@ ui <- shiny::fluidPage(
           value = "20210910",
           placeholder = "e.g. 20210910"
         ),
-        shiny::checkboxInput("rake_par", "rake", value = TRUE),
-        shiny::checkboxInput("aggregate_par", "aggregate", value = TRUE),
-        shiny::checkboxInput("return_data_par", "return_data", value = TRUE),
-        shiny::checkboxInput("return_data_imp_par", "return_data_imp", value = TRUE),
-        shiny::checkboxInput("return_agg_data_par", "return_agg_data", value = TRUE),
-        shiny::checkboxInput("return_agg_data_imp_par", "return_agg_data_imp", value = TRUE),
-        shiny::checkboxInput("return_info_imp_par", "return_info_imp", value = TRUE),
+        shiny::checkboxInput("rake_par",
+                             "rake", value = TRUE),
+        shiny::checkboxInput("aggregate_par",
+                             "aggregate", value = TRUE),
+        shiny::checkboxInput("return_data_par",
+                             "return_data", value = TRUE),
+        shiny::checkboxInput("return_data_imp_par",
+                             "return_data_imp", value = TRUE),
+        shiny::checkboxInput("return_agg_data_par",
+                             "return_agg_data", value = TRUE),
+        shiny::checkboxInput("return_agg_data_imp_par",
+                             "return_agg_data_imp", value = TRUE),
+        shiny::checkboxInput("return_info_imp_par",
+                             "return_info_imp", value = TRUE),
         shiny::textInput(
           "output_file_path_par",
-          "output_file_path (If empty, the output file is stored in the R Environment)",
+          "output_file_path
+          (If empty, the output file is stored in the R Environment)",
           placeholder = "e.g. path/to/data/data_file.RData"
         )
       )
@@ -111,24 +122,30 @@ server <- function(input, output, session) {
   shiny::observeEvent(input$prevBtn, navPage(-1))
   shiny::observeEvent(input$nextBtn, {
     if (rv$page < 3) {
-      assign("data_filtered_global", update_selected_table(data_filtered_global, FALSE), envir = .GlobalEnv)
+      assign("data_filtered_global",
+             update_selected_table(data_filtered_global, FALSE),
+             envir = .GlobalEnv)
       if (rv$page > 1) {
         if (has_missing_file_names()) {
           shinyalert::shinyalert(
-            "Please download the selected data manually using the provided download links and put the files into the respective folders.",
+            "Please download the selected data manually using the
+            provided download links and put the
+            files into the respective folders.",
             size = "l",
             animation = "slide-from-top",
             type = "error"
           )
           return()
         } else {
-          assign("data_filtered_global", store_selected_file_names(data_filtered_global), envir = .GlobalEnv)
+          assign("data_filtered_global",
+                 store_selected_file_names(data_filtered_global),
+                 envir = .GlobalEnv)
         }
       }
       navPage(1)
     } else {
       # Call process function from external source
-      voteswitchR::build_infrastructure(
+      build_infrastructure(
         folder_location = input$dir,
         available_data = data_filtered_global,
         selected_concepts = input$concepts,
@@ -157,8 +174,9 @@ server <- function(input, output, session) {
   ##### Page 1: Concepts + Context List Output #####
   # select concepts from input data
   concepts <-
-    unique(voteswitchR::concepts_df[!(voteswitchR::concepts_df$base_concept %in%
-                                            c("drop", "region", "vote", "l_vote")), ]$description)
+    unique(concepts_df[!(
+      concepts_df$base_concept %in%
+        c("drop", "region", "vote", "l_vote")), ]$description)
   output$variables_concepts <-
     renderUI({
       tags$div(align = 'left',
@@ -190,15 +208,23 @@ server <- function(input, output, session) {
 
   assign("available_data",
          as.data.frame(
-           voteswitchR::available_data %>%
+           available_data %>%
              dplyr::group_by(country_name, year) %>%
              dplyr::mutate(n = dplyr::n()) %>%
              dplyr::ungroup() %>%
-             dplyr::mutate(year = ifelse(n > 1, stringr::str_replace(elec_id, paste0(iso2c, "-"), ""), as.character(year))) %>%
+             dplyr::mutate(year =
+                             ifelse(n > 1,
+                                    stringr::str_replace(
+                                      elec_id, paste0(iso2c, "-"), ""),
+                                    as.character(year))) %>%
              dplyr::group_by(country_name, year) %>%
              dplyr::mutate(n = dplyr::n()) %>%
              dplyr::ungroup() %>%
-             dplyr::mutate(year = ifelse(n > 1, paste0(year, stringr::str_sub(iso2c, start=-3)), as.character(year))) %>%
+             dplyr::mutate(year = ifelse(n > 1,
+                                         paste0(year,
+                                                stringr::str_sub(
+                                                  iso2c, start=-3)),
+                                         as.character(year))) %>%
              dplyr::select(-n)), envir = .GlobalEnv)
 
   # Build country/year matrix
@@ -226,7 +252,8 @@ server <- function(input, output, session) {
   set_values_year <- function(row) {
     available_data <- as.data.frame(get('available_data', envir = .GlobalEnv))
     current_years <-
-      list(as.character(available_data[available_data$country_name == row["Country"], ]$year))
+      list(as.character(available_data[
+        available_data$country_name == row["Country"], ]$year))
     for (year in current_years) {
       row[year] <- paste0(year, "_", row["Country"])
     }
@@ -318,66 +345,75 @@ server <- function(input, output, session) {
   }
 
   # Render Data Table with preprocessed data
-  output$countries_year = DT::renderDT(data_country_year_datatable)
+  output$countries_year <- DT::renderDT(data_country_year_datatable)
 
   # add JS handlers to checkbox clicks
   shinyjs::runjs(
     "$('body').on('click', '#select_all',
-                function() {
-                  $('[class*=contexts]').attr('checked', event.target.checked)
-                  $('[class=select_column]').attr('checked', event.target.checked)
-                  $('[class=select_row]').attr('checked', event.target.checked)
+      function() {
+        $('[class*=contexts]').attr('checked', event.target.checked)
+        $('[class=select_column]').attr('checked', event.target.checked)
+        $('[class=select_row]').attr('checked', event.target.checked)
 
-                  let checkboxes = [...document.querySelectorAll('.contexts:checked')].map(item => item.id);
-                  Shiny.setInputValue('checkboxes',checkboxes);
-                }
+        let checkboxes = [...document.querySelectorAll('.contexts:checked')]
+          .map(item => item.id);
+        Shiny.setInputValue('checkboxes',checkboxes);
+      }
     );"
   )
   shinyjs::runjs(
     "$('body').on('click', '.select_column',
-                function(event) {
-                  let firstCells = document.querySelectorAll('td:nth-child(' + event.target.id + ')');
-                  firstCells.forEach(function(singleCell) {
-                    if(singleCell.hasChildNodes() && !singleCell.childNodes[0].classList.contains('select_column')) {
-                      $('#' + String(singleCell.childNodes[0].id)).attr('checked', event.target.checked)
-                    }
-                  });
+      function(event) {
+        let firstCells = document.querySelectorAll(
+          'td:nth-child(' + event.target.id + ')');
+        firstCells.forEach(function(singleCell) {
+          if(singleCell.hasChildNodes() &&
+            !singleCell.childNodes[0].classList.contains('select_column')) {
+            $('#' + String(singleCell.childNodes[0].id))
+              .attr('checked', event.target.checked)
+          }
+        });
 
-                  let checkboxes = [...document.querySelectorAll('.contexts:checked')].map(item => item.id);
-                  Shiny.setInputValue('checkboxes',checkboxes);
-                }
+        let checkboxes = [...document.querySelectorAll('.contexts:checked')]
+          .map(item => item.id);
+        Shiny.setInputValue('checkboxes',checkboxes);
+      }
     );"
   )
 
   shinyjs::runjs(
     "$('body').on('click', '.select_row',
-                function(event) {
-                  let nextSibling = document.getElementById(event.target.id).parentElement.nextElementSibling;
-                  while(nextSibling) {
-                    if(nextSibling.hasChildNodes()) {
-                      $('#' + String(nextSibling.childNodes[0].id)).attr('checked', event.target.checked)
-                    }
-                    nextSibling = nextSibling.nextElementSibling;
-                  }
+      function(event) {
+        let nextSibling = document.getElementById(event.target.id)
+          .parentElement.nextElementSibling;
+        while(nextSibling) {
+          if(nextSibling.hasChildNodes()) {
+            $('#' + String(nextSibling.childNodes[0].id))
+              .attr('checked', event.target.checked)
+          }
+          nextSibling = nextSibling.nextElementSibling;
+        }
 
-                  let checkboxes = [...document.querySelectorAll('.contexts:checked')].map(item => item.id);
-                  Shiny.setInputValue('checkboxes',checkboxes);
-                }
+        let checkboxes = [...document.querySelectorAll('.contexts:checked')]
+          .map(item => item.id);
+        Shiny.setInputValue('checkboxes',checkboxes);
+      }
     );"
   )
 
   shinyjs::runjs(
     "$('body').on('click', '.contexts',
-            function() {
-              let checkboxes = [...document.querySelectorAll('.contexts:checked')].map(item => item.id);
-              Shiny.setInputValue('checkboxes',checkboxes);
-            }
-          );"
+      function() {
+        let checkboxes = [...document.querySelectorAll('.contexts:checked')]
+          .map(item => item.id);
+        Shiny.setInputValue('checkboxes',checkboxes);
+      }
+    );"
   )
 
   # Event to reset context selections
   shiny::observeEvent(input$resetall, {
-    output$countries_year = DT::renderDT(data_country_year_datatable)
+    output$countries_year <- DT::renderDT(data_country_year_datatable)
   })
 
   ##### Page 2: Choose Directory #####
@@ -400,12 +436,16 @@ server <- function(input, output, session) {
       dplyr::filter(country_name %in% checkbox_names_country)
 
     for (context in 1:nrow(data)) {
-      dir.create(file.path(paste0(input_dir, "/"), paste0(data[context, "folder_name"], "/")), showWarnings = FALSE)
+      dir.create(file.path(paste0(input_dir, "/"),
+                           paste0(data[context, "folder_name"], "/")),
+                 showWarnings = FALSE)
     }
   })
 
   shiny::observeEvent(input$find_files, {
-    assign("data_filtered_global",update_selected_table(data_filtered_global, TRUE), envir = .GlobalEnv)
+    assign("data_filtered_global",
+           update_selected_table(data_filtered_global, TRUE),
+           envir = .GlobalEnv)
   })
 
   # Create Data Table with selected contexts
@@ -419,9 +459,11 @@ server <- function(input, output, session) {
         data_access == 1 ~ "Accept terms of use",
         data_access == 2 ~ "Register and accept terms of use",
         data_access == 3 ~ "Specific research proposal required",
-        data_access == 4 ~ "Specific research proposal and signed user agreement required",
+        data_access == 4 ~
+          "Specific research proposal and signed user agreement required",
         data_access == 5 ~ "Request access from data provider",
-        data_access == 6 ~ "Request access from data provider and pay a provision fee"
+        data_access == 6 ~
+          "Request access from data provider and pay a provision fee"
       ))
 
     checkbox_names <- gsub("_",  " ", input$checkboxes, fixed = TRUE)
@@ -436,7 +478,9 @@ server <- function(input, output, session) {
       store_selected_file_names()
 
     if (!forceUpdate & (nrow(previous_data_filtered) > 0)) {
-      if (isTRUE(dplyr::all_equal(dplyr::select(previous_data_filtered, elec_id), dplyr::select(data_filtered, elec_id)))) {
+      if (isTRUE(dplyr::all_equal(
+        dplyr::select(previous_data_filtered, elec_id),
+        dplyr::select(data_filtered, elec_id)))) {
         return(previous_data_filtered)
       }
     }
@@ -444,7 +488,8 @@ server <- function(input, output, session) {
     for (i in 1:nrow(data_filtered)) {
       file_path <- paste0(input$dir, "/", data_filtered$folder_name[i])
       files <- list.files(path = file_path,
-                          pattern = "\\.(dta|sav|rdata|DTA|SAV|RDATA|Rdata|RData)$",
+                          pattern =
+                            "\\.(dta|sav|rdata|DTA|SAV|RDATA|Rdata|RData)$",
                           full.names = FALSE)
 
       if (length(files) > 1) {
@@ -459,28 +504,31 @@ server <- function(input, output, session) {
         as.character
 
       data_filtered[i, "file_name_options"] <- dplyr::case_when(
-        length(files) == 1 ~ gsub("<select ", "<select class='success'", data_filtered[i, "file_name_options"]),
-        length(files) > 1 ~ gsub("<select ", "<select class='warning'", data_filtered[i, "file_name_options"]),
-        length(files) == 0 ~ gsub("<select ", "<select class='error'", data_filtered[i, "file_name_options"])
+        length(files) == 1 ~ gsub("<select ", "<select class='success'",
+                                  data_filtered[i, "file_name_options"]),
+        length(files) > 1 ~ gsub("<select ", "<select class='warning'",
+                                 data_filtered[i, "file_name_options"]),
+        length(files) == 0 ~ gsub("<select ", "<select class='error'",
+                                  data_filtered[i, "file_name_options"])
       )
 
       shinyjs::runjs(
         paste0("
           $('body').on('change', '#", input_id, "',
-                  function(event) {
-                    let select_element = document.getElementById(event.target.id);
-                    select_element.classList.remove('error', 'warning', 'success');
+            function(event) {
+              let select_element = document.getElementById(event.target.id);
+              select_element.classList.remove('error', 'warning', 'success');
 
-                    if (select_element.value == '') {
-                      if (select_element.length > 0) {
-                        select_element.classList.add('warning');
-                      } else {
-                        select_element.classList.add('error');
-                      }
-                    } else {
-                      select_element.classList.add('success');
-                    }
-                  }
+              if (select_element.value == '') {
+                if (select_element.length > 0) {
+                  select_element.classList.add('warning');
+                } else {
+                  select_element.classList.add('error');
+                }
+              } else {
+                select_element.classList.add('success');
+              }
+            }
           );"))
     }
 
@@ -519,14 +567,18 @@ server <- function(input, output, session) {
   }
 
   shiny::observeEvent(input$refresh_table, {
-    assign("data_filtered_global", update_selected_table(data_filtered_global, TRUE), envir = .GlobalEnv)
+    assign("data_filtered_global",
+           update_selected_table(data_filtered_global, TRUE),
+           envir = .GlobalEnv)
   })
 
   has_missing_file_names <- function() {
-    data_filtered <- as.data.frame(get('data_filtered_global', envir = .GlobalEnv))
+    data_filtered <- as.data.frame(get('data_filtered_global',
+                                       envir = .GlobalEnv))
     if (nrow(data_filtered) > 0) {
       for (i in 1:nrow(data_filtered)) {
-        file_name <- input[[paste0("sel", i, "_", data_filtered[i, "random_id"])]]
+        file_name <-
+          input[[paste0("sel", i, "_", data_filtered[i, "random_id"])]]
         if ((is.null(file_name)) || (file_name == "")) {
           return(TRUE)
         }
@@ -538,8 +590,10 @@ server <- function(input, output, session) {
   store_selected_file_names <- function(data_filtered) {
     if (nrow(data_filtered) > 0) {
       for (i in 1:nrow(data_filtered)) {
-        selected_value <- input[[paste0("sel", i, "_", data_filtered[i, "random_id"])]]
-        data_filtered[i, "file_name"] <- ifelse(is.null(selected_value), "", selected_value)
+        selected_value <-
+          input[[paste0("sel", i, "_", data_filtered[i, "random_id"])]]
+        data_filtered[i, "file_name"] <-
+          ifelse(is.null(selected_value), "", selected_value)
       }
     }
     return(data_filtered)
@@ -548,19 +602,26 @@ server <- function(input, output, session) {
   # Event for updating the selected concepts table on change on UI
   shiny::observe({
     if (!input$map_par) {
-      shiny::updateCheckboxInput(session, "impute_par", value = FALSE)
+      shiny::updateCheckboxInput(session,
+                                 "impute_par", value = FALSE)
       shinyjs::disable("impute_par")
-      shiny::updateCheckboxInput(session, "rake_par", value = FALSE)
+      shiny::updateCheckboxInput(session,
+                                 "rake_par", value = FALSE)
       shinyjs::disable("rake_par")
-      shiny::updateCheckboxInput(session, "aggregate_par", value = FALSE)
+      shiny::updateCheckboxInput(session,
+                                 "aggregate_par", value = FALSE)
       shinyjs::disable("aggregate_par")
-      shiny::updateCheckboxInput(session, "return_data_imp_par", value = FALSE)
+      shiny::updateCheckboxInput(session,
+                                 "return_data_imp_par", value = FALSE)
       shinyjs::disable("return_data_imp_par")
-      shiny::updateCheckboxInput(session, "return_agg_data_par", value = FALSE)
+      shiny::updateCheckboxInput(session,
+                                 "return_agg_data_par", value = FALSE)
       shinyjs::disable("return_agg_data_par")
-      shiny::updateCheckboxInput(session, "return_agg_data_imp_par", value = FALSE)
+      shiny::updateCheckboxInput(session,
+                                 "return_agg_data_imp_par", value = FALSE)
       shinyjs::disable("return_agg_data_imp_par")
-      shiny::updateCheckboxInput(session, "return_info_imp_par", value = FALSE)
+      shiny::updateCheckboxInput(session,
+                                 "return_info_imp_par", value = FALSE)
       shinyjs::disable("return_info_imp_par")
     } else {
       shinyjs::enable("impute_par")
@@ -573,11 +634,14 @@ server <- function(input, output, session) {
     }
 
     if (!input$impute_par) {
-      shiny::updateCheckboxInput(session, "return_data_imp_par", value = FALSE)
+      shiny::updateCheckboxInput(session,
+                                 "return_data_imp_par", value = FALSE)
       shinyjs::disable("return_data_imp_par")
-      shiny::updateCheckboxInput(session, "return_agg_data_imp_par", value = FALSE)
+      shiny::updateCheckboxInput(session,
+                                 "return_agg_data_imp_par", value = FALSE)
       shinyjs::disable("return_agg_data_imp_par")
-      shiny::updateCheckboxInput(session, "return_info_imp_par", value = FALSE)
+      shiny::updateCheckboxInput(session,
+                                 "return_info_imp_par", value = FALSE)
       shinyjs::disable("return_info_imp_par")
     } else {
       shinyjs::enable("return_data_imp_par")
