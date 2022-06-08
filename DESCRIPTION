@@ -39,7 +39,7 @@ Biarch: true
 Depends: 
     R (>= 3.4.0)
 Imports: 
-    abind (>= 1.4.5), 
+    abind (>= 1.4.5),
     methods,
     Rcpp (>= 0.12.0),
     RcppParallel (>= 5.0.1),
@@ -53,13 +53,14 @@ Imports:
     knitr (>= 1.36),
     labelled (>= 2.8.0),
     lubridate (>= 1.8.0),
-    magrittr (>= 2.0.1), 
+    magrittr (>= 2.0.1),
     rio (>= 0.5.27),
-    shiny (>=	1.7.1),
+    shiny (>= 1.7.1),
     shinyalert (>= 2.0.0),
     shinyjs (>= 2.0.0),
     tidyr (>= 1.1.4),
-    stringr (>= 1.4.0)
+    stringr (>= 1.4.0),
+    tibble (>= 3.1.7)
 LinkingTo:
     BH (>= 1.66.0),
     Rcpp (>= 0.12.0),

@@ -128,7 +128,7 @@ server <- function(input, output, session) {
       navPage(1)
     } else {
       # Call process function from external source
-      voteswitchR:::build_infrastructure(
+      voteswitchR::build_infrastructure(
         folder_location = input$dir,
         available_data = data_filtered_global,
         selected_concepts = input$concepts,
@@ -157,7 +157,7 @@ server <- function(input, output, session) {
   ##### Page 1: Concepts + Context List Output #####
   # select concepts from input data
   concepts <-
-    unique(voteswitchR:::concepts_df[!(voteswitchR:::concepts_df$base_concept %in%
+    unique(voteswitchR::concepts_df[!(voteswitchR::concepts_df$base_concept %in%
                                             c("drop", "region", "vote", "l_vote")), ]$description)
   output$variables_concepts <-
     renderUI({
@@ -190,7 +190,7 @@ server <- function(input, output, session) {
 
   assign("available_data",
          as.data.frame(
-           voteswitchR:::available_data %>%
+           voteswitchR::available_data %>%
              dplyr::group_by(country_name, year) %>%
              dplyr::mutate(n = dplyr::n()) %>%
              dplyr::ungroup() %>%

@@ -5,8 +5,8 @@
 #' intercepts (i.e., random intercepts for each cell of an election-specific
 #' voter transition matrix).
 #'
-#' @param data A data object generated via \code{\link{voteswitchR::build_data_file()}}
-#' and processed via \code{\link{voteswitchR::recode_switches()}}. Can be a single
+#' @param data A data object generated via [voteswitchR::build_data_file()]
+#' and processed via [voteswitchR::recode_switches()]. Can be a single
 #' \code{tbl_df}/\code{tbl}/\code{data.frame} or, in the case multiply imputed vote
 #' switching counts, a list thereof.
 #' @param y_names A vector of column names for vote switching counts, as generated
@@ -34,6 +34,8 @@
 #' @param re_countries Logical; if \code{TRUE}, higher-level cell-specific
 #' intercepts at the level of \code{voteswitchR::mappings$iso2c}
 #' are added.
+#' @param max_treedepth Maximum tree depth used in NUTS algorithm.
+#' @param adapt_delta Delta adaption value used in NUTS algorithm.
 #' @param parallelize Logical; if \code{TRUE}, estimation is not only parallelized
 #' within imputations but concurrently across imputations. Note: This initializes
 #' many processes and is only recommended if sufficient cores are available.

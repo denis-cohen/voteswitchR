@@ -6,7 +6,7 @@
 #'
 #' @param mavcl_object An estimation object of class \code{mavcl_est}.
 #' @param y_structure Structure of switching patterns, as generated
-#' by \code{\link{voteswitchR::recode_switches()}}.
+#' by [voteswitchR::recode_switches()].
 #' @param posterior_quantiles A numeric vector of quantile values for the
 #' posterior quantile summaries.
 #' @param full_posterior Logical; if \code{TRUE}, the full posterior draws
@@ -20,6 +20,7 @@
 #' main predictor) will be returned.
 #' @param relative Logical; if \code{TRUE}, the returned quantities of interest
 #' are normalized by \code{base}.
+#' @param ame_shift Specifies type of (\code{tiny} or numerical) AME shift in predictor.
 #' @param base Specifies whether the denominator for the normalization of
 #' relative quantities of interest. Can be \code{"t"} for parties' electorates
 #' at t, \code{"tm1"} for parties' electorates at t - 1, or \code{"avg"} for
