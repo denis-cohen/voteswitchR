@@ -116,7 +116,7 @@ compute_qoi <- function(mavcl_object,
     est <- list()
     for (p in pars_all) {
       est[[p]] <- do.call(abind::abind, c(
-        vapply(mavcl_object$estimates,
+        sapply(mavcl_object$estimates,
           rstan::extract,
           pars = p
         ),
@@ -158,7 +158,7 @@ compute_qoi <- function(mavcl_object,
     pred_x_names <-
       c("(Intercept)", paste0(main_predictor, predictor_levels[-1]))
     which_predictor <-
-      vapply(
+      sapply(
         pred_x_names,
         function(x) {
           which(x_names == x)
@@ -199,14 +199,14 @@ compute_qoi <- function(mavcl_object,
       mod_x_names <-
         c("(Intercept)", paste0(moderator, moderator_levels[-1]))
       which_moderator <-
-        vapply(mod_x_names, function(x) {
+        sapply(mod_x_names, function(x) {
           which(x_names == x)
         })
 
       if (predictor_continuous) {
         ## Product term positions
         which_prod_term <-
-          vapply(
+          sapply(
             x_names[startsWith(x_names, main_predictor) &
               grepl(moderator, x_names)],
             function(x) {

@@ -76,7 +76,7 @@ run_mavcl <- function(data,
     is_imputed <- FALSE
     data <- list(data)
   } else if (class(data) == "list" &
-    vapply(data, class) %>%
+    sapply(data, class) %>%
       apply(2, function(d) {
         d %in% c("tbl_df", "tbl", "data.frame")
       }) %>%
@@ -154,7 +154,7 @@ run_mavcl <- function(data,
       dat[[m]]$num_parties <- length(unique(data[[m]]$party_harmonized))
       dat[[m]]$party_id <- data[[m]]$party_harmonized
       dat[[m]]$party_id <-
-        vapply(dat[[m]]$party_id, function(x) {
+        sapply(dat[[m]]$party_id, function(x) {
           which(unique(dat[[m]]$party_id) == x)
         })
     } else {
@@ -166,7 +166,7 @@ run_mavcl <- function(data,
       dat[[m]]$num_elections <- length(unique(data[[m]]$elec_id))
       dat[[m]]$election_id <- data[[m]]$elec_id
       dat[[m]]$election_id <-
-        vapply(dat[[m]]$election_id, function(x) {
+        sapply(dat[[m]]$election_id, function(x) {
           which(unique(dat[[m]]$election_id) == x)
         })
     } else {
@@ -178,7 +178,7 @@ run_mavcl <- function(data,
       dat[[m]]$num_countries <- length(unique(data[[m]]$iso2c))
       dat[[m]]$country_id <- data[[m]]$iso2c
       dat[[m]]$country_id <-
-        vapply(dat[[m]]$country_id, function(x) {
+        sapply(dat[[m]]$country_id, function(x) {
           which(unique(dat[[m]]$country_id) == x)
         })
     } else {

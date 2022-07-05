@@ -6,7 +6,7 @@
 
 compute_ce <- function(eta, which_empty, s) {
   eta %>%
-    vapply(function(x) {
+    sapply(function(x) {
       x[s, ]
     }) %>%
     softmax_vcl(which_empty = which_empty) %>%

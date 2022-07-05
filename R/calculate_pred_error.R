@@ -54,7 +54,7 @@ calculate_pred_error <- function(mavcl_object,
     est <- list()
     for (p in pars_all) {
       est[[p]] <- do.call(abind, c(
-        vapply(mavcl_object$estimates,
+        sapply(mavcl_object$estimates,
           rstan::extract,
           pars = p
         ),
@@ -88,9 +88,10 @@ calculate_pred_error <- function(mavcl_object,
     pars_ext,
     V
   )
+
   pi <- array(NA, c(num_sim, num_replic, num_cat))
   for (s in seq_len(num_sim)) {
-    pi[s, , ] <- vapply(eta, function(c) {
+    pi[s, , ] <- sapply(eta, function(c) {
       c[s, ]
     }) %>%
       softmax_vcl(which_empty)

@@ -507,7 +507,7 @@ build_infrastructure <- function(folder_location = NULL,
       is_replace <-
         vapply(names(recodes_jk), function(x) {
           grepl("replace", x)
-        })
+        }, FUN.VALUE = TRUE)
       if (any(is_replace)) {
         replace_jk <- recodes_jk[which(is_replace)]
         replace_if <-
@@ -705,7 +705,7 @@ build_infrastructure <- function(folder_location = NULL,
         survey_p_vars_k_stubs <-
           unique(vapply(survey_p_vars_k, function(x) {
             gsub("(.+?)(\\_.*)", "\\1", x)
-          }))
+          }, FUN.VALUE = character(1L)))
 
         ## Context data
         mappings_k <- mappings %>%
@@ -925,7 +925,7 @@ build_infrastructure <- function(folder_location = NULL,
         max_cats <- data_k[noms] %>%
           vapply(function(var) {
             length(unique(var))
-          }) %>%
+          }, FUN.VALUE = integer(1L)) %>%
           max()
 
         data_k_imp <- hot.deck::hot.deck(

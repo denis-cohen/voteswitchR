@@ -16,7 +16,7 @@ Rcpp::loadModule("stan_fit4vclogit_l2_type7_mod", what = TRUE)
 Rcpp::loadModule("stan_fit4vclogit_l2_type8_mod", what = TRUE)
 
 # instantiate each stanmodel object
-stanmodels <- vapply(stanmodels, function(model_name) {
+stanmodels <- sapply(stanmodels, function(model_name) {
   # create C++ code for stan model
   stan_file <- if (dir.exists("stan")) "stan" else file.path("inst", "stan")
   stan_file <- file.path(stan_file, paste0(model_name, ".stan"))
