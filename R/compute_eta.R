@@ -24,7 +24,7 @@ compute_eta <- function(est,
         if (D == 1) {
           eta_c <- eta_c + est$nu[, , c]
         } else if (D > 1) {
-          eta_c <- eta_c + t(vapply(seq_len(num_sim), function(s) {
+          eta_c <- eta_c + t(sapply(seq_len(num_sim), function(s) {
             (est$nu[[c]][s, , ] * x_vary) %*% rep(1, D)
           }))
         }
