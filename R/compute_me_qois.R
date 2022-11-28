@@ -120,6 +120,7 @@ compute_me_qois <- function(pr_obj_0,
   }
 
   ## Return
+  ## Average effects
   if (full_posterior) {
     me_qois <- list(
       losses = losses,
@@ -155,5 +156,27 @@ compute_me_qois <- function(pr_obj_0,
     )
   }
 
-  return(me_qois)
+  ## Posterior probability of positive effect
+  prob_pos <- list(
+    losses = mean(losses > 0),
+    gains = mean(gains > 0),
+    balance = mean(balance > 0),
+    volume = mean(volume > 0),
+    retention = mean(retention > 0),
+    dyadic_losses = dyadic_losses %>% lapply(function(x)
+      mean(x > 0)),
+    dyadic_gains = dyadic_gains %>% lapply(function(x)
+      mean(x > 0)),
+    dyadic_balances = dyadic_balances %>% lapply(function(x)
+      mean(x > 0)),
+    dyadic_volumes = dyadic_volumes %>% lapply(function(x)
+      mean(x > 0))
+  )
+
+  return(
+    list(
+      me_qois = me_qois,
+      prob_pos = prob_pos
+    )
+  )
 }

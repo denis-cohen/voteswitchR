@@ -658,7 +658,7 @@ compute_qoi <- function(mavcl_object,
         }
 
         ## Average marginal effects
-        me_qois <- compute_me_qois(pi_0,
+        me_qois_aux <- compute_me_qois(pi_0,
           pi_1,
           y_structure = y_structure,
           base = base,
@@ -667,8 +667,10 @@ compute_qoi <- function(mavcl_object,
           predictor_shift = predictor_shift,
           relative = relative
         )
+        me_prob_pos <- me_qois_aux$prob_pos
+        me_qois <- me_qois_aux$me_qois
       } else {
-        me_qois <- list()
+        me_qois <- me_prob_pos <- list()
 
         for (i in seq_along(predictor_levels)) {
           for (j in seq_along(predictor_levels)) {
@@ -677,7 +679,7 @@ compute_qoi <- function(mavcl_object,
                 predictor_levels[j],
                 sep = " - "
               )
-              me_qois[[pair_name]] <-
+              me_qois_aux <-
                 compute_me_qois(
                   ce_est[, , i],
                   ce_est[, , j],
@@ -688,6 +690,8 @@ compute_qoi <- function(mavcl_object,
                   predictor_shift = 1,
                   relative = relative
                 )
+              me_prob_pos[[pair_name]] <- me_qois_aux$prob_pos
+              me_qois[[pair_name]] <- me_qois_aux$me_qois
             }
           }
         }
@@ -702,7 +706,7 @@ compute_qoi <- function(mavcl_object,
         pred_1 <- pred_0 + predictor_shift
 
         ## Initialize container
-        me_qois <- list()
+        me_qois <- me_prob_pos <- list()
 
         for (u in seq_along(moderator_sequence)) {
           ## Moderator value as character
@@ -753,7 +757,7 @@ compute_qoi <- function(mavcl_object,
           }
 
           ## Average marginal effects
-          me_qois[[u_char]] <-
+          me_qois_aux <-
             compute_me_qois(pi_0,
               pi_1,
               y_structure = y_structure,
@@ -763,20 +767,23 @@ compute_qoi <- function(mavcl_object,
               predictor_shift = predictor_shift,
               relative = relative
             )
+          me_prob_pos[[u_char]] <- me_qois_aux$prob_pos
+          me_qois[[u_char]] <- me_qois_aux$me_qois
         }
+        me_prob_pos <- me_prob_pos %>% reorder_qoi()
         me_qois <- me_qois %>% reorder_qoi()
       } else {
         for (i in seq_along(predictor_levels)) {
           for (j in seq_along(predictor_levels)) {
             if (i != j) {
-              me_qois[[pair_name]] <- list()
               pair_name <- paste(predictor_levels[i],
                 predictor_levels[j],
                 sep = " - "
               )
+              me_qois[[pair_name]] <- me_prob_pos[[pair_name]] <- list()
 
               for (u in moderator_sequence) {
-                me_qois[[pair_name]][[u]] <-
+                me_qois_aux  <-
                   compute_me_qois(ce_est[, , i, u],
                     ce_est[, , j, u],
                     y_structure = y_structure,
@@ -786,7 +793,11 @@ compute_qoi <- function(mavcl_object,
                     predictor_shift = 1,
                     relative = relative
                   )
+                me_prob_pos[[pair_name]][[u]] <- me_qois_aux$prob_pos
+                me_qois[[pair_name]][[u]] <- me_qois_aux$me_qois
               }
+              me_prob_pos[[pair_name]] <- me_prob_pos[[pair_name]] %>%
+                reorder_qoi()
               me_qois[[pair_name]] <- me_qois[[pair_name]] %>%
                 reorder_qoi()
             }
@@ -799,7 +810,7 @@ compute_qoi <- function(mavcl_object,
         ## Compute average marginal effect
         pi_1 <-
           pi_0 <- array(NA, c(num_sim, num_cat, num_cat_moderator))
-        me_qois <- list()
+        me_qois <- me_prob_pos <- list()
 
         for (k in seq_along(moderator_levels)) {
           ## Adjust matrix
@@ -851,24 +862,28 @@ compute_qoi <- function(mavcl_object,
           }
 
           ## Average marginal effects
-          me_qois[[moderator_levels[k]]] <-
-            compute_me_qois(pi_0[, , k],
-              pi_1[, , k],
-              y_structure = y_structure,
-              base = base,
-              posterior_quantiles = posterior_quantiles,
-              full_posterior = full_posterior,
-              predictor_shift = predictor_shift,
-              relative = relative
-            )
+          me_qois_aux <- compute_me_qois(
+            pi_0[, , k],
+            pi_1[, , k],
+            y_structure = y_structure,
+            base = base,
+            posterior_quantiles = posterior_quantiles,
+            full_posterior = full_posterior,
+            predictor_shift = predictor_shift,
+            relative = relative
+          )
+          me_prob_pos[[moderator_levels[k]]] <- me_qois_aux$prob_pos
+          me_qois[[moderator_levels[k]]] <- me_qois_aux$me_qois
         }
 
         ## Reorder qoi
+        me_prob_pos <- me_prob_pos %>% reorder_qoi()
         me_qois <- me_qois %>% reorder_qoi()
       } else {
-        me_qois_tmp <- list()
+        me_qois_tmp <- me_prob_pos_tmp <- list()
         pair_names <- c()
         for (k in seq_along(moderator_levels)) {
+          me_prob_pos_tmp[[moderator_levels[k]]] <- list()
           me_qois_tmp[[moderator_levels[k]]] <- list()
           for (i in seq_along(predictor_levels)) {
             for (j in seq_along(predictor_levels)) {
@@ -878,8 +893,9 @@ compute_qoi <- function(mavcl_object,
                   sep = " - "
                 )
                 pair_names <- c(pair_names, pair_name)
-                me_qois_tmp[[moderator_levels[k]]][[pair_name]] <-
-                  compute_me_qois(ce_est[, , i, k],
+                me_qois_aux <-
+                  compute_me_qois(
+                    ce_est[, , i, k],
                     ce_est[, , j, k],
                     y_structure = y_structure,
                     base = base,
@@ -888,6 +904,10 @@ compute_qoi <- function(mavcl_object,
                     predictor_shift = 1,
                     relative = relative
                   )
+                me_prob_pos_tmp[[moderator_levels[k]]][[pair_name]] <-
+                  me_qois_aux$prob_pos
+                me_qois_tmp[[moderator_levels[k]]][[pair_name]] <-
+                  me_qois_aux$me_qois
               }
             }
           }
@@ -896,6 +916,10 @@ compute_qoi <- function(mavcl_object,
         ## Reorder qoi
         me_qois <- list()
         for (n in unique(pair_names)) {
+          me_prob_pos[[n]] <- lapply(me_prob_pos_tmp, function(x) {
+            x[[n]]
+          }) %>%
+            reorder_qoi()
           me_qois[[n]] <- lapply(me_qois_tmp, function(x) {
             x[[n]]
           }) %>%
@@ -915,6 +939,7 @@ compute_qoi <- function(mavcl_object,
 
   if (average_marginal_effect) {
     output$average_marginal_effect <- me_qois
+    output$ame_probability_positive <- me_prob_pos
   } else {
     output$average_marginal_effect <- NULL
   }
