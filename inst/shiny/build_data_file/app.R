@@ -68,12 +68,6 @@ ui <- shiny::fluidPage(
           placeholder = "e.g. 5"
         ),
         shiny::textInput(
-          "cap_par",
-          "cap",
-          value = "5.0",
-          placeholder = "e.g. 5.0"
-        ),
-        shiny::textInput(
           "seed_par",
           "seed",
           value = "20210910",
@@ -81,6 +75,12 @@ ui <- shiny::fluidPage(
         ),
         shiny::checkboxInput("rake_par",
                              "rake", value = TRUE),
+        shiny::textInput(
+          "cap_par",
+          "cap",
+          value = "5.0",
+          placeholder = "e.g. 5.0"
+        ),
         shiny::checkboxInput("aggregate_par",
                              "aggregate", value = TRUE),
         shiny::radioButtons(
@@ -641,6 +641,7 @@ server <- function(input, output, session) {
     } else {
       shinyjs::enable("impute_par")
       shinyjs::enable("rake_par")
+      shinyjs::enable("cap_par")
       shinyjs::enable("aggregate_par")
       shinyjs::enable("format_par")
       shinyjs::enable("return_data_imp_par")
