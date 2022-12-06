@@ -68,6 +68,12 @@ ui <- shiny::fluidPage(
           placeholder = "e.g. 5"
         ),
         shiny::textInput(
+          "cap_par",
+          "cap",
+          value = "5.0",
+          placeholder = "e.g. 5.0"
+        ),
+        shiny::textInput(
           "seed_par",
           "seed",
           value = "20210910",
@@ -160,6 +166,7 @@ server <- function(input, output, session) {
         n_imp = as.numeric(input$n_imp_par),
         seed = as.numeric(input$seed_par),
         rake = input$rake_par,
+        cap = as.numeric(input$cap_par),
         aggregate = input$aggregate_par,
         format = input$format_par,
         return_data = input$return_data_par,
@@ -656,6 +663,14 @@ server <- function(input, output, session) {
       shinyjs::enable("return_data_imp_par")
       shinyjs::enable("return_agg_data_imp_par")
       shinyjs::enable("return_info_imp_par")
+    }
+
+    if (!input$rake_par) {
+      shiny::updateCheckboxInput(session,
+                                 "cap_par", value = FALSE)
+      shinyjs::disable("cap_par")
+    } else {
+      shinyjs::enable("cap_par")
     }
   })
 }
