@@ -84,7 +84,7 @@ ui <- shiny::fluidPage(
         shiny::checkboxInput("aggregate_par",
                              "aggregate", value = TRUE),
         shiny::radioButtons(
-          "format_par", selected = "long", "format",
+          "format_par", selected = "wide", "format",
           c("long" = "long",
             "wide" = "wide")
         ),
