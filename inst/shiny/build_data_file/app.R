@@ -59,56 +59,42 @@ ui <- shiny::fluidPage(
         class = "page",
         id = paste0("step", i),
         h4('Execution Specification:'),
-        shiny::checkboxInput("map_par", "Mapping", value = TRUE),
-        shiny::checkboxInput("impute_par", "Imputation", value = TRUE),
+        shiny::checkboxInput("map_par", "map", value = TRUE),
+        shiny::checkboxInput("impute_par", "impute", value = TRUE),
         shiny::textInput(
           "n_imp_par",
-          "Number of imputations",
+          "n_imp",
           value = "5",
           placeholder = "e.g. 5"
         ),
         shiny::textInput(
           "seed_par",
-          "Imputation seed",
+          "seed",
           value = "20210910",
           placeholder = "e.g. 20210910"
         ),
         shiny::checkboxInput("rake_par",
-                             "Raking", value = TRUE),
-        shiny::textInput(
-          "pctlim_par",
-          "Discrepancy limit for selection",
-          value = "0.005",
-          placeholder = "e.g. 0.005"
-        ),
-        shiny::textInput(
-          "cap_par",
-          "Maximum rake weight",
-          value = "5.0",
-          placeholder = "e.g. 5.0"
-        ),
+                             "rake", value = TRUE),
         shiny::checkboxInput("aggregate_par",
-                             "Aggregation", value = TRUE),
+                             "aggregate", value = TRUE),
         shiny::radioButtons(
-          "format_par",
-          selected = "wide",
-          "Output format for micro-level data",
+          "format_par", selected = "long", "format",
           c("long" = "long",
             "wide" = "wide")
         ),
         shiny::checkboxInput("return_data_par",
-                             "Return micro-level data", value = TRUE),
+                             "return_data", value = TRUE),
         shiny::checkboxInput("return_data_imp_par",
-                             "Return imputed micro-level data", value = TRUE),
+                             "return_data_imp", value = TRUE),
         shiny::checkboxInput("return_agg_data_par",
-                             "Return switches", value = TRUE),
+                             "return_agg_data", value = TRUE),
         shiny::checkboxInput("return_agg_data_imp_par",
-                             "Return imputed switches", value = TRUE),
+                             "return_agg_data_imp", value = TRUE),
         shiny::checkboxInput("return_info_imp_par",
-                             "Return imputation information", value = TRUE),
+                             "return_info_imp", value = TRUE),
         shiny::textInput(
           "output_file_path_par",
-          "Output file path
+          "output_file_path
           (If empty, the output file is stored in the R Environment)",
           placeholder = "e.g. path/to/data/data_file.RData"
         )
@@ -174,8 +160,6 @@ server <- function(input, output, session) {
         n_imp = as.numeric(input$n_imp_par),
         seed = as.numeric(input$seed_par),
         rake = input$rake_par,
-        pctlim = as.numeric(input$pctlim_par),
-        cap = as.numeric(input$cap_par),
         aggregate = input$aggregate_par,
         format = input$format_par,
         return_data = input$return_data_par,
@@ -630,12 +614,6 @@ server <- function(input, output, session) {
                                  "rake_par", value = FALSE)
       shinyjs::disable("rake_par")
       shiny::updateCheckboxInput(session,
-                                 "pctlim_par", value = FALSE)
-      shinyjs::disable("pctlim_par")
-      shiny::updateCheckboxInput(session,
-                                 "cap_par", value = FALSE)
-      shinyjs::disable("cap_par")
-      shiny::updateCheckboxInput(session,
                                  "aggregate_par", value = FALSE)
       shinyjs::disable("aggregate_par")
       updateRadioButtons(session,
@@ -656,8 +634,6 @@ server <- function(input, output, session) {
     } else {
       shinyjs::enable("impute_par")
       shinyjs::enable("rake_par")
-      shinyjs::enable("pctlim_par")
-      shinyjs::enable("cap_par")
       shinyjs::enable("aggregate_par")
       shinyjs::enable("format_par")
       shinyjs::enable("return_data_imp_par")
@@ -680,18 +656,6 @@ server <- function(input, output, session) {
       shinyjs::enable("return_data_imp_par")
       shinyjs::enable("return_agg_data_imp_par")
       shinyjs::enable("return_info_imp_par")
-    }
-
-    if (!input$rake_par) {
-      shiny::updateCheckboxInput(session,
-                                 "pctlim_par", value = FALSE)
-      shinyjs::disable("pctlim_par")
-      shiny::updateCheckboxInput(session,
-                                 "cap_par", value = FALSE)
-      shinyjs::disable("cap_par")
-    } else {
-      shinyjs::enable("pctlim_par")
-      shinyjs::enable("cap_par")
     }
   })
 }

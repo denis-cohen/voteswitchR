@@ -16,22 +16,26 @@ functions:
 
 For data processing:
 \enumerate{
-\item \code{\link{build_data_file}}: Harmonize, impute, map, rake, and aggregate vote switching data
+\item \code{\link{build_data_file}}: Harmonize, impute, map, rake, and
+aggregate vote switching data
 \item \code{\link{recode_switches}}: Recode aggregate switching patterns
 }
 
 For model estimation and post-estimation:
 \enumerate{
 \item \code{\link{run_mavcl}}: Run the MAVCL model
-\item \code{\link{calculate_pred_error}}: Calculate the MAEs and RMSEs of MAVCL Predictions
+\item \code{\link{calculate_pred_error}}: Calculate the MAEs and RMSEs of
+MAVCL Predictions
 \item \code{\link{compute_qoi}}: Compute MAVCL quantities of interest
 }
 
 Package-specific data:
 \enumerate{
-\item \code{\link{mappings}}: Mapping of vote choices from surveys to ParlGov and MARPOR IDs.
+\item \code{\link{mappings}}: Mapping of vote choices from surveys to
+ParlGov and MARPOR IDs.
 \item \code{\link{codebook}}: Documentations of \code{\link{mappings}}.
-\item \code{\link{data_guide}}: Versions, download links, and access details for survey data.
+\item \code{\link{data_guide}}: Versions, download links, and access
+details for survey data.
 }
 }
 \details{
@@ -39,8 +43,12 @@ The 'voteswitchR' package.
 }
 \references{
 \enumerate{
-\item Cohen, Denis, Krause, Werner and Abou-Chadi, Tarik (2021). Getting the most out of comparative vote-switching data: A new framework for studying dynamic multiparty competition. Conference Paper. Unpublished manuscript.
-\item Stan Development Team (2020). RStan: the R interface to Stan. R package version 2.21.2. https://mc-stan.org
+\item Cohen, Denis, Krause, Werner and Abou-Chadi, Tarik (2022).
+Comparative vote switching: A new framework for
+studying dynamic multiparty competition. Conference Paper. Unpublished
+manuscript.
+\item Stan Development Team (2020). RStan: the R interface to Stan. R
+package version 2.21.2. https://mc-stan.org
 }
 }
 \seealso{
@@ -56,7 +64,7 @@ Useful links:
 
 Other contributors:
 \itemize{
-  \item Andreas Küpfer \email{akuepfer@mail.uni-mannheim.de} [contributor]
+  \item Andreas KÃ¼pfer \email{akuepfer@mail.uni-mannheim.de} [contributor]
   \item Tim Allinger \email{tialling@mail.uni-mannheim.de} [contributor]
   \item Nick Baumann \email{nbaumann@mail.uni-mannheim.de} [contributor]
   \item Werner Krause \email{werner.krause@hu-berlin.de} [contributor]

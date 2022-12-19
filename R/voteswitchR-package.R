@@ -41,18 +41,17 @@
 #' @import Rcpp
 #' @importFrom rstan sampling
 #' @importFrom magrittr "%>%"
-#' @importFrom stats
-#' @importFrom as.formula
-#' @importFrom median
-#' @importFrom model.matrix
-#' @importFrom na.omit
-#' @importFrom quantile
-#' @importFrom sd
+#' @importFrom stats as.formula
+#' @importFrom stats median
+#' @importFrom stats model.matrix
+#' @importFrom stats na.omit
+#' @importFrom stats quantile
+#' @importFrom stats sd
 #'
 #' @references
 #' \enumerate{
-#'   \item Cohen, Denis, Krause, Werner and Abou-Chadi, Tarik (2021). Getting
-#'   the most out of comparative vote-switching data: A new framework for
+#'   \item Cohen, Denis, Krause, Werner and Abou-Chadi, Tarik (2022).
+#'   Comparative vote switching: A new framework for
 #'   studying dynamic multiparty competition. Conference Paper. Unpublished
 #'   manuscript.
 #'   \item Stan Development Team (2020). RStan: the R interface to Stan. R

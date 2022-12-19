@@ -14,12 +14,12 @@ calculate_pred_error(
 \arguments{
 \item{mavcl_object}{An object of class \code{mavcl_est}.}
 
-\item{posterior}{\code{"mean"} or \code{"median"}, depending on whether posterior
-means or medians should be evaluated against the observed proportions of the
-outcome variable.}
+\item{posterior}{\code{"mean"} or \code{"median"}, depending on whether
+posterior means or medians should be evaluated against the observed
+proportions of the outcome variable.}
 
-\item{type}{\code{"mae"} or \code{"rmse"}, depending on whether (mean) average
-errors or the root mean squared standard error should be reported}
+\item{type}{\code{"mae"} or \code{"rmse"}, depending on whether (mean)
+average errors or the root mean squared standard error should be reported}
 
 \item{re_null}{logical, specifies whether the prediction should be calculated
 with (\code{FALSE}) or without (\code{TRUE}) random effects}

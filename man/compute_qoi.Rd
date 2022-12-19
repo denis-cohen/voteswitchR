@@ -23,7 +23,7 @@ compute_qoi(
 \item{mavcl_object}{An estimation object of class \code{mavcl_est}.}
 
 \item{y_structure}{Structure of switching patterns, as generated
-by \code{\link{voteswitchR::recode_switches()}}.}
+by \code{\link[=recode_switches]{recode_switches()}}.}
 
 \item{posterior_quantiles}{A numeric vector of quantile values for the
 posterior quantile summaries.}
@@ -40,6 +40,9 @@ expectations (a.k.a. "expected values" or "predicitions") will be returned.}
 \item{average_marginal_effect}{Logical; if \code{TRUE}, average marginal
 effects (continuous main predictor) or average first difference (categorical
 main predictor) will be returned.}
+
+\item{ame_shift}{Specifies type of (\code{tiny} or numerical) AME shift in
+predictor.}
 
 \item{base}{Specifies whether the denominator for the normalization of
 relative quantities of interest. Can be \code{"t"} for parties' electorates
