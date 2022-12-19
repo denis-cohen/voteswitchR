@@ -19,6 +19,8 @@ build_infrastructure <- function(folder_location = NULL,
                                  n_imp = 5L,
                                  seed = 19890213L,
                                  rake = TRUE,
+                                 cap = 5,
+                                 pctlim = .005,
                                  aggregate = TRUE,
                                  format = c("long", "wide"),
                                  return_data = TRUE,
@@ -1078,7 +1080,8 @@ build_infrastructure <- function(folder_location = NULL,
                   ),
                 caseid = data_k_imp$data[[m]]$id,
                 weightvec = data_k_imp$data[[m]]$weights,
-                pctlim = 0.005
+                pctlim = pctlim,
+                cap = cap
               )$weightvec
             }
             data_file$data_imp[[k]] <- data_k_imp$data
@@ -1097,7 +1100,8 @@ build_infrastructure <- function(folder_location = NULL,
               ),
             caseid = seq_along(data_k$id),
             weightvec = data_k$weights,
-            pctlim = 0.005
+            pctlim = pctlim,
+            cap = cap
           )$weightvec
           data_file$data[[k]] <- data_k
         }
