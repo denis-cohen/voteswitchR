@@ -48,11 +48,13 @@ compute_ce_qois <- function(ce_obj,
     ((ce_obj[, gain_vec, , drop = FALSE] %>% apply(c(1, 3), sum)) / denom)
 
   balance <-
-    (((ce_obj[, gain_vec, , drop = FALSE] - ce_obj[, loss_vec,]) %>%
+    (((ce_obj[, gain_vec, , drop = FALSE] -
+         ce_obj[, loss_vec, drop = FALSE]) %>%
         apply(c(1, 3), sum)) / denom)
 
   volume <-
-    (((ce_obj[, gain_vec, , drop = FALSE] + ce_obj[, loss_vec,]) %>%
+    (((ce_obj[, gain_vec, , drop = FALSE] +
+         ce_obj[, loss_vec, drop = FALSE]) %>%
         apply(c(1, 3), sum)) / denom)
 
   retention <-
