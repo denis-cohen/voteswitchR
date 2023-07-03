@@ -9,9 +9,9 @@
 \description{
 The \code{voteswitchR} package offers functions for data
 management and statistical analyses to implement the conceptual
-framework presented in Cohen, Krause and Abou-Chadi (2021).
+framework presented in Cohen, Krause and Abou-Chadi (2023).
 
-\code{voteswichR} (development version 0.1.0) consists of the following
+\code{voteswichR} (version 0.1.0) consists of the following
 functions:
 
 For data processing:
@@ -19,6 +19,8 @@ For data processing:
 \item \code{\link{build_data_file}}: Harmonize, impute, map, rake, and
 aggregate vote switching data
 \item \code{\link{recode_switches}}: Recode aggregate switching patterns
+\item \code{\link{calculate_meas_error}}: Calculate measurement error in
+vote switching survey data
 }
 
 For model estimation and post-estimation:
@@ -43,10 +45,9 @@ The 'voteswitchR' package.
 }
 \references{
 \enumerate{
-\item Cohen, Denis, Krause, Werner and Abou-Chadi, Tarik (2022).
+\item Cohen, Denis, Krause, Werner and Abou-Chadi, Tarik (2023).
 Comparative vote switching: A new framework for
-studying dynamic multiparty competition. Conference Paper. Unpublished
-manuscript.
+studying dynamic multiparty competition. Forthcoming at The Journal of Politics.
 \item Stan Development Team (2020). RStan: the R interface to Stan. R
 package version 2.21.2. https://mc-stan.org
 }

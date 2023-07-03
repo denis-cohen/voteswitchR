@@ -75,6 +75,7 @@ compute_qoi <- function(mavcl_object,
   moderator <- mavcl_object$moderator
   moderator_continuous <- mavcl_object$moderator_continuous
   is_imputed <- mavcl_object$is_imputed
+  baseline <- mavcl_object$baseline
 
   if (!predictor_continuous) {
     predictor_levels <- mavcl_object$predictor_levels
@@ -82,6 +83,15 @@ compute_qoi <- function(mavcl_object,
   if (!is.null(moderator) & !moderator_continuous) {
     moderator_levels <- mavcl_object$moderator_levels
   }
+
+  ## Update y_structure to ensure baseline is in final position
+  y_structure <- dplyr::bind_rows(
+    y_structure %>%
+      dplyr::filter(switch != baseline),
+    y_structure %>%
+      dplyr::filter(switch == baseline),
+  ) %>%
+    dplyr::mutate(pos = dplyr::row_number())
 
   ## Data objects and auxiliaries
   X <- mavcl_object$data[[1]]$X

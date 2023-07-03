@@ -6,6 +6,7 @@
 \usage{
 calculate_meas_error(
   switches,
+  raked_switches = NULL,
   mappings = NULL,
   switch_factor = NULL,
   assign_others = NULL,
@@ -14,6 +15,8 @@ calculate_meas_error(
 }
 \arguments{
 \item{switches}{A switching object produced by \code{build_data_file}.}
+
+\item{raked_switches}{Optionally, a raked switching object produced by \code{build_data_file}.}
 
 \item{mappings}{Optional: A copy of \link{mappings}, including a
 column \link{switch_factor}.}

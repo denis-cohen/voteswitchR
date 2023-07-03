@@ -382,7 +382,8 @@ run_mavcl <- function(data,
       estimates = est,
       is_imputed = is_imputed,
       type = type,
-      pars = pars
+      pars = pars,
+      baseline = baseline
     )
   } else {
     output <- list(
@@ -397,7 +398,8 @@ run_mavcl <- function(data,
       estimates = est,
       is_imputed = is_imputed,
       type = type,
-      pars = pars
+      pars = pars,
+      baseline = baseline
     )
     if (!predictor_continuous) {
       output$predictor_levels <- cats_predictor

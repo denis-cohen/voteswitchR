@@ -4,6 +4,7 @@
 #' prediction errors of posterior means or medians.
 #'
 #' @param switches A switching object produced by \code{build_data_file}.
+#' @param raked_switches Optionally, a raked switching object produced by \code{build_data_file}.
 #' @param mappings Optional: A copy of [mappings], including a
 #' column [switch_factor].
 #' @param switch_factor Optional: Column name of a factor variable in \code{mappings}
@@ -27,6 +28,7 @@
 #' @export
 
 calculate_meas_error <- function(switches,
+                                 raked_switches = NULL,
                                  mappings = NULL,
                                  switch_factor = NULL,
                                  assign_others = NULL,
