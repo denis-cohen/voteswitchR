@@ -14,6 +14,8 @@
 #'   \item \code{\link{build_data_file}}: Harmonize, impute, map, rake, and
 #'   aggregate vote switching data
 #'   \item \code{\link{recode_switches}}: Recode aggregate switching patterns
+#'   \item \code{\link{calculate_meas_error}}: Calculate measurement error in
+#'   vote switching survey data
 #' }
 #'
 #' For model estimation and post-estimation:
@@ -21,8 +23,6 @@
 #'   \item \code{\link{run_mavcl}}: Run the MAVCL model
 #'   \item \code{\link{calculate_pred_error}}: Calculate the MAEs and RMSEs of
 #'   MAVCL Predictions
-#'   \item \code{\link{calculate_meas_error}}: Calculate measurement error in
-#'   vote switching survey data
 #'   \item \code{\link{compute_qoi}}: Compute MAVCL quantities of interest
 #' }
 #'

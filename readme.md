@@ -5,11 +5,11 @@ Denis Cohen (<denis.cohen@uni-mannheim.de>)
 
 The `voteswitchR` package is an open-source R package that offers a
 suite of functions for managing and analyzing vote switching data. It
-offers a comprehensive software implement of the conceptual framework
-and the various extensions presented in Cohen, Krause, and Abou-Chadi
-(2023).
+offers a comprehensive software implementation of the conceptual
+framework and the various extensions presented in Cohen, Krause, and
+Abou-Chadi (2023).
 
-`voteswitchR` consists of the following functions:
+`voteswitchR` features the following functions:
 
 **For data processing:**
 

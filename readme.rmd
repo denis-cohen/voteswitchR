@@ -18,10 +18,10 @@ load("../voteswitchR-aux/data_file.rdata")
 The `voteswitchR` package is an open-source R package that
 offers a suite of functions for managing and analyzing vote
 switching data.
-It offers a comprehensive software implement of the
+It offers a comprehensive software implementation of the
 conceptual framework and the various extensions presented in @Cohen2023.
 
-`voteswitchR` consists of the following functions:
+`voteswitchR` features the following functions:
 
 **For data processing:**
 
