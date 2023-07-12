@@ -1,7 +1,7 @@
 Package: voteswitchR
 Type: Package
 Title: Data and Methods for Analyzing Comparative Vote Switching Data
-Version: 0.1.0
+Version: 0.2.0
 Authors@R:
     c(person(given = "Denis",
              family = "Cohen",
