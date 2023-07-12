@@ -76,6 +76,12 @@ development.
 This vignette illustrates the functionality and the use of
 `voteswitchR`.
 
+### Video tutorial
+
+A video tutorial, based on a talk in the [MZES Social Science Data
+Lab](https://www.mzes.uni-mannheim.de/socialsciencedatalab/page/events/),
+is available on [YouTube](https://youtu.be/-35D-mqmrF0).
+
 ## Data processing
 
 ### Building the data infrastructure: `voteswitchR::build_data_file()`
