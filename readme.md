@@ -22,26 +22,15 @@ remotes::install_github("denis-cohen/voteswitchR")
 Note that the installation may take up to 30 minutes as several variants
 of the proposed MAVCL model, implemented in
 [Stan](https://mc-stan.org/), will be compiled during installation. This
-pre-compilation during installation facilitates the subsequent use of
-`voteswitchR`, as the model won’t have to be recompiled every time users
-call the main estimation function `voteswitchR::run_mavcl()`.
+pre-compilation facilitates the subsequent use of `voteswitchR`, as the
+model won’t have to be recompiled every time users call the main
+estimation function `voteswitchR::run_mavcl()`.
 
 ### Citation
 
 Please acknowledge the use of `voteswitchR` and the conceptual framework
 presented in Cohen, Krause, and Abou-Chadi (2023) by citing the
 following:
-
-``` r
-bib <- RefManageR::ReadBib("fig/references.bib")
-RefManageR::BibOptions(
-  bib.style = "authoryear",
-  first.inits = FALSE,
-  style = "markdown"
-)
-RefManageR::NoCite(bib, c("Cohen2023", "voteswitchR"))
-RefManageR::PrintBibliography(bib)
-```
 
 <a name=bib-voteswitchR></a>[Cohen, Denis](#cite-voteswitchR) (2023).
 *voteswitchR: Data and Methods for Analyzing Comparative Vote Switching
