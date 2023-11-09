@@ -748,15 +748,8 @@ The overview below gives the `codebook`, which the variables included in `mappin
 ```{r codebook-print, eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE}
 voteswitchR::codebook %>%
   dplyr::select(-Level, -Notes) %>%
-  huxtable::as_huxtable(.) %>%
-  huxtable::set_width(., 1) %>%
-  huxtable::set_all_padding(4) %>%
-  huxtable::set_font_size(9) %>%
-  huxtable::set_background_color(., evens, everywhere, "grey95") %>%
-  huxtable::set_align(col = 2:ncol(.), value = "right") %>%
-  huxtable::set_bold(row = 1, col = everywhere) %>% 
-  huxtable::set_bottom_border(row = 1, col = everywhere) %>%
-  huxtable::set_caption(value = "Overview of mappings. The asterisk shows indicators from other sources that were manually updated. Manual updates are described in the codebook.")
+  knitr::kable(., format = "markdown")
 ```
+Sources marked with an asterisk (*) indicate that the variables were manually updated or extended. These changes are explained in the column `codebook$Notes` (not shown here). External party and election IDs like `party` (Manifesto party ID), `parlgov_election_id` (ParlGov election ID), or `ppeg_party_id` (PPEG Party ID) ensure quick linkages to the corresponding external data collections.
 
 # References
