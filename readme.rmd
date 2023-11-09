@@ -154,8 +154,9 @@ concepts <- data_file$data %>%
 concepts <-
   as_tibble(cbind(
     Concepts = names(concepts),
-    Availability = t(concepts)
-  ))
+    t(concepts)
+  )) %>%
+  dplyr::rename(Availability = V2)
 ```
 
 ```{r concepts-print, eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE}

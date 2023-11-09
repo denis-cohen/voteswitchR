@@ -126,21 +126,21 @@ available as part of the `voteswitchR` data infrastructure across its
 254 electoral contexts:
 
             Concepts: Availability across all post-election surveys.            
-                     Concepts                           V2  
-                   ─────────────────────────────────────────
-                     Vote choice (t)               254/254  
-                     Vote choice (t-1)             254/254  
-                     Party ID                      235/254  
-                     Strength of party ID, V1      211/254  
-                     Strength of party ID, V2      212/254  
-                     Left-right self-placement     222/254  
-                     Satisfaction with democracy   159/254  
-                     Party like-dislike scores     183/254  
-                     Left-right party placements   181/254  
-                     Gender (binary)               254/254  
-                     Age                           251/254  
+                   Concepts                      Availability  
+                 ──────────────────────────────────────────────
+                   Vote choice (t)                    254/254  
+                   Vote choice (t-1)                  254/254  
+                   Party ID                           235/254  
+                   Strength of party ID, V1           211/254  
+                   Strength of party ID, V2           212/254  
+                   Left-right self-placement          222/254  
+                   Satisfaction with democracy        159/254  
+                   Party like-dislike scores          183/254  
+                   Left-right party placements        181/254  
+                   Gender (binary)                    254/254  
+                   Age                                251/254  
 
-Column names: Concepts, V2
+Column names: Concepts, Availability
 
 The second step is **data procurement**. Our data infrastructure is
 based on decades of election studies from various countries. Needless to
