@@ -93,9 +93,9 @@ users through three sequential steps to initialize the HIMRA
 (harmonization, imputation, mapping, raking, aggregation) routine.
 
 The first step is **concept and context selection**. The screenshot
-below the corresponding slide of the Shiny GUI. Here, users can select
-both the concepts (variables) and contexts (elections) they wish to
-include in the data processing routine. The concepts “vote choice at
+below shows the corresponding slide of the Shiny GUI. Here, users can
+select both the concepts (variables) and contexts (elections) they wish
+to include in the data processing routine. The concepts “vote choice at
 $t$” and “vote choice at $t-1$” are selected by default, as these are
 strictly required for the study of vote switching.
 
