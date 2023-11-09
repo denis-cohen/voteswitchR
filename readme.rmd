@@ -98,6 +98,10 @@ to include in the data processing routine. The concepts "vote choice at $t$"
 and "vote choice at $t-1$" are selected by default, as these are strictly required
 for the study of vote switching.
 
+```{r build1, echo=FALSE, out.width='100%', fig.cap='Shiny GUI: Step 1 (concept and context selection)'}
+knitr::include_graphics("fig/build_data_file1.png")
+```
+
 The selection of additional variables can serve three distinct purposes.
 First, information on variables such as party identification, left-right
 self-placement, or like/dislike-scores of parties can decisively improve the
@@ -111,8 +115,60 @@ the aggregation step to use the micro-level data, enriched with contextual
 information from our mapping file, to conduct classical analyses
 of individual or contextual determinants of vote choice or vote switching.
 
-```{r build1, echo=FALSE, out.width='100%', fig.cap='Shiny GUI: Step 1 (concept and context selection)'}
-knitr::include_graphics("fig/build_data_file1.png")
+The following overview indicates the availability of all concepts available as part of the `voteswitchR` data infrastructure across its `r length(unique(data_file$data$elec_id))` electoral contexts:
+
+```{r concepts, eval=TRUE, echo=FALSE}
+total_n <- length(unique(data_file$data$elec_id))
+concepts <- data_file$data %>%
+  dplyr::select(elec_id,
+                vote,
+                l_vote,
+                pid,
+                strength1,
+                strength2,
+                lr_self,
+                stfdem,
+                like_1,
+                lr_1,
+                male,
+                age) %>%
+  dplyr::rename(
+    `Vote choice (t)` = vote,
+    `Vote choice (t-1)` = l_vote,
+    `Party ID` = `pid`,
+    `Strength of party ID, V1` = strength1,
+    `Strength of party ID, V2` = strength2,
+    `Left-right self-placement` = lr_self,
+    `Satisfaction with democracy` = stfdem,
+    `Party like-dislike scores` = like_1,
+    `Left-right party placements` = lr_1,
+    `Gender (binary)` = male,
+    `Age` = age
+  ) %>%
+  dplyr::group_by(elec_id) %>%
+  dplyr::summarize_all(.funs = ~ mean(is.na(.)) < 1) %>%
+  dplyr::select(-elec_id) %>%
+  dplyr::ungroup() %>%
+  dplyr::summarize_all(.funs = ~paste(sum(.), total_n, sep = "/"))
+
+concepts <-
+  as_tibble(cbind(
+    Concepts = names(concepts),
+    Availability = t(concepts)
+  ))
+```
+
+```{r concepts-print, eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE}
+concepts %>%
+  huxtable::as_huxtable(.) %>%
+  huxtable::set_width(., 1) %>%
+  huxtable::set_all_padding(4) %>%
+  huxtable::set_font_size(9) %>%
+  huxtable::set_background_color(., evens, everywhere, "grey95") %>%
+  huxtable::set_align(col = 2:ncol(.), value = "right") %>%
+  huxtable::set_bold(row = 1, col = everywhere) %>% 
+  huxtable::set_bottom_border(row = 1, col = everywhere) %>%
+  huxtable::set_caption(value = "Concepts: Availability across all post-election surveys.")
 ```
 
 The second step is **data procurement**.
@@ -143,7 +199,7 @@ accepting the data provider's terms of use.
 knitr::include_graphics("fig/build_data_file2.png")
 ```
 
-```{r access, eval=TRUE}
+```{r access, eval=TRUE, echo=FALSE}
 access <- table(voteswitchR::data_guide$data_access) %>%
   as.data.frame() %>%
   dplyr::rename(`Data Access` = Var1,
@@ -686,5 +742,21 @@ The package comes with three data frames:
 1. `mappings`: Mappings of vote choices from surveys to ParlGov and MARPOR IDs
 1. `codebook`: Documentations of mappings
 1. `data_guide`: Versions, download links, and access details for survey data
+
+The overview below gives the `codebook`, which the variables included in `mappings`:
+
+```{r codebook-print, eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE}
+voteswitchR::codebook %>%
+  dplyr::select(-Level, -Notes) %>%
+  huxtable::as_huxtable(.) %>%
+  huxtable::set_width(., 1) %>%
+  huxtable::set_all_padding(4) %>%
+  huxtable::set_font_size(9) %>%
+  huxtable::set_background_color(., evens, everywhere, "grey95") %>%
+  huxtable::set_align(col = 2:ncol(.), value = "right") %>%
+  huxtable::set_bold(row = 1, col = everywhere) %>% 
+  huxtable::set_bottom_border(row = 1, col = everywhere) %>%
+  huxtable::set_caption(value = "Overview of mappings. The asterisk shows indicators from other sources that were manually updated. Manual updates are described in the codebook.")
+```
 
 # References

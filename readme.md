@@ -99,6 +99,15 @@ include in the data processing routine. The concepts “vote choice at
 $t$” and “vote choice at $t-1$” are selected by default, as these are
 strictly required for the study of vote switching.
 
+<div class="figure">
+
+<img src="fig/build_data_file1.png" alt="Shiny GUI: Step 1 (concept and context selection)" width="100%" />
+<p class="caption">
+Shiny GUI: Step 1 (concept and context selection)
+</p>
+
+</div>
+
 The selection of additional variables can serve three distinct purposes.
 First, information on variables such as party identification, left-right
 self-placement, or like/dislike-scores of parties can decisively improve
@@ -112,14 +121,30 @@ use the micro-level data, enriched with contextual information from our
 mapping file, to conduct classical analyses of individual or contextual
 determinants of vote choice or vote switching.
 
-<div class="figure">
+The following overview indicates the availability of all concepts
+available as part of the `voteswitchR` data infrastructure across its
+254 electoral contexts:
 
-<img src="fig/build_data_file1.png" alt="Shiny GUI: Step 1 (concept and context selection)" width="100%" />
-<p class="caption">
-Shiny GUI: Step 1 (concept and context selection)
-</p>
+    ## Warning: The `x` argument of `as_tibble.matrix()` must have unique column names if
+    ## `.name_repair` is omitted as of tibble 2.0.0.
+    ## i Using compatibility `.name_repair`.
 
-</div>
+            Concepts: Availability across all post-election surveys.            
+                     Concepts                           V2  
+                   ─────────────────────────────────────────
+                     Vote choice (t)               254/254  
+                     Vote choice (t-1)             254/254  
+                     Party ID                      235/254  
+                     Strength of party ID, V1      211/254  
+                     Strength of party ID, V2      212/254  
+                     Left-right self-placement     222/254  
+                     Satisfaction with democracy   159/254  
+                     Party like-dislike scores     183/254  
+                     Left-right party placements   181/254  
+                     Gender (binary)               254/254  
+                     Age                           251/254  
+
+Column names: Concepts, V2
 
 The second step is **data procurement**. Our data infrastructure is
 based on decades of election studies from various countries. Needless to
@@ -152,13 +177,6 @@ Shiny GUI: Step 2 (data procurement)
 </p>
 
 </div>
-
-``` r
-access <- table(voteswitchR::data_guide$data_access) %>%
-  as.data.frame() %>%
-  dplyr::rename(`Data Access` = Var1,
-                `Frequency` = Freq)
-```
 
 Nearly 60% of all electoral contexts included in `voteswitchR`’s data
 processing routine come from comparative projects like CSES 2-5
@@ -738,6 +756,201 @@ The package comes with three data frames:
 2.  `codebook`: Documentations of mappings
 3.  `data_guide`: Versions, download links, and access details for
     survey data
+
+The overview below gives the `codebook`, which the variables included in
+`mappings`:
+
+Overview of mappings. The asterisk shows indicators from other sources
+that  
+were manually updated. Manual updates are described in the codebook.  
+Variable Source(s) Description  
+───────────────────────────────────────────────────────────────────────────────
+iso2c Original ISO2C Country Code  
+countryname Manifesto Project*, Country name  
+ParlGov*  
+year Manifesto Project, Year of current  
+ParlGov election  
+edate Manifesto Project, Date of current  
+ParlGov election (YYYY-MM-DD)  
+edate_lag Manifesto Project, Date of previous  
+ParlGov election (YYYY-MM-DD)  
+elec_id Original Original ID for current  
+election  
+(iso2c-YYYY-MM)  
+elec_id_lag Original Original ID for  
+previous election  
+(iso2c-YYYY-MM)  
+parlgov_election_id ParlGov ParlGov election ID for  
+current election  
+parlgov_election_id_lag ParlGov ParlGov election ID for  
+previous election  
+turnout ParlGov\* Turnout rate in current  
+election  
+turnout_lag ParlGov\* Turnout rate in  
+previous election  
+incoming_cabinet ParlGov\* ParlGov cabinet ID for  
+incoming cabinet  
+following the current  
+election  
+incoming_cabinet_name ParlGov\* Name of incoming  
+cabinet  
+incoming_caretaker ParlGov\* Indicates if incoming  
+cabinet is a caretaker  
+cabinet   
+incoming_minority_cabin ParlGov\* Indicates if incoming  
+et cabinet is a minority  
+cabinet   
+outgoing_cabinet_lag ParlGov\* ParlGov cabinet ID for  
+outgoing cabinet going  
+into the current  
+election  
+outgoing_cabinet_name_l ParlGov\* Name of outgoing  
+ag cabinet   
+outgoing_caretaker_lag ParlGov\* Indicates if outgoing  
+cabinet was a caretaker  
+cabinet  
+outgoing_minority_cabin ParlGov\* Indicates if outgoing  
+et_lag cabinet was a minority  
+cabinet   
+cmp_pres Original Manifesto Project data  
+refer to parliamentary  
+(0) or presidential (1)  
+elections  
+survey_pres Original Survey data refer to  
+vote choices in  
+parliamentary (0) or  
+presidential (1)  
+elections  
+peid Original Party-election ID  
+party Manifesto Project Manifesto Project party  
+ID  
+party_harmonized Manifesto Project\* Harmonized Manifesto  
+Project party ID  
+map_vote Original Numerical key for  
+mapping current and  
+previous vote choices  
+in the survey data  
+map_lr Original Alphanumerical key for  
+mapping party-specific  
+left-right and  
+like/dislike scores in  
+the survey data  
+party_name Manifesto Project Party name  
+partyabbrev Manifesto Project Party abbreviation  
+parfam Manifesto Project Manifesto Project party  
+family  
+parfam_harmonized Manifesto Project\* Harmonized Manifesto  
+Project party family  
+vote_share Manifesto Project, Party Vote Share in  
+ParlGov current election   
+vote_share_lag Manifesto Project, Party Vote Share in  
+ParlGov previous election   
+ppeg_party_id PPEG PPEG (Political  
+Parties, Presidents,  
+Elections, and  
+Governments) Party ID  
+parlgov_id_1 ParlGov Parlgov Party ID (1st  
+party, in case of  
+campaign coalitions)  
+parlgov_id_2 ParlGov Parlgov Party ID (2nd  
+party, in case of  
+campaign coalitions)  
+parlgov_id_3 ParlGov Parlgov Party ID (3rd  
+party, in case of  
+campaign coalitions)  
+parlgov_id_4 ParlGov Parlgov Party ID (4th  
+party, in case of  
+campaign coalitions)  
+parlgov_parfam_1 ParlGov Parlgov Party Family  
+(1st party, in case of  
+campaign coalitions)  
+parlgov_parfam_2 ParlGov Parlgov Party Family  
+(2nd party, in case of  
+campaign coalitions)  
+parlgov_parfam_3 ParlGov Parlgov Party Family  
+(3rd party, in case of  
+campaign coalitions)  
+parlgov_parfam_4 ParlGov Parlgov Party Family  
+(4th party, in case of  
+campaign coalitions)  
+parlgov_vote_share_1 ParlGov Party Vote Share in  
+current election (1st  
+party, in case of  
+campaign coalitions)  
+parlgov_vote_share_lag\_ ParlGov Party Vote Share in  
+1 previous election (1st  
+party, in case of  
+campaign coalitions)  
+parlgov_vote_share_2 ParlGov Party Vote Share in  
+current election (2nd  
+party, in case of  
+campaign coalitions)  
+parlgov_vote_share_lag\_ ParlGov Party Vote Share in  
+2 previous election (2nd  
+party, in case of  
+campaign coalitions)  
+parlgov_vote_share_3 ParlGov Party Vote Share in  
+current election (3rd  
+party, in case of  
+campaign coalitions)  
+parlgov_vote_share_lag\_ ParlGov Party Vote Share in  
+3 previous election (3rd  
+party, in case of  
+campaign coalitions)  
+parlgov_vote_share_4 ParlGov Party Vote Share in  
+current election (4th  
+party, in case of  
+campaign coalitions)  
+parlgov_vote_share_lag\_ ParlGov Party Vote Share in  
+4 previous election (4th  
+party, in case of  
+campaign coalitions)  
+parlgov_vote_share ParlGov\* Party Vote Share in  
+current election (sum  
+across all parties in  
+case of campaign  
+coalitions)  
+parlgov_vote_share_lag ParlGov\* Party Vote Share in  
+previous election (sum  
+across all parties in  
+case of campaign  
+coalitions)  
+incoming_cabinet_party ParlGov\* Indicates if party  
+became part of cabinet  
+following the current  
+election  
+incoming_prime_minister ParlGov\* Indicates if party is  
+the prime minister’s  
+party following the  
+current election   
+incoming_president Original Indicates if party is  
+the prime minister’s  
+party following the  
+current election   
+incoming_support Original Indicates if party  
+supports a minority  
+cabinet following the  
+current election   
+outgoing_cabinet_party\_ ParlGov\* Indicates if party was  
+lag part of cabinet going  
+into the current  
+election  
+outgoing_prime_minister ParlGov\* Indicates if party was  
+\_lag the prime minister’s  
+party going into the  
+current election   
+outgoing_president_lag Original Indicates if party was  
+the presidents’s party  
+going into the current  
+election   
+outgoing_support_lag Original Indicates if party  
+supported a minority  
+cabinet going into the  
+current election   
+stack Original Numerical position of  
+party in election
+
+Column names: Variable, Source(s), Description
 
 # References
 
