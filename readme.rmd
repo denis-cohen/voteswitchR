@@ -117,7 +117,7 @@ of individual or contextual determinants of vote choice or vote switching.
 
 The following overview indicates the availability of all concepts available as part of the `voteswitchR` data infrastructure across its `r length(unique(data_file$data$elec_id))` electoral contexts:
 
-```{r concepts, eval=TRUE, echo=FALSE}
+```{r concepts, eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE}
 total_n <- length(unique(data_file$data$elec_id))
 concepts <- data_file$data %>%
   dplyr::select(elec_id,

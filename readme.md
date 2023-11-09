@@ -40,7 +40,7 @@ Data*. R package version 0.2.0. URL:
 <a name=bib-Cohen2023></a>[Cohen, Denis, Werner Krause, and Tarik
 Abou-Chadi](#cite-Cohen2023) (2023). “Comparative vote switching: A new
 framework for studying dynamic multiparty competition”. In: *The Journal
-of Politics* (Forthcoming).
+of Politics* (First view).
 
 ### Functionality
 
@@ -124,10 +124,6 @@ determinants of vote choice or vote switching.
 The following overview indicates the availability of all concepts
 available as part of the `voteswitchR` data infrastructure across its
 254 electoral contexts:
-
-    ## Warning: The `x` argument of `as_tibble.matrix()` must have unique column names if
-    ## `.name_repair` is omitted as of tibble 2.0.0.
-    ## i Using compatibility `.name_repair`.
 
             Concepts: Availability across all post-election surveys.            
                      Concepts                           V2  
