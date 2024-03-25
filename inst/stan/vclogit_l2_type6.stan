@@ -1,12 +1,12 @@
 functions {
   /* compute correlated group-level effects
-  * Args: 
+  * Args:
     *   z: matrix of unscaled group-level effects
     *   SD: vector of standard deviation parameters
     *   L: cholesky factor correlation matrix
-  * Returns: 
+  * Returns:
     *   matrix of scaled group-level effects
-  */ 
+  */
   matrix scale_r_cor(matrix z, vector SD, matrix L) {
     // r is stored in another dimension order than z
     return transpose(diag_pre_multiply(SD, L) * z);
@@ -19,13 +19,13 @@ data {
   int<lower=1> K;      // number of predictors at higher levels
   int<lower=1> J;      // number of units
   int<lower=1> D;      // number of varying coefficients at lowest level
-  
+
   // multiplier for (weighted) outcomes at lower upper level
   matrix[J, ncat] Y; // aggregate number of (weighted) outcomes
 
   // predictors
   matrix[J,K] X; // upper level predictors (matrix at lowest upper level)
-  
+
   // optional REs
   int<lower=1> num_parties;
   int<lower=1> party_id[J];
@@ -38,8 +38,6 @@ transformed data {
   int<lower=2> Q = D * ncatm1;
   vector[ncat] ones_cats = rep_vector(1.0, ncat);
   vector[D] ones_D = rep_vector(1.0, D);
-  vector[K-1] mean_X;
-  vector[K] mean_X_full;
   matrix[K,J] X_transpose = X';
   matrix[J,D] X_varying = X[, 1:D];
   matrix[ncat, J] Y_transpose = Y';
@@ -73,7 +71,7 @@ transformed parameters {
   matrix[J,Q] nu;
   matrix[num_parties,ncatm1] nu_parties;
   matrix[num_countries,ncatm1] nu_countries;
-    
+
   nu = scale_r_cor(nu_raw, sigma, L);
   nu_parties = scale_r_cor(nu_raw_parties, sigma_parties, L_parties);
   nu_countries = scale_r_cor(nu_raw_countries, sigma_countries, L_countries);
@@ -87,17 +85,17 @@ model {
   // linear predictions, incl. random intercepts
   log_prob[ncat, ] = rep_row_vector(0.0, J);
   for (c in 1:ncatm1) {
-    log_prob[c, ] =  beta[c] * X_transpose + 
+    log_prob[c, ] =  beta[c] * X_transpose +
       ((X_varying .* nu[, start:end]) * ones_D)';
       start = start + D;
       end = end + D;
-      
+
       for (j in 1:J) {
-        log_prob[c,j] = log_prob[c,j] + 
+        log_prob[c,j] = log_prob[c,j] +
           nu_parties[party_id[j],c] +
           nu_countries[country_id[j],c];
       }
-      
+
   }
 
   // transform to log probabilities
@@ -109,8 +107,8 @@ model {
     }
     log_prob[, l] = log_softmax(log_prob[, l]);
   }
-  
-  // priors 
+
+  // priors
   for (c in 1:ncatm1) {
     // fixed effects
     target += normal_lpdf(beta[c] | 0, 2.5);
@@ -120,12 +118,12 @@ model {
   target += student_t_lpdf(sigma | 3, 0, 2.5)
     - 4 * student_t_lccdf(0 | 3, 0, 2.5);
   target += lkj_corr_cholesky_lpdf(L | 2);
-  
+
   target += std_normal_lpdf(to_vector(nu_raw_parties));
   target += student_t_lpdf(sigma_parties | 3, 0, 2.5)
     - 4 * student_t_lccdf(0 | 3, 0, 2.5);
   target += lkj_corr_cholesky_lpdf(L_parties | 2);
-  
+
   target += std_normal_lpdf(to_vector(nu_raw_countries));
   target += student_t_lpdf(sigma_countries | 3, 0, 2.5)
     - 4 * student_t_lccdf(0 | 3, 0, 2.5);

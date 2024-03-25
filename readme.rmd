@@ -2,6 +2,7 @@
 output: github_document
 title: "`voteswitchR`: Data and Methods for Analyzing Comparative Vote Switching Data"
 author: "Denis Cohen ([denis.cohen@uni-mannheim.de](mailto:denis.cohen@uni-mannheim.de))"
+date: "This version: March 25, 2024"
 bibliography: 
   - fig/references.bib
   - fig/sup.bib
@@ -11,8 +12,8 @@ bibliography:
 ```{r datafile, echo = FALSE, include = FALSE}
 library(dplyr)
 library(huxtable)
-devtools::document()
-load("../voteswitchR-aux/data_file.rdata")
+# devtools::document()
+load("../../voteswitchR-aux/data_file.rdata")
 ```
 
 ## The `voteswitchR` package
@@ -22,6 +23,15 @@ offers a suite of functions for processing and analyzing vote
 switching data.
 It offers a comprehensive software implementation of the
 conceptual framework and the various extensions presented in @Cohen2023.
+
+### Version information
+
+The current version, `voteswitchR 0.3.0`, was released on March 25, 2024. It incorporates the following changes and additions:
+
+- minor fix in [`R/build_infrastructure.R`](https://github.com/denis-cohen/voteswitchR/blob/master/R/build_infrastructure.R)
+- recompilation of Stan models in [`inst/stan`](https://github.com/denis-cohen/voteswitchR/tree/master/inst/stan) using `rstan_2.32.6` under R 4.3.3 and RTools 4.3 (C++17)
+- addition of (rake-weighted) cell counts for all idiosyncratic transition matrices in [`data`](https://github.com/denis-cohen/voteswitchR/tree/master/data)
+- corresponding updates to this file, [`readme.md`](https://github.com/denis-cohen/voteswitchR/blob/master/readme.md)
 
 ### Installation
 
@@ -69,6 +79,10 @@ RefManageR::PrintBibliography(bib)
 1. `mappings`: Mappings of vote choices from surveys to ParlGov and MARPOR IDs
 1. `codebook`: Documentations of mappings
 1. `data_guide`: Versions, download links, and access details for survey data
+1. `switches`: Cell counts for the raw, idiosyncratic transition matrices for all elections included in `voteswitchR`.
+1. `switches_imp`: 25 imputations of the cell counts for the raw, idiosyncratic transition matrices for all elections included in `voteswitchR`.
+1. `raked_switches`: Rake-weighted cell counts for the raw, idiosyncratic transition matrices for all elections included in `voteswitchR`.
+1. `raked_switches_imp`: 25 imputations of the rake-weighted cell counts for the raw, idiosyncratic transition matrices for all elections included in `voteswitchR`.
 
 On top of these, generalized functions for the visualization of quantities of
 interest generated via `compute_qoi()` are currently in development.
@@ -80,9 +94,30 @@ of `voteswitchR`.
 
 A video tutorial, based on a talk in the [MZES Social Science Data Lab](https://www.mzes.uni-mannheim.de/socialsciencedatalab/page/events/), is available on [YouTube](https://youtu.be/-35D-mqmrF0).
 
-## Data processing
+## Data
 
-### Building the data infrastructure: `voteswitchR::build_data_file()`
+Our data infrastructure is based on decades of election studies from various
+countries. Needless to say, the right to distribute the data lies with the
+respective owners and data providers.
+Therefore, the original election studies cannot be distributed as a part of the
+`voteswitchR` package. Instead, users who wish to use the original respondent-level data (or any processed respondent-level versions thereof produced by `voteswitchR`) must retrieve such data from the data providers (detailed information is provided below).
+
+However, as of version 0.3.0 (March 25, 2024), `voteswitchR` features aggregate-level summaries of vote switching data in the form of the (weighted) cell counts from all election-level voter transition matrices. These serve as the primary inputs for the statistical analysis of comparative vote switching data and therefore enable users to apply the methodological framework introduced in @Cohen2023. This section describes both the use of the pre-supplied election-level switching data, as well as the required steps for procurement and processing of the original respondent-level survey data .
+
+### Election-level switching data: (Weighted) cell counts
+
+As of version 0.3.0 (March 25, 2024), `voteswitchR`'s package-specific data features the following data objects:
+
+1. `switches`: Cell counts for the raw, idiosyncratic transition matrices for all elections included in `voteswitchR`.
+1. `switches_imp`: 25 imputations of the cell counts for the raw, idiosyncratic transition matrices for all elections included in `voteswitchR`.
+1. `raked_switches`: Rake-weighted cell counts for the raw, idiosyncratic transition matrices for all elections included in `voteswitchR`.
+1. `raked_switches_imp`: 25 imputations of the rake-weighted cell counts for the raw, idiosyncratic transition matrices for all elections included in `voteswitchR`.
+
+More elaborate descriptions can be found in the package documentation (e.g., `?switches`). Users who wish to use these pre-processed cell counts can countinue reading in the subsection on [generalized transition matrices](#generalized-transition-matrices).
+
+### Data-processing: Micro-level data
+
+#### Building the data infrastructure
 
 The primary tool for data processing is the `voteswitchR::build_data_file()`
 function. The function launches a ShinyApp that provides a graphical user
@@ -161,23 +196,10 @@ concepts <-
 
 ```{r concepts-print, eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE}
 concepts %>%
-  huxtable::as_huxtable(.) %>%
-  huxtable::set_width(., 1) %>%
-  huxtable::set_all_padding(4) %>%
-  huxtable::set_font_size(9) %>%
-  huxtable::set_background_color(., evens, everywhere, "grey95") %>%
-  huxtable::set_align(col = 2:ncol(.), value = "right") %>%
-  huxtable::set_bold(row = 1, col = everywhere) %>% 
-  huxtable::set_bottom_border(row = 1, col = everywhere) %>%
-  huxtable::set_caption(value = "Concepts: Availability across all post-election surveys.")
+  knitr::kable(., format = "markdown")
 ```
 
 The second step is **data procurement**.
-Our data infrastructure is based on decades of election studies from various
-countries. Needless to say, the right to distribute the data lies with the
-respective owners and data providers.
-Therefore, the original election studies cannot be distributed as a part of the
-`voteswitchR` package. Instead, they must be retrieved from the data providers.
 To facilitate this step as much as possible, the second screen of the Shiny GUI,
 shown below, guides users through this process.
 First, users can specify a path at which a folder structure will be initialized
@@ -226,15 +248,7 @@ data access logistics.
 
 ```{r access-print, eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE}
 access %>%
-  huxtable::as_huxtable(.) %>%
-  huxtable::set_width(., 1) %>%
-  huxtable::set_all_padding(4) %>%
-  huxtable::set_font_size(9) %>%
-  huxtable::set_background_color(., evens, everywhere, "grey95") %>%
-  huxtable::set_align(col = 2:ncol(.), value = "right") %>%
-  huxtable::set_bold(row = 1, col = everywhere) %>% 
-  huxtable::set_bottom_border(row = 1, col = everywhere) %>%
-  huxtable::set_caption(value = "An overview of access logistics across all post-election surveys.")
+  knitr::kable(., format = "markdown")
 ```
 
 Once users have obtained all election studies for the electoral contexts
@@ -283,7 +297,7 @@ and several hours with imputation. The routine returns an object
 called `data_file`, which contains all the requested output. By default,
 this object will be stored in the current R environment.
 
-### Data preparation for subgroup-specific voter transition matrices {-}
+#### Optional: Data preparation for subgroup-specific voter transition matrices {-}
 
 `voteswitchR:::aggregate_switches()` is an internal package function that is
 called in the final step of the HIMRA routine to generate the
@@ -320,8 +334,10 @@ subgroup.
 
 ### Generalized transition matrices {-}
 
-The aggregation step outlined above produces "raw" voter transition matrices:
-Each cell count represents switches between specific parties. 
+The package data objects `switches`, `switches_imp`, `raked_switches`, and `raked_switches_imp` contain idiosyncratic election-specific voter transition matrices.
+Equivalently, analogous data objects would be included in `data_file$switches`, `data_file$switches_imp`, `data_file$raked_switches`, and `data_file$raked_switches_imp` if users were to obtain the original micro-level data and process them according to the steps described in the preceding section [building the data infrastructure](#building-the-data-infrastructure) (provided that both imputation and raking were requested).
+
+In these raw, idiosyncratic transition matrices, each cell count represents switches between specific nominal parties. 
 An example is given in the table below, which shows the raked
 cell counts for the 2010 UK General Election.
 The column `weights` records the raked counts for each cell.
@@ -330,7 +346,7 @@ has $25$ cells.
 
 ```{r raw-switches, eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE, results='asis'}
 options(knitr.kable.NA = '') 
-data_file$raked_switches_imp[[1]] %>%
+voteswitchR::raked_switches_imp[[1]] %>%
   dplyr::filter(elec_id == "GB-2010-05") %>%
   dplyr::mutate(
     switch_from = ifelse(switch_from %in% c(1, 5, 6, 7, 8), 98L, switch_from),
@@ -388,19 +404,8 @@ data_file$raked_switches_imp[[1]] %>%
     -starts_with("switch"),
     -starts_with("cmp")
   ) %>%
-  dplyr::relocate(name_from, name_to, .after = "elec_id") %>%
-  huxtable::as_huxtable(.) %>%
-  huxtable::set_width(., 0.8) %>%
-  huxtable::set_all_padding(4) %>%
-  huxtable::set_font_size(9) %>%
-  huxtable::set_background_color(., evens, everywhere, "grey95") %>%
-  huxtable::set_align(col = 2:ncol(.), value = "right") %>%#
-  huxtable::set_bold(row = 1, col = everywhere) %>%
-  huxtable::set_bottom_border(row = 1, col = everywhere) %>%
-  huxtable::set_tabular_environment(., "longtable") %>%
-  huxtable::set_caption("Raw (party-specific) raked vote switching counts, 2010 UK General Election.") %>%
-  huxtable::set_caption_pos(value = "bottomcenter") %>%
-  huxtable::set_label("raw-switches")
+  dplyr::relocate(name_from, name_to, .after = "elec_id")  %>%
+  knitr::kable(., format = "markdown")
 ```
 
 Users can use `voteswitchR::recode_switches()` to convert such "raw" voter
@@ -416,7 +421,7 @@ the Conservatives, Liberal Democrats, and others constituted the opposition.
 As a result, we can re-express the voter transition matrix as follows:
 
 ```{r recoded-switches-2, eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE, results='asis'}
-data_file$raked_switches_imp[[1]] %>%
+voteswitchR::raked_switches_imp[[1]] %>%
   dplyr::filter(elec_id == "GB-2010-05") %>%
   dplyr::left_join(
     voteswitchR::mappings %>%
@@ -472,25 +477,14 @@ data_file$raked_switches_imp[[1]] %>%
   dplyr::summarize(
     weights = sum(weights, na.rm = TRUE),
     n = unique(n)
-  ) %>%
-  huxtable::as_huxtable(.) %>%
-  huxtable::set_width(., 0.8) %>%
-  huxtable::set_all_padding(4) %>%
-  huxtable::set_font_size(9) %>%
-  huxtable::set_background_color(., evens, everywhere, "grey95") %>%
-  huxtable::set_align(col = 2:ncol(.), value = "right") %>%
-  huxtable::set_bold(row = 1, col = everywhere) %>%
-  huxtable::set_bottom_border(row = 1, col = everywhere)  %>%
-  huxtable::set_tabular_environment(., "longtable") %>%
-  huxtable::set_caption("Generalized raked vote switching counts: Switches between government party (Labour), opposition parties (Conservatives, Liberals, Others), and non-voters in the 2010 UK General Election.") %>%
-  huxtable::set_caption_pos(value = "bottomcenter") %>%
-  huxtable::set_label("recoded-switches-2")
+  )  %>%
+  knitr::kable(., format = "markdown")
 ```
 
 `voteswitchR::recode_switches()` implements this data-processing step as follows:
 
 ```{r recoded-switches-1, eval = TRUE, echo = TRUE, message=FALSE, warning=FALSE}
-model_data <- data_file$raked_switches_imp[[1]] %>%
+model_data <- voteswitchR::raked_switches_imp[[1]] %>%
   voteswitchR::recode_switches(
     mappings = voteswitchR::mappings %>%
       dplyr::mutate(
@@ -547,20 +541,8 @@ Analogous information is included for the other two categories under
 `model_data$y_structure$non`, respectively.
 
 ```{r government, eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE, results='asis'}
-model_data$y_structure$government %>%
-  huxtable::as_huxtable(.) %>%
-  huxtable::set_width(., 0.8) %>%
-  huxtable::set_all_padding(4) %>%
-  huxtable::set_font_size(9) %>%
-  huxtable::set_background_color(., evens, everywhere, "grey95") %>%
-  huxtable::set_col_width(col = c(1:5), value = c(.2, .4, .1, .2, .1)) %>%
-  huxtable::set_align(col = 5, value = "right") %>%#
-  huxtable::set_bold(row = 1, col = everywhere) %>%
-  huxtable::set_bottom_border(row = 1, col = everywhere)  %>%
-  huxtable::set_tabular_environment(., "longtable") %>%
-  huxtable::set_caption("Conceptual meaning of each cell for governing parties.") %>%
-  huxtable::set_caption_pos(value = "bottomcenter") %>%
-  huxtable::set_label("government")
+model_data$y_structure$government  %>%
+  knitr::kable(., format = "markdown")
 ```
 
 ### Quality checks
@@ -581,7 +563,7 @@ These can then guide users in their decisions on context inclusion and robustnes
 checks.
 
 ```{r measerror, eval=TRUE, warning=FALSE, message=FALSE}
-meas_error <- calculate_meas_error(
+meas_error <- voteswitchR::calculate_meas_error(
   switches = data_file$switches,
   mappings = voteswitchR::mappings %>%
       dplyr::mutate(
@@ -603,7 +585,8 @@ voter transition matrix and for elections at large, as illustrated below:
 ```{r measerror-elec, eval=TRUE, warning=FALSE, message=FALSE, results='asis'}
 meas_error$elec_errors %>%
   dplyr::mutate_if(is.numeric, ~round(., 3)) %>%
-  head(8)
+  head(8) %>%
+  knitr::kable(., format = "markdown")
 ```
 
 ## Data analysis

@@ -3,13 +3,14 @@
 \docType{package}
 \name{voteswitchR-package}
 \alias{voteswitchR-package}
-\alias{_PACKAGE}
 \alias{voteswitchR}
 \title{Data and Methods for Analyzing Comparative Vote Switching Data}
 \description{
-The \code{voteswitchR} package offers functions for data
-management and statistical analyses to implement the conceptual
-framework presented in Cohen, Krause and Abou-Chadi (2023).
+The voteswitchR package is an open-source R package that offers
+a suite of functions for processing and analyzing vote switching data. It
+offers a comprehensive software implementation of the conceptual framework
+and the various extensions presented in Cohen, Krause, and Abou-Chadi
+(2024).
 
 \code{voteswichR} consists of the following
 functions:
@@ -38,6 +39,10 @@ ParlGov and MARPOR IDs.
 \item \code{\link{codebook}}: Documentations of \code{\link{mappings}}.
 \item \code{\link{data_guide}}: Versions, download links, and access
 details for survey data.
+\item \code{\link{switches}}: Cell counts for the raw, idiosyncratic transition matrices for all elections included in \code{voteswitchR}.
+\item \code{\link{switches_imp}}: 25 imputations of the cell counts for the raw, idiosyncratic transition matrices for all elections included in \code{voteswitchR}.
+\item \code{\link{raked_switches}}: Rake-weighted cell counts for the raw, idiosyncratic transition matrices for all elections included in \code{voteswitchR}.
+\item \code{\link{raked_switches_imp}}: 25 imputations of the rake-weighted cell counts for the raw, idiosyncratic transition matrices for all elections included in \code{voteswitchR}.
 }
 }
 \details{
@@ -45,11 +50,11 @@ The 'voteswitchR' package.
 }
 \references{
 \enumerate{
-\item Cohen, Denis, Krause, Werner and Abou-Chadi, Tarik (2023).
+\item Cohen, Denis, Krause, Werner and Abou-Chadi, Tarik (2024).
 Comparative vote switching: A new framework for
-studying dynamic multiparty competition. Forthcoming at The Journal of Politics.
-\item Stan Development Team (2020). RStan: the R interface to Stan. R
-package version 2.21.2. https://mc-stan.org
+studying dynamic multiparty competition. The Journal of Politics.
+\item Stan Development Team (2024). RStan: the R interface to Stan. R
+package version 2.32.6. https://mc-stan.org
 }
 }
 \seealso{

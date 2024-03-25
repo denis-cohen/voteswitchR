@@ -2,6 +2,7 @@
 Data
 ================
 Denis Cohen (<denis.cohen@uni-mannheim.de>)
+This version: March 25, 2024
 
 ## The `voteswitchR` package
 
@@ -9,7 +10,23 @@ The `voteswitchR` package is an open-source R package that offers a
 suite of functions for processing and analyzing vote switching data. It
 offers a comprehensive software implementation of the conceptual
 framework and the various extensions presented in Cohen, Krause, and
-Abou-Chadi (2023).
+Abou-Chadi (2024).
+
+### Version information
+
+The current version, `voteswitchR 0.3.0`, was released on March 25,
+2024. It incorporates the following changes and additions:
+
+- minor fix in
+  [`R/build_infrastructure.R`](https://github.com/denis-cohen/voteswitchR/blob/master/R/build_infrastructure.R)
+- recompilation of Stan models in
+  [`inst/stan`](https://github.com/denis-cohen/voteswitchR/tree/master/inst/stan)
+  using `rstan_2.32.6` under R 4.3.3 and RTools 4.3 (C++17)
+- addition of (rake-weighted) cell counts for all idiosyncratic
+  transition matrices in
+  [`data`](https://github.com/denis-cohen/voteswitchR/tree/master/data)
+- corresponding updates to this file,
+  [`readme.md`](https://github.com/denis-cohen/voteswitchR/blob/master/readme.md)
 
 ### Installation
 
@@ -29,16 +46,16 @@ estimation function `voteswitchR::run_mavcl()`.
 ### Citation
 
 Please acknowledge the use of `voteswitchR` and the conceptual framework
-presented in Cohen, Krause, and Abou-Chadi (2023) by citing the
+presented in Cohen, Krause, and Abou-Chadi (2024) by citing the
 following:
 
-<a name=bib-voteswitchR></a>[Cohen, Denis](#cite-voteswitchR) (2023).
+<a name=bib-voteswitchR></a>[Cohen, Denis](#cite-voteswitchR) (2024).
 *voteswitchR: Data and Methods for Analyzing Comparative Vote Switching
-Data*. R package version 0.2.0. URL:
+Data*. R package version 0.3.0. URL:
 <https://github.com/denis-cohen/voteswitchR>.
 
 <a name=bib-Cohen2023></a>[Cohen, Denis, Werner Krause, and Tarik
-Abou-Chadi](#cite-Cohen2023) (2023). “Comparative vote switching: A new
+Abou-Chadi](#cite-Cohen2023) (2024). “Comparative vote switching: A new
 framework for studying dynamic multiparty competition”. In: *The Journal
 of Politics* (First view).
 
@@ -68,6 +85,17 @@ of Politics* (First view).
 2.  `codebook`: Documentations of mappings
 3.  `data_guide`: Versions, download links, and access details for
     survey data
+4.  `switches`: Cell counts for the raw, idiosyncratic transition
+    matrices for all elections included in `voteswitchR`.
+5.  `switches_imp`: 25 imputations of the cell counts for the raw,
+    idiosyncratic transition matrices for all elections included in
+    `voteswitchR`.
+6.  `raked_switches`: Rake-weighted cell counts for the raw,
+    idiosyncratic transition matrices for all elections included in
+    `voteswitchR`.
+7.  `raked_switches_imp`: 25 imputations of the rake-weighted cell
+    counts for the raw, idiosyncratic transition matrices for all
+    elections included in `voteswitchR`.
 
 On top of these, generalized functions for the visualization of
 quantities of interest generated via `compute_qoi()` are currently in
@@ -82,9 +110,53 @@ A video tutorial, based on a talk in the [MZES Social Science Data
 Lab](https://www.mzes.uni-mannheim.de/socialsciencedatalab/page/events/),
 is available on [YouTube](https://youtu.be/-35D-mqmrF0).
 
-## Data processing
+## Data
 
-### Building the data infrastructure: `voteswitchR::build_data_file()`
+Our data infrastructure is based on decades of election studies from
+various countries. Needless to say, the right to distribute the data
+lies with the respective owners and data providers. Therefore, the
+original election studies cannot be distributed as a part of the
+`voteswitchR` package. Instead, users who wish to use the original
+respondent-level data (or any processed respondent-level versions
+thereof produced by `voteswitchR`) must retrieve such data from the data
+providers (detailed information is provided below).
+
+However, as of version 0.3.0 (March 25, 2024), `voteswitchR` features
+aggregate-level summaries of vote switching data in the form of the
+(weighted) cell counts from all election-level voter transition
+matrices. These serve as the primary inputs for the statistical analysis
+of comparative vote switching data and therefore enable users to apply
+the methodological framework introduced in Cohen, Krause, and Abou-Chadi
+(2024). This section describes both the use of the pre-supplied
+election-level switching data, as well as the required steps for
+procurement and processing of the original respondent-level survey data
+.
+
+### Election-level switching data: (Weighted) cell counts
+
+As of version 0.3.0 (March 25, 2024), `voteswitchR`’s package-specific
+data features the following data objects:
+
+1.  `switches`: Cell counts for the raw, idiosyncratic transition
+    matrices for all elections included in `voteswitchR`.
+2.  `switches_imp`: 25 imputations of the cell counts for the raw,
+    idiosyncratic transition matrices for all elections included in
+    `voteswitchR`.
+3.  `raked_switches`: Rake-weighted cell counts for the raw,
+    idiosyncratic transition matrices for all elections included in
+    `voteswitchR`.
+4.  `raked_switches_imp`: 25 imputations of the rake-weighted cell
+    counts for the raw, idiosyncratic transition matrices for all
+    elections included in `voteswitchR`.
+
+More elaborate descriptions can be found in the package documentation
+(e.g., `?switches`). Users who wish to use these pre-processed cell
+counts can countinue reading in the subsection on [generalized
+transition matrices](#generalized-transition-matrices).
+
+### Data-processing: Micro-level data
+
+#### Building the data infrastructure
 
 The primary tool for data processing is the
 `voteswitchR::build_data_file()` function. The function launches a
@@ -125,34 +197,27 @@ The following overview indicates the availability of all concepts
 available as part of the `voteswitchR` data infrastructure across its
 254 electoral contexts:
 
-            Concepts: Availability across all post-election surveys.            
-                   Concepts                      Availability  
-                 ──────────────────────────────────────────────
-                   Vote choice (t)                    254/254  
-                   Vote choice (t-1)                  254/254  
-                   Party ID                           235/254  
-                   Strength of party ID, V1           211/254  
-                   Strength of party ID, V2           212/254  
-                   Left-right self-placement          222/254  
-                   Satisfaction with democracy        159/254  
-                   Party like-dislike scores          183/254  
-                   Left-right party placements        181/254  
-                   Gender (binary)                    254/254  
-                   Age                                251/254  
+| Concepts                    | Availability |
+|:----------------------------|:-------------|
+| Vote choice (t)             | 254/254      |
+| Vote choice (t-1)           | 254/254      |
+| Party ID                    | 235/254      |
+| Strength of party ID, V1    | 211/254      |
+| Strength of party ID, V2    | 212/254      |
+| Left-right self-placement   | 222/254      |
+| Satisfaction with democracy | 159/254      |
+| Party like-dislike scores   | 183/254      |
+| Left-right party placements | 181/254      |
+| Gender (binary)             | 254/254      |
+| Age                         | 251/254      |
 
-Column names: Concepts, Availability
-
-The second step is **data procurement**. Our data infrastructure is
-based on decades of election studies from various countries. Needless to
-say, the right to distribute the data lies with the respective owners
-and data providers. Therefore, the original election studies cannot be
-distributed as a part of the `voteswitchR` package. Instead, they must
-be retrieved from the data providers. To facilitate this step as much as
-possible, the second screen of the Shiny GUI, shown below, guides users
-through this process. First, users can specify a path at which a folder
-structure will be initialized (by clicking on **Create initial folder
-structure**). This structure will contain a separate sub-directory for
-each selected electoral context selected in the previous step.
+The second step is **data procurement**. To facilitate this step as much
+as possible, the second screen of the Shiny GUI, shown below, guides
+users through this process. First, users can specify a path at which a
+folder structure will be initialized (by clicking on **Create initial
+folder structure**). This structure will contain a separate
+sub-directory for each selected electoral context selected in the
+previous step.
 
 Users can then consult the data table shown in the screenshot below to
 learn about the logistics of data procurement. For each selected
@@ -192,20 +257,14 @@ cases, signed use agreements) are required in order to access the data.
 `voteswitchR::data_guide` gives a complete overview of all election
 studies and data access logistics.
 
-       An overview of access logistics across all post-election surveys.        
-                Data Access                            Frequency  
-              ────────────────────────────────────────────────────
-                accept terms of use                          158  
-                register and accept terms of use              28  
-                request access                                37  
-                request access and pay provision fee           3  
-                request access with specific                  15  
-                research proposal                                 
-                request access with specific                   8  
-                research proposal and sign data use               
-                agreement                                         
-
-Column names: Data Access, Frequency
+| Data Access                                                                | Frequency |
+|:---------------------------------------------------------------------------|----------:|
+| accept terms of use                                                        |       158 |
+| register and accept terms of use                                           |        28 |
+| request access                                                             |        37 |
+| request access and pay provision fee                                       |         3 |
+| request access with specific research proposal                             |        15 |
+| request access with specific research proposal and sign data use agreement |         8 |
 
 Once users have obtained all election studies for the electoral contexts
 they have selected, they must store each data file in the correct
@@ -265,7 +324,7 @@ imputation. The routine returns an object called `data_file`, which
 contains all the requested output. By default, this object will be
 stored in the current R environment.
 
-### Data preparation for subgroup-specific voter transition matrices
+#### Optional: Data preparation for subgroup-specific voter transition matrices
 
 `voteswitchR:::aggregate_switches()` is an internal package function
 that is called in the final step of the HIMRA routine to generate the
@@ -304,54 +363,50 @@ defines the subgroup.
 
 ### Generalized transition matrices
 
-The aggregation step outlined above produces “raw” voter transition
-matrices: Each cell count represents switches between specific parties.
-An example is given in the table below, which shows the raked cell
-counts for the 2010 UK General Election. The column `weights` records
-the raked counts for each cell. As we can see, this raw transition
-matrix is of dimensions $5 \times 5$ and thus has $25$ cells.
+The package data objects `switches`, `switches_imp`, `raked_switches`,
+and `raked_switches_imp` contain idiosyncratic election-specific voter
+transition matrices. Equivalently, analogous data objects would be
+included in `data_file$switches`, `data_file$switches_imp`,
+`data_file$raked_switches`, and `data_file$raked_switches_imp` if users
+were to obtain the original micro-level data and process them according
+to the steps described in the preceding section [building the data
+infrastructure](#building-the-data-infrastructure) (provided that both
+imputation and raking were requested).
 
-           elec_id         name_from        name_to   weights      n  
-         ─────────────────────────────────────────────────────────────
-           GB-2010-05         Labour         Labour       196   1577  
-           GB-2010-05         Labour        LibDems      38.8   1577  
-           GB-2010-05         Labour   Conservative      32.8   1577  
-                                                  s                   
-           GB-2010-05         Labour         others        14   1577  
-           GB-2010-05         Labour     non-voters      58.5   1577  
-           GB-2010-05        LibDems         Labour      21.9   1577  
-           GB-2010-05        LibDems        LibDems       135   1577  
-           GB-2010-05        LibDems   Conservative      27.1   1577  
-                                                  s                   
-           GB-2010-05        LibDems         others      9.24   1577  
-           GB-2010-05        LibDems     non-voters      19.8   1577  
-           GB-2010-05   Conservative         Labour      13.4   1577  
-                                   s                                  
-           GB-2010-05   Conservative        LibDems      15.5   1577  
-                                   s                                  
-           GB-2010-05   Conservative   Conservative       231   1577  
-                                   s              s                   
-           GB-2010-05   Conservative         others      19.7   1577  
-                                   s                                  
-           GB-2010-05   Conservative     non-voters      33.9   1577  
-                                   s                                  
-           GB-2010-05         others         Labour      4.53   1577  
-           GB-2010-05         others        LibDems      10.6   1577  
-           GB-2010-05         others   Conservative      11.5   1577  
-                                                  s                   
-           GB-2010-05         others         others      49.8   1577  
-           GB-2010-05         others     non-voters      24.3   1577  
-           GB-2010-05     non-voters         Labour      61.5   1577  
-           GB-2010-05     non-voters        LibDems      36.1   1577  
-           GB-2010-05     non-voters   Conservative        69   1577  
-                                                  s                   
-           GB-2010-05     non-voters         others      29.2   1577  
-           GB-2010-05     non-voters     non-voters       414   1577  
+In these raw, idiosyncratic transition matrices, each cell count
+represents switches between specific nominal parties. An example is
+given in the table below, which shows the raked cell counts for the 2010
+UK General Election. The column `weights` records the raked counts for
+each cell. As we can see, this raw transition matrix is of dimensions
+$5 \times 5$ and thus has $25$ cells.
 
-Raw (party-specific) raked vote switching counts, 2010 UK General
-Election.
-
-Column names: elec_id, name_from, name_to, weights, n
+| elec_id    | name_from     | name_to       |    weights |    n |
+|:-----------|:--------------|:--------------|-----------:|-----:|
+| GB-2010-05 | Labour        | Labour        | 199.148875 | 1577 |
+| GB-2010-05 | Labour        | LibDems       |  40.969907 | 1577 |
+| GB-2010-05 | Labour        | Conservatives |  31.625192 | 1577 |
+| GB-2010-05 | Labour        | others        |  13.947481 | 1577 |
+| GB-2010-05 | Labour        | non-voters    |  54.774879 | 1577 |
+| GB-2010-05 | LibDems       | Labour        |  18.552846 | 1577 |
+| GB-2010-05 | LibDems       | LibDems       | 131.680426 | 1577 |
+| GB-2010-05 | LibDems       | Conservatives |  29.402564 | 1577 |
+| GB-2010-05 | LibDems       | others        |  18.010985 | 1577 |
+| GB-2010-05 | LibDems       | non-voters    |  15.684085 | 1577 |
+| GB-2010-05 | Conservatives | Labour        |  12.797470 | 1577 |
+| GB-2010-05 | Conservatives | LibDems       |  17.621483 | 1577 |
+| GB-2010-05 | Conservatives | Conservatives | 235.882419 | 1577 |
+| GB-2010-05 | Conservatives | others        |  12.190968 | 1577 |
+| GB-2010-05 | Conservatives | non-voters    |  34.619411 | 1577 |
+| GB-2010-05 | others        | Labour        |   7.178417 | 1577 |
+| GB-2010-05 | others        | LibDems       |   7.572071 | 1577 |
+| GB-2010-05 | others        | Conservatives |   7.296465 | 1577 |
+| GB-2010-05 | others        | others        |  43.928867 | 1577 |
+| GB-2010-05 | others        | non-voters    |  34.733940 | 1577 |
+| GB-2010-05 | non-voters    | Labour        |  60.050098 | 1577 |
+| GB-2010-05 | non-voters    | LibDems       |  38.309413 | 1577 |
+| GB-2010-05 | non-voters    | Conservatives |  66.728588 | 1577 |
+| GB-2010-05 | non-voters    | others        |  33.858941 | 1577 |
+| GB-2010-05 | non-voters    | non-voters    | 410.434209 | 1577 |
 
 Users can use `voteswitchR::recode_switches()` to convert such “raw”
 voter transition matrices into generalized transition matrices by
@@ -366,30 +421,23 @@ Labour, whereas the Conservatives, Liberal Democrats, and others
 constituted the opposition. As a result, we can re-express the voter
 transition matrix as follows:
 
-             elec_id        gov_from       gov_to   weights      n  
-           ─────────────────────────────────────────────────────────
-             GB-2010-05   government   government       196   1577  
-             GB-2010-05   government   non-voters      58.5   1577  
-             GB-2010-05   government   opposition      85.6   1577  
-             GB-2010-05   non-voters   government      61.5   1577  
-             GB-2010-05   non-voters   non-voters       414   1577  
-             GB-2010-05   non-voters   opposition       134   1577  
-             GB-2010-05   opposition   government      39.9   1577  
-             GB-2010-05   opposition   non-voters        78   1577  
-             GB-2010-05   opposition   opposition       509   1577  
-
-Generalized raked vote switching counts: Switches between government
-party  
-(Labour), opposition parties (Conservatives, Liberals, Others), and
-non-voters in the 2010 UK General Election.
-
-Column names: elec_id, gov_from, gov_to, weights, n
+| elec_id    | gov_from   | gov_to     |   weights |    n |
+|:-----------|:-----------|:-----------|----------:|-----:|
+| GB-2010-05 | government | government | 199.14887 | 1577 |
+| GB-2010-05 | government | non-voters |  54.77488 | 1577 |
+| GB-2010-05 | government | opposition |  86.54258 | 1577 |
+| GB-2010-05 | non-voters | government |  60.05010 | 1577 |
+| GB-2010-05 | non-voters | non-voters | 410.43421 | 1577 |
+| GB-2010-05 | non-voters | opposition | 138.89694 | 1577 |
+| GB-2010-05 | opposition | government |  38.52873 | 1577 |
+| GB-2010-05 | opposition | non-voters |  85.03744 | 1577 |
+| GB-2010-05 | opposition | opposition | 503.58625 | 1577 |
 
 `voteswitchR::recode_switches()` implements this data-processing step as
 follows:
 
 ``` r
-model_data <- data_file$raked_switches_imp[[1]] %>%
+model_data <- voteswitchR::raked_switches_imp[[1]] %>%
   voteswitchR::recode_switches(
     mappings = voteswitchR::mappings %>%
       dplyr::mutate(
@@ -429,10 +477,8 @@ required for estimation and post-estimation:
 - `data`: Model data, including a separate column for each cell-specific
   switching pattern of the generalized voter transition matrix (“wide
   format”).
-
 - `y_names`: The column names of the outcome variable, i.e., the $C^2$
   cells of the voter transition matrix.
-
 - `y_structure`: A list of data frames that specifies, for each marginal
   category of the voter transition matrix, the conceptual meaning for
   each cell. An example for government parties, stored under
@@ -447,22 +493,17 @@ required for estimation and post-estimation:
   two categories under `model_data$y_structure$opposition` and
   `model_data$y_structure$non`, respectively.
 
-                  cat          switch                  type    
-                ───────────────────────────────────────────────
-                  government   government_government   retain  
-                  government   government_non          loss    
-                  government   government_opposition   loss    
-                  government   non_government          gain    
-                  government   non_non                 resid   
-                  government   non_opposition          resid   
-                  government   opposition_government   gain    
-                  government   opposition_non          resid   
-                  government   opposition_opposition   resid   
-             Conceptual meaning of each cell for governing parties.             
-
-Column names: cat, switch, type, dyad, pos
-
-3/5 columns shown.
+| cat        | switch                | type   | dyad       | pos |
+|:-----------|:----------------------|:-------|:-----------|----:|
+| government | government_government | retain |            |   1 |
+| government | government_non        | loss   | non        |   2 |
+| government | government_opposition | loss   | opposition |   3 |
+| government | non_government        | gain   | non        |   4 |
+| government | non_non               | resid  |            |   5 |
+| government | non_opposition        | resid  |            |   6 |
+| government | opposition_government | gain   | opposition |   7 |
+| government | opposition_non        | resid  |            |   8 |
+| government | opposition_opposition | resid  |            |   9 |
 
 ### Quality checks
 
@@ -482,7 +523,7 @@ marginal vote proportions. These can then guide users in their decisions
 on context inclusion and robustness checks.
 
 ``` r
-meas_error <- calculate_meas_error(
+meas_error <- voteswitchR::calculate_meas_error(
   switches = data_file$switches,
   mappings = voteswitchR::mappings %>%
       dplyr::mutate(
@@ -504,23 +545,20 @@ transition matrix and for elections at large, as illustrated below:
 ``` r
 meas_error$elec_errors %>%
   dplyr::mutate_if(is.numeric, ~round(., 3)) %>%
-  head(8)
+  head(8) %>%
+  knitr::kable(., format = "markdown")
 ```
 
-                 ┌────────────────────────────────────────────┐
-                 │ elec_id      mean_error_t   mean_error_tm1 │
-                 ├────────────────────────────────────────────┤
-                 │ AT-2013-09          0.087            0.104 │
-                 │ AT-2017-10          0.039            0.064 │
-                 │ AU-1987-07          0.056            0.06  │
-                 │ AU-1990-03          0.05             0.052 │
-                 │ AU-1993-03          0.045            0.066 │
-                 │ AU-1996-03          0.042            0.022 │
-                 │ AU-1998-10          0.048            0.024 │
-                 │ AU-2001-11          0.052            0.046 │
-                 └────────────────────────────────────────────┘
-
-Column names: elec_id, mean_error_t, mean_error_tm1
+| elec_id    | mean_error_t | mean_error_tm1 |
+|:-----------|-------------:|---------------:|
+| AT-2013-09 |        0.087 |          0.104 |
+| AT-2017-10 |        0.039 |          0.064 |
+| AU-1987-07 |        0.056 |          0.060 |
+| AU-1990-03 |        0.050 |          0.052 |
+| AU-1993-03 |        0.045 |          0.066 |
+| AU-1996-03 |        0.042 |          0.022 |
+| AU-1998-10 |        0.048 |          0.024 |
+| AU-2001-11 |        0.052 |          0.046 |
 
 ## Data analysis
 
@@ -832,9 +870,10 @@ corresponding external data collections.
 
 <div id="ref-Cohen2023" class="csl-entry">
 
-Cohen, Denis, Werner Krause, and Tarik Abou-Chadi. 2023. “<span
-class="nocase">Comparative vote switching: A new framework for studying
-dynamic multiparty competition</span>.” *The Journal of Politics*.
+Cohen, Denis, Werner Krause, and Tarik Abou-Chadi. 2024.
+“<span class="nocase">Comparative vote switching: A new framework for
+studying dynamic multiparty competition</span>.” *The Journal of
+Politics*.
 
 </div>
 
@@ -870,8 +909,8 @@ Documentation\]. May 14, 2020 Version.”
 
 <div id="ref-Hanmer2013" class="csl-entry">
 
-Hanmer, Michael J., and Kerem Ozan Kalkan. 2013. “<span
-class="nocase">Behind the Curve: Clarifying the Best Approach to
+Hanmer, Michael J., and Kerem Ozan Kalkan. 2013.
+“<span class="nocase">Behind the Curve: Clarifying the Best Approach to
 Calculating Predicted Probabilities and Marginal Effects from Limited
 Dependent Variable Models</span>.” *American Journal of Political
 Science* 57 (1): 263–77.
