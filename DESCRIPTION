@@ -1,11 +1,11 @@
 Package: voteswitchR
 Type: Package
 Title: Data and Methods for Analyzing Comparative Vote Switching Data
-Version: 0.3.0
+Version: 0.4.0
 Authors@R:
     c(person(given = "Denis",
              family = "Cohen",
-             email = "denis.cohen@mzes.uni-mannheim.de",
+             email = "denis.cohen@uni-mannheim.de",
              role = c("cre", "aut")),
       person(given = "Andreas",
              family = "Küpfer",
@@ -23,7 +23,7 @@ Authors@R:
              family = "Krause",
              email = "werner.krause@hu-berlin.de",
              role = c("ctb")))
-Maintainer: Denis Cohen <denis.cohen@mzes.uni-mannheim.de>
+Maintainer: Denis Cohen <denis.cohen@uni-mannheim.de>
 Description: The \code{voteswitchR} package is an open-source R package that offers a suite of functions for processing and analyzing vote switching data. It offers a comprehensive software implementation of the conceptual framework and the various extensions presented in Cohen, Krause, and Abou-Chadi (2024).
 License: GPL-3
 URL: https://github.com/denis-cohen/voteswitchR
@@ -34,16 +34,17 @@ Encoding: UTF-8
 Language: en-US
 LazyData: true
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.1
+RoxygenNote: 7.3.2
 Biarch: true
 Depends: 
-    R (>= 3.5.0)
+    R (>= 3.4.0)
 Imports: 
     abind (>= 1.4.5),
     methods,
-    Rcpp (>= 1.0.7),
-    RcppParallel (>= 5.1.4),
-    rstan (>= 2.32.1),
+    Rcpp (>= 0.12.0),
+    RcppParallel (>= 5.0.1),
+    rstan (>= 2.18.1),
+    rstantools (>= 2.1.1),
     anesrake (>= 0.8.0),
     countrycode (>= 1.3.0),
     dplyr (>= 1.0.0),
@@ -55,19 +56,20 @@ Imports:
     magrittr (>= 2.0.1),
     rio (>= 0.5.27),
     shiny (>= 1.7.1),
+    shiny (<= 1.7.2),
     shinyalert (>= 2.0.0),
     shinyjs (>= 2.0.0),
     tidyr (>= 1.1.4),
     stringr (>= 1.4.0),
     tibble (>= 3.1.7)
 LinkingTo:
-    BH (>= 1.75.0),
-    Rcpp (>= 1.0.7),
-    RcppParallel (>= 5.1.4),
-    RcppEigen (>= 0.3.4.0.0),
-    rstan (>= 2.32.1),
-    StanHeaders (>= 2.32.0)
+    BH (>= 1.66.0),
+    Rcpp (>= 0.12.0),
+    RcppParallel (>= 5.0.1),
+    RcppEigen (>= 0.3.3.3.0),
+    rstan (>= 2.18.1),
+    StanHeaders (>= 2.18.0)
 SystemRequirements: GNU make
 Suggests: 
-    testthat (>= 3.0.4)
+    testthat (>= 3.0.0)
 Config/testthat/edition: 3

@@ -6,7 +6,7 @@ ui <- shiny::fluidPage(
   shinyalert::useShinyalert(force = TRUE),
   shinyjs::useShinyjs(),
   shiny::tags$head(
-    shiny::tags$style(HTML("
+    shiny::tags$style(htmltools::HTML("
       .error {
         border: 5px solid red;
       }
@@ -24,12 +24,12 @@ ui <- shiny::fluidPage(
       htmltools::div(
         class = "page",
         id = paste0("step", i),
-        h4('Concepts:'),
+        shiny::h4('Concepts:'),
         shiny::actionLink("selectall", "Select All"),
-        shiny::fluidRow(column(
-          width = 4, uiOutput("variables_concepts")
+        shiny::fluidRow(shiny::column(
+          width = 4, shiny::uiOutput("variables_concepts")
         )),
-        h4('Contexts:'),
+        shiny::h4('Contexts:'),
         shiny::actionLink("resetall", "Reset Context Selection"),
         DT::dataTableOutput('countries_year')
       )
@@ -38,8 +38,8 @@ ui <- shiny::fluidPage(
       htmltools::div(
         class = "page",
         id = paste0("step", i),
-        h4('Preparation:'),
-        h5(
+        shiny::h4('Preparation:'),
+        shiny::h5(
           "In case you haven't already done, please download the
           selected data manually using the provided download links
           and put the files into the respective folders."
@@ -48,8 +48,8 @@ ui <- shiny::fluidPage(
         shiny::actionButton("find_files", "Find files"),
         shiny::actionButton("structure_creation",
                             "Create initial folder structure"),
-        h4('Selected Contexts:'),
-        h5("Please Note: File format must be either .sav, .dta or .rdata."),
+        shiny::h4('Selected Contexts:'),
+        shiny::h5("Please Note: File format must be either .sav, .dta or .rdata."),
         shiny::actionLink("refresh_table", "Reset Context Table"),
         DT::dataTableOutput('data_selected')
       )
@@ -58,7 +58,7 @@ ui <- shiny::fluidPage(
       htmltools::div(
         class = "page",
         id = paste0("step", i),
-        h4('Execution Specification:'),
+        shiny::h4('Execution Specification:'),
         shiny::checkboxInput("map_par", "Mapping", value = TRUE),
         shiny::checkboxInput("impute_par", "Imputation", value = TRUE),
         shiny::textInput(
@@ -490,22 +490,23 @@ server <- function(input, output, session) {
     checkbox_names <- gsub("_",  " ", input$checkboxes, fixed = TRUE)
     checkbox_names_year <- sub(" .*", "", checkbox_names)
     checkbox_names_country <- sub(".*? ", "", checkbox_names)
-    data_filtered <-
-      data_filtered %>% dplyr::filter(year %in% checkbox_names_year)
-    data_filtered <-
-      data_filtered %>% dplyr::filter(country_name %in% checkbox_names_country)
     data_filtered <- data_filtered %>%
-      dplyr::mutate(file_name, "") %>%
+      dplyr::filter(year %in% checkbox_names_year)
+    data_filtered <- data_filtered %>%
+      dplyr::filter(country_name %in% checkbox_names_country)
+    data_filtered <- data_filtered %>%
+      dplyr::mutate(file_name = "") %>%
       store_selected_file_names()
 
     if (!forceUpdate & (nrow(previous_data_filtered) > 0)) {
-      if (isTRUE(dplyr::all_equal(
+      if (isTRUE(all.equal(
         dplyr::select(previous_data_filtered, elec_id),
         dplyr::select(data_filtered, elec_id)))) {
         return(previous_data_filtered)
       }
     }
 
+    random_ids <- sample(1:10000, nrow(data_filtered))
     for (i in 1:nrow(data_filtered)) {
       file_path <- paste0(input$dir, "/", data_filtered$folder_name[i])
       files <- list.files(path = file_path,
@@ -517,12 +518,15 @@ server <- function(input, output, session) {
         files <- c("", files)
       }
 
-      random_id <- sample(1:10000, 1)
+      random_id <- random_ids[i]
       data_filtered[i, "random_id"] <- random_id
       input_id <- paste0("sel", i, "_", random_id)
       data_filtered[i, "file_name_options"] <-
-        shiny::selectInput(input_id, "", choices = files, width = "100px") %>%
-        as.character
+        shiny::selectInput(inputId = input_id,
+                           label = "",
+                           choices = files,
+                           width = "100px") %>%
+        as.character()
 
       data_filtered[i, "file_name_options"] <- dplyr::case_when(
         length(files) == 1 ~ gsub("<select ", "<select class='success'",
@@ -598,8 +602,8 @@ server <- function(input, output, session) {
                                        envir = .GlobalEnv))
     if (nrow(data_filtered) > 0) {
       for (i in 1:nrow(data_filtered)) {
-        file_name <-
-          input[[paste0("sel", i, "_", data_filtered[i, "random_id"])]]
+        input_id <- paste0("sel", i, "_", data_filtered[i, "random_id"])
+        file_name <- input[[input_id]]
         if ((is.null(file_name)) || (file_name == "")) {
           return(TRUE)
         }
@@ -611,8 +615,9 @@ server <- function(input, output, session) {
   store_selected_file_names <- function(data_filtered) {
     if (nrow(data_filtered) > 0) {
       for (i in 1:nrow(data_filtered)) {
+        input_id <- paste0("sel", i, "_", data_filtered[i, "random_id"])
         selected_value <-
-          input[[paste0("sel", i, "_", data_filtered[i, "random_id"])]]
+          input[[input_id]]
         data_filtered[i, "file_name"] <-
           ifelse(is.null(selected_value), "", selected_value)
       }

@@ -5,7 +5,7 @@
 \alias{switches_imp}
 \title{Imputed cell counts for all idiosyncratic transition matrices}
 \format{
-A list of 25 data frames with 20415 rows and 5 columns.
+A list of 5 data frames with 21409 rows and 5 columns.
 \code{elec_id} gives the
 election identifier, \code{switch_from} and \code{switch_to} specify the
 sending and receiving parties, respectively, for each dyad (for identifying

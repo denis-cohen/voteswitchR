@@ -2,7 +2,7 @@
 output: github_document
 title: "`voteswitchR`: Data and Methods for Analyzing Comparative Vote Switching Data"
 author: "Denis Cohen ([denis.cohen@uni-mannheim.de](mailto:denis.cohen@uni-mannheim.de))"
-date: "This version: March 25, 2024"
+date: "2025-03-12"
 bibliography: 
   - fig/references.bib
   - fig/sup.bib
@@ -13,7 +13,7 @@ bibliography:
 library(dplyr)
 library(huxtable)
 # devtools::document()
-load("../../voteswitchR-aux/data_file.rdata")
+load("../voteswitchR-update/data_file_0.4.0.rdata")
 ```
 
 ## The `voteswitchR` package
@@ -24,9 +24,21 @@ switching data.
 It offers a comprehensive software implementation of the
 conceptual framework and the various extensions presented in @Cohen2023.
 
-### Version information
+### Version history
 
-The current version, `voteswitchR 0.3.0`, was released on March 25, 2024. It incorporates the following changes and additions:
+#### Version 0.4.0
+
+Released on March 12, 2025, `voteswitchR 0.4.0` incorporates the following changes and additions:
+
+- restricted version range of dependency `shiny` to prevent problems that occur when using `voteswitchR::build_data_file()` newer versions of `shiny`
+- added 10 new electoral contexts: AU-2022-05, CA-2021-09, CZ-2017-10, CZ-2021-10, GR-2019-07, IL-2021-03, IL-2022-11, LT-2020-10, LV-2018-10, PL-2019-10
+- corresponding updates to [`data`](https://github.com/denis-cohen/voteswitchR/tree/master/data) and the documentation of the package data
+- minor changes to [`inst/shiny/build_data_file/app.R`](https://github.com/denis-cohen/voteswitchR/blob/master/inst/shiny/build_data_file/app.R)
+- corresponding updates to this file, [`readme.md`](https://github.com/denis-cohen/voteswitchR/blob/master/readme.md)
+
+#### Version 0.3.0
+
+Released on March 25, 2024, `voteswitchR 0.3.0` incorporates the following changes and additions:
 
 - minor fix in [`R/build_infrastructure.R`](https://github.com/denis-cohen/voteswitchR/blob/master/R/build_infrastructure.R)
 - recompilation of Stan models in [`inst/stan`](https://github.com/denis-cohen/voteswitchR/tree/master/inst/stan) using `rstan_2.32.6` under R 4.3.3 and RTools 4.3 (C++17)
@@ -80,9 +92,9 @@ RefManageR::PrintBibliography(bib)
 1. `codebook`: Documentations of mappings
 1. `data_guide`: Versions, download links, and access details for survey data
 1. `switches`: Cell counts for the raw, idiosyncratic transition matrices for all elections included in `voteswitchR`.
-1. `switches_imp`: 25 imputations of the cell counts for the raw, idiosyncratic transition matrices for all elections included in `voteswitchR`.
+1. `switches_imp`: 5 imputations of the cell counts for the raw, idiosyncratic transition matrices for all elections included in `voteswitchR`.
 1. `raked_switches`: Rake-weighted cell counts for the raw, idiosyncratic transition matrices for all elections included in `voteswitchR`.
-1. `raked_switches_imp`: 25 imputations of the rake-weighted cell counts for the raw, idiosyncratic transition matrices for all elections included in `voteswitchR`.
+1. `raked_switches_imp`: 5 imputations of the rake-weighted cell counts for the raw, idiosyncratic transition matrices for all elections included in `voteswitchR`.
 
 On top of these, generalized functions for the visualization of quantities of
 interest generated via `compute_qoi()` are currently in development.
@@ -109,9 +121,9 @@ However, as of version 0.3.0 (March 25, 2024), `voteswitchR` features aggregate-
 As of version 0.3.0 (March 25, 2024), `voteswitchR`'s package-specific data features the following data objects:
 
 1. `switches`: Cell counts for the raw, idiosyncratic transition matrices for all elections included in `voteswitchR`.
-1. `switches_imp`: 25 imputations of the cell counts for the raw, idiosyncratic transition matrices for all elections included in `voteswitchR`.
+1. `switches_imp`: 5 imputations of the cell counts for the raw, idiosyncratic transition matrices for all elections included in `voteswitchR`.
 1. `raked_switches`: Rake-weighted cell counts for the raw, idiosyncratic transition matrices for all elections included in `voteswitchR`.
-1. `raked_switches_imp`: 25 imputations of the rake-weighted cell counts for the raw, idiosyncratic transition matrices for all elections included in `voteswitchR`.
+1. `raked_switches_imp`: 5 imputations of the rake-weighted cell counts for the raw, idiosyncratic transition matrices for all elections included in `voteswitchR`.
 
 More elaborate descriptions can be found in the package documentation (e.g., `?switches`). Users who wish to use these pre-processed cell counts can countinue reading in the subsection on [generalized transition matrices](#generalized-transition-matrices).
 
@@ -155,6 +167,7 @@ The following overview indicates the availability of all concepts available as p
 ```{r concepts, eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE}
 total_n <- length(unique(data_file$data$elec_id))
 concepts <- data_file$data %>%
+  dplyr::filter(stack == 1) %>%
   dplyr::select(elec_id,
                 vote,
                 l_vote,
@@ -163,8 +176,8 @@ concepts <- data_file$data %>%
                 strength2,
                 lr_self,
                 stfdem,
-                like_1,
-                lr_1,
+                like,
+                lr,
                 male,
                 age) %>%
   dplyr::rename(
@@ -175,8 +188,8 @@ concepts <- data_file$data %>%
     `Strength of party ID, V2` = strength2,
     `Left-right self-placement` = lr_self,
     `Satisfaction with democracy` = stfdem,
-    `Party like-dislike scores` = like_1,
-    `Left-right party placements` = lr_1,
+    `Party like-dislike scores` = like,
+    `Left-right party placements` = lr,
     `Gender (binary)` = male,
     `Age` = age
   ) %>%

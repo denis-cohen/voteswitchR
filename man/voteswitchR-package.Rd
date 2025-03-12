@@ -66,11 +66,11 @@ Useful links:
 
 }
 \author{
-\strong{Maintainer}: Denis Cohen \email{denis.cohen@mzes.uni-mannheim.de}
+\strong{Maintainer}: Denis Cohen \email{denis.cohen@uni-mannheim.de}
 
 Other contributors:
 \itemize{
-  \item Andreas KÃ¼pfer \email{akuepfer@mail.uni-mannheim.de} [contributor]
+  \item Andreas Küpfer \email{akuepfer@mail.uni-mannheim.de} [contributor]
   \item Tim Allinger \email{tialling@mail.uni-mannheim.de} [contributor]
   \item Nick Baumann \email{nbaumann@mail.uni-mannheim.de} [contributor]
   \item Werner Krause \email{werner.krause@hu-berlin.de} [contributor]

@@ -2,7 +2,7 @@
 Data
 ================
 Denis Cohen (<denis.cohen@uni-mannheim.de>)
-This version: March 25, 2024
+2025-03-12
 
 ## The `voteswitchR` package
 
@@ -12,10 +12,31 @@ offers a comprehensive software implementation of the conceptual
 framework and the various extensions presented in Cohen, Krause, and
 Abou-Chadi (2024).
 
-### Version information
+### Version history
 
-The current version, `voteswitchR 0.3.0`, was released on March 25,
-2024. It incorporates the following changes and additions:
+#### Version 0.4.0
+
+Released on March 12, 2025, `voteswitchR 0.4.0` incorporates the
+following changes and additions:
+
+- restricted version range of dependency `shiny` to prevent problems
+  that occur when using `voteswitchR::build_data_file()` newer versions
+  of `shiny`
+- added 10 new electoral contexts: AU-2022-05, CA-2021-09, CZ-2017-10,
+  CZ-2021-10, GR-2019-07, IL-2021-03, IL-2022-11, LT-2020-10,
+  LV-2018-10, PL-2019-10
+- corresponding updates to
+  [`data`](https://github.com/denis-cohen/voteswitchR/tree/master/data)
+  and the documentation of the package data
+- minor changes to
+  [`inst/shiny/build_data_file/app.R`](https://github.com/denis-cohen/voteswitchR/blob/master/inst/shiny/build_data_file/app.R)
+- corresponding updates to this file,
+  [`readme.md`](https://github.com/denis-cohen/voteswitchR/blob/master/readme.md)
+
+#### Version 0.3.0
+
+Released on March 25, 2024, `voteswitchR 0.3.0` incorporates the
+following changes and additions:
 
 - minor fix in
   [`R/build_infrastructure.R`](https://github.com/denis-cohen/voteswitchR/blob/master/R/build_infrastructure.R)
@@ -49,15 +70,15 @@ Please acknowledge the use of `voteswitchR` and the conceptual framework
 presented in Cohen, Krause, and Abou-Chadi (2024) by citing the
 following:
 
-<a name=bib-voteswitchR></a>[Cohen, Denis](#cite-voteswitchR) (2024).
+<a name=bib-voteswitchR></a>[Cohen, Denis](#cite-voteswitchR) (2025).
 *voteswitchR: Data and Methods for Analyzing Comparative Vote Switching
-Data*. R package version 0.3.0. URL:
+Data*. R package version 0.4.0. URL:
 <https://github.com/denis-cohen/voteswitchR>.
 
 <a name=bib-Cohen2023></a>[Cohen, Denis, Werner Krause, and Tarik
 Abou-Chadi](#cite-Cohen2023) (2024). “Comparative vote switching: A new
 framework for studying dynamic multiparty competition”. In: *The Journal
-of Politics* (First view).
+of Politics* 86.2, pp. 597-607.
 
 ### Functionality
 
@@ -87,15 +108,15 @@ of Politics* (First view).
     survey data
 4.  `switches`: Cell counts for the raw, idiosyncratic transition
     matrices for all elections included in `voteswitchR`.
-5.  `switches_imp`: 25 imputations of the cell counts for the raw,
+5.  `switches_imp`: 5 imputations of the cell counts for the raw,
     idiosyncratic transition matrices for all elections included in
     `voteswitchR`.
 6.  `raked_switches`: Rake-weighted cell counts for the raw,
     idiosyncratic transition matrices for all elections included in
     `voteswitchR`.
-7.  `raked_switches_imp`: 25 imputations of the rake-weighted cell
-    counts for the raw, idiosyncratic transition matrices for all
-    elections included in `voteswitchR`.
+7.  `raked_switches_imp`: 5 imputations of the rake-weighted cell counts
+    for the raw, idiosyncratic transition matrices for all elections
+    included in `voteswitchR`.
 
 On top of these, generalized functions for the visualization of
 quantities of interest generated via `compute_qoi()` are currently in
@@ -139,15 +160,15 @@ data features the following data objects:
 
 1.  `switches`: Cell counts for the raw, idiosyncratic transition
     matrices for all elections included in `voteswitchR`.
-2.  `switches_imp`: 25 imputations of the cell counts for the raw,
+2.  `switches_imp`: 5 imputations of the cell counts for the raw,
     idiosyncratic transition matrices for all elections included in
     `voteswitchR`.
 3.  `raked_switches`: Rake-weighted cell counts for the raw,
     idiosyncratic transition matrices for all elections included in
     `voteswitchR`.
-4.  `raked_switches_imp`: 25 imputations of the rake-weighted cell
-    counts for the raw, idiosyncratic transition matrices for all
-    elections included in `voteswitchR`.
+4.  `raked_switches_imp`: 5 imputations of the rake-weighted cell counts
+    for the raw, idiosyncratic transition matrices for all elections
+    included in `voteswitchR`.
 
 More elaborate descriptions can be found in the package documentation
 (e.g., `?switches`). Users who wish to use these pre-processed cell
@@ -195,21 +216,21 @@ determinants of vote choice or vote switching.
 
 The following overview indicates the availability of all concepts
 available as part of the `voteswitchR` data infrastructure across its
-254 electoral contexts:
+264 electoral contexts:
 
 | Concepts                    | Availability |
 |:----------------------------|:-------------|
-| Vote choice (t)             | 254/254      |
-| Vote choice (t-1)           | 254/254      |
-| Party ID                    | 235/254      |
-| Strength of party ID, V1    | 211/254      |
-| Strength of party ID, V2    | 212/254      |
-| Left-right self-placement   | 222/254      |
-| Satisfaction with democracy | 159/254      |
-| Party like-dislike scores   | 183/254      |
-| Left-right party placements | 181/254      |
-| Gender (binary)             | 254/254      |
-| Age                         | 251/254      |
+| Vote choice (t)             | 264/264      |
+| Vote choice (t-1)           | 264/264      |
+| Party ID                    | 243/264      |
+| Strength of party ID, V1    | 219/264      |
+| Strength of party ID, V2    | 220/264      |
+| Left-right self-placement   | 232/264      |
+| Satisfaction with democracy | 169/264      |
+| Party like-dislike scores   | 193/264      |
+| Left-right party placements | 191/264      |
+| Gender (binary)             | 264/264      |
+| Age                         | 260/264      |
 
 The second step is **data procurement**. To facilitate this step as much
 as possible, the second screen of the Shiny GUI, shown below, guides
@@ -257,14 +278,14 @@ cases, signed use agreements) are required in order to access the data.
 `voteswitchR::data_guide` gives a complete overview of all election
 studies and data access logistics.
 
-| Data Access                                                                | Frequency |
-|:---------------------------------------------------------------------------|----------:|
-| accept terms of use                                                        |       158 |
-| register and accept terms of use                                           |        28 |
-| request access                                                             |        37 |
-| request access and pay provision fee                                       |         3 |
-| request access with specific research proposal                             |        15 |
-| request access with specific research proposal and sign data use agreement |         8 |
+| Data Access | Frequency |
+|:---|---:|
+| accept terms of use | 168 |
+| register and accept terms of use | 28 |
+| request access | 37 |
+| request access and pay provision fee | 3 |
+| request access with specific research proposal | 15 |
+| request access with specific research proposal and sign data use agreement | 8 |
 
 Once users have obtained all election studies for the electoral contexts
 they have selected, they must store each data file in the correct
@@ -794,68 +815,68 @@ The package comes with three data frames:
 The overview below gives the `codebook`, which the variables included in
 `mappings`:
 
-| Variable                      | Source(s)                    | Description                                                                                         |
-|:------------------------------|:-----------------------------|:----------------------------------------------------------------------------------------------------|
-| iso2c                         | Original                     | ISO2C Country Code                                                                                  |
-| countryname                   | Manifesto Project*, ParlGov* | Country name                                                                                        |
-| year                          | Manifesto Project, ParlGov   | Year of current election                                                                            |
-| edate                         | Manifesto Project, ParlGov   | Date of current election (YYYY-MM-DD)                                                               |
-| edate_lag                     | Manifesto Project, ParlGov   | Date of previous election (YYYY-MM-DD)                                                              |
-| elec_id                       | Original                     | Original ID for current election (iso2c-YYYY-MM)                                                    |
-| elec_id_lag                   | Original                     | Original ID for previous election (iso2c-YYYY-MM)                                                   |
-| parlgov_election_id           | ParlGov                      | ParlGov election ID for current election                                                            |
-| parlgov_election_id_lag       | ParlGov                      | ParlGov election ID for previous election                                                           |
-| turnout                       | ParlGov\*                    | Turnout rate in current election                                                                    |
-| turnout_lag                   | ParlGov\*                    | Turnout rate in previous election                                                                   |
-| incoming_cabinet              | ParlGov\*                    | ParlGov cabinet ID for incoming cabinet following the current election                              |
-| incoming_cabinet_name         | ParlGov\*                    | Name of incoming cabinet                                                                            |
-| incoming_caretaker            | ParlGov\*                    | Indicates if incoming cabinet is a caretaker cabinet                                                |
-| incoming_minority_cabinet     | ParlGov\*                    | Indicates if incoming cabinet is a minority cabinet                                                 |
-| outgoing_cabinet_lag          | ParlGov\*                    | ParlGov cabinet ID for outgoing cabinet going into the current election                             |
-| outgoing_cabinet_name_lag     | ParlGov\*                    | Name of outgoing cabinet                                                                            |
-| outgoing_caretaker_lag        | ParlGov\*                    | Indicates if outgoing cabinet was a caretaker cabinet                                               |
-| outgoing_minority_cabinet_lag | ParlGov\*                    | Indicates if outgoing cabinet was a minority cabinet                                                |
-| cmp_pres                      | Original                     | Manifesto Project data refer to parliamentary (0) or presidential (1) elections                     |
-| survey_pres                   | Original                     | Survey data refer to vote choices in parliamentary (0) or presidential (1) elections                |
-| peid                          | Original                     | Party-election ID                                                                                   |
-| party                         | Manifesto Project            | Manifesto Project party ID                                                                          |
-| party_harmonized              | Manifesto Project\*          | Harmonized Manifesto Project party ID                                                               |
-| map_vote                      | Original                     | Numerical key for mapping current and previous vote choices in the survey data                      |
-| map_lr                        | Original                     | Alphanumerical key for mapping party-specific left-right and like/dislike scores in the survey data |
-| party_name                    | Manifesto Project            | Party name                                                                                          |
-| partyabbrev                   | Manifesto Project            | Party abbreviation                                                                                  |
-| parfam                        | Manifesto Project            | Manifesto Project party family                                                                      |
-| parfam_harmonized             | Manifesto Project\*          | Harmonized Manifesto Project party family                                                           |
-| vote_share                    | Manifesto Project, ParlGov   | Party Vote Share in current election                                                                |
-| vote_share_lag                | Manifesto Project, ParlGov   | Party Vote Share in previous election                                                               |
-| ppeg_party_id                 | PPEG                         | PPEG (Political Parties, Presidents, Elections, and Governments) Party ID                           |
-| parlgov_id_1                  | ParlGov                      | Parlgov Party ID (1st party, in case of campaign coalitions)                                        |
-| parlgov_id_2                  | ParlGov                      | Parlgov Party ID (2nd party, in case of campaign coalitions)                                        |
-| parlgov_id_3                  | ParlGov                      | Parlgov Party ID (3rd party, in case of campaign coalitions)                                        |
-| parlgov_id_4                  | ParlGov                      | Parlgov Party ID (4th party, in case of campaign coalitions)                                        |
-| parlgov_parfam_1              | ParlGov                      | Parlgov Party Family (1st party, in case of campaign coalitions)                                    |
-| parlgov_parfam_2              | ParlGov                      | Parlgov Party Family (2nd party, in case of campaign coalitions)                                    |
-| parlgov_parfam_3              | ParlGov                      | Parlgov Party Family (3rd party, in case of campaign coalitions)                                    |
-| parlgov_parfam_4              | ParlGov                      | Parlgov Party Family (4th party, in case of campaign coalitions)                                    |
-| parlgov_vote_share_1          | ParlGov                      | Party Vote Share in current election (1st party, in case of campaign coalitions)                    |
-| parlgov_vote_share_lag_1      | ParlGov                      | Party Vote Share in previous election (1st party, in case of campaign coalitions)                   |
-| parlgov_vote_share_2          | ParlGov                      | Party Vote Share in current election (2nd party, in case of campaign coalitions)                    |
-| parlgov_vote_share_lag_2      | ParlGov                      | Party Vote Share in previous election (2nd party, in case of campaign coalitions)                   |
-| parlgov_vote_share_3          | ParlGov                      | Party Vote Share in current election (3rd party, in case of campaign coalitions)                    |
-| parlgov_vote_share_lag_3      | ParlGov                      | Party Vote Share in previous election (3rd party, in case of campaign coalitions)                   |
-| parlgov_vote_share_4          | ParlGov                      | Party Vote Share in current election (4th party, in case of campaign coalitions)                    |
-| parlgov_vote_share_lag_4      | ParlGov                      | Party Vote Share in previous election (4th party, in case of campaign coalitions)                   |
-| parlgov_vote_share            | ParlGov\*                    | Party Vote Share in current election (sum across all parties in case of campaign coalitions)        |
-| parlgov_vote_share_lag        | ParlGov\*                    | Party Vote Share in previous election (sum across all parties in case of campaign coalitions)       |
-| incoming_cabinet_party        | ParlGov\*                    | Indicates if party became part of cabinet following the current election                            |
-| incoming_prime_minister       | ParlGov\*                    | Indicates if party is the prime minister’s party following the current election                     |
-| incoming_president            | Original                     | Indicates if party is the prime minister’s party following the current election                     |
-| incoming_support              | Original                     | Indicates if party supports a minority cabinet following the current election                       |
-| outgoing_cabinet_party_lag    | ParlGov\*                    | Indicates if party was part of cabinet going into the current election                              |
-| outgoing_prime_minister_lag   | ParlGov\*                    | Indicates if party was the prime minister’s party going into the current election                   |
-| outgoing_president_lag        | Original                     | Indicates if party was the presidents’s party going into the current election                       |
-| outgoing_support_lag          | Original                     | Indicates if party supported a minority cabinet going into the current election                     |
-| stack                         | Original                     | Numerical position of party in election                                                             |
+| Variable | Source(s) | Description |
+|:---|:---|:---|
+| iso2c | Original | ISO2C Country Code |
+| countryname | Manifesto Project*, ParlGov* | Country name |
+| year | Manifesto Project, ParlGov | Year of current election |
+| edate | Manifesto Project, ParlGov | Date of current election (YYYY-MM-DD) |
+| edate_lag | Manifesto Project, ParlGov | Date of previous election (YYYY-MM-DD) |
+| elec_id | Original | Original ID for current election (iso2c-YYYY-MM) |
+| elec_id_lag | Original | Original ID for previous election (iso2c-YYYY-MM) |
+| parlgov_election_id | ParlGov | ParlGov election ID for current election |
+| parlgov_election_id_lag | ParlGov | ParlGov election ID for previous election |
+| turnout | ParlGov\* | Turnout rate in current election |
+| turnout_lag | ParlGov\* | Turnout rate in previous election |
+| incoming_cabinet | ParlGov\* | ParlGov cabinet ID for incoming cabinet following the current election |
+| incoming_cabinet_name | ParlGov\* | Name of incoming cabinet |
+| incoming_caretaker | ParlGov\* | Indicates if incoming cabinet is a caretaker cabinet |
+| incoming_minority_cabinet | ParlGov\* | Indicates if incoming cabinet is a minority cabinet |
+| outgoing_cabinet_lag | ParlGov\* | ParlGov cabinet ID for outgoing cabinet going into the current election |
+| outgoing_cabinet_name_lag | ParlGov\* | Name of outgoing cabinet |
+| outgoing_caretaker_lag | ParlGov\* | Indicates if outgoing cabinet was a caretaker cabinet |
+| outgoing_minority_cabinet_lag | ParlGov\* | Indicates if outgoing cabinet was a minority cabinet |
+| cmp_pres | Original | Manifesto Project data refer to parliamentary (0) or presidential (1) elections |
+| survey_pres | Original | Survey data refer to vote choices in parliamentary (0) or presidential (1) elections |
+| peid | Original | Party-election ID |
+| party | Manifesto Project | Manifesto Project party ID |
+| party_harmonized | Manifesto Project\* | Harmonized Manifesto Project party ID |
+| map_vote | Original | Numerical key for mapping current and previous vote choices in the survey data |
+| map_lr | Original | Alphanumerical key for mapping party-specific left-right and like/dislike scores in the survey data |
+| party_name | Manifesto Project | Party name |
+| partyabbrev | Manifesto Project | Party abbreviation |
+| parfam | Manifesto Project | Manifesto Project party family |
+| parfam_harmonized | Manifesto Project\* | Harmonized Manifesto Project party family |
+| vote_share | Manifesto Project, ParlGov | Party Vote Share in current election |
+| vote_share_lag | Manifesto Project, ParlGov | Party Vote Share in previous election |
+| ppeg_party_id | PPEG | PPEG (Political Parties, Presidents, Elections, and Governments) Party ID |
+| parlgov_id_1 | ParlGov | Parlgov Party ID (1st party, in case of campaign coalitions) |
+| parlgov_id_2 | ParlGov | Parlgov Party ID (2nd party, in case of campaign coalitions) |
+| parlgov_id_3 | ParlGov | Parlgov Party ID (3rd party, in case of campaign coalitions) |
+| parlgov_id_4 | ParlGov | Parlgov Party ID (4th party, in case of campaign coalitions) |
+| parlgov_parfam_1 | ParlGov | Parlgov Party Family (1st party, in case of campaign coalitions) |
+| parlgov_parfam_2 | ParlGov | Parlgov Party Family (2nd party, in case of campaign coalitions) |
+| parlgov_parfam_3 | ParlGov | Parlgov Party Family (3rd party, in case of campaign coalitions) |
+| parlgov_parfam_4 | ParlGov | Parlgov Party Family (4th party, in case of campaign coalitions) |
+| parlgov_vote_share_1 | ParlGov | Party Vote Share in current election (1st party, in case of campaign coalitions) |
+| parlgov_vote_share_lag_1 | ParlGov | Party Vote Share in previous election (1st party, in case of campaign coalitions) |
+| parlgov_vote_share_2 | ParlGov | Party Vote Share in current election (2nd party, in case of campaign coalitions) |
+| parlgov_vote_share_lag_2 | ParlGov | Party Vote Share in previous election (2nd party, in case of campaign coalitions) |
+| parlgov_vote_share_3 | ParlGov | Party Vote Share in current election (3rd party, in case of campaign coalitions) |
+| parlgov_vote_share_lag_3 | ParlGov | Party Vote Share in previous election (3rd party, in case of campaign coalitions) |
+| parlgov_vote_share_4 | ParlGov | Party Vote Share in current election (4th party, in case of campaign coalitions) |
+| parlgov_vote_share_lag_4 | ParlGov | Party Vote Share in previous election (4th party, in case of campaign coalitions) |
+| parlgov_vote_share | ParlGov\* | Party Vote Share in current election (sum across all parties in case of campaign coalitions) |
+| parlgov_vote_share_lag | ParlGov\* | Party Vote Share in previous election (sum across all parties in case of campaign coalitions) |
+| incoming_cabinet_party | ParlGov\* | Indicates if party became part of cabinet following the current election |
+| incoming_prime_minister | ParlGov\* | Indicates if party is the prime minister’s party following the current election |
+| incoming_president | Original | Indicates if party is the prime minister’s party following the current election |
+| incoming_support | Original | Indicates if party supports a minority cabinet following the current election |
+| outgoing_cabinet_party_lag | ParlGov\* | Indicates if party was part of cabinet going into the current election |
+| outgoing_prime_minister_lag | ParlGov\* | Indicates if party was the prime minister’s party going into the current election |
+| outgoing_president_lag | Original | Indicates if party was the presidents’s party going into the current election |
+| outgoing_support_lag | Original | Indicates if party supported a minority cabinet going into the current election |
+| stack | Original | Numerical position of party in election |
 
 Sources marked with an asterisk (\*) indicate that the variables were
 manually updated or extended. These changes are explained in the column
@@ -866,14 +887,15 @@ corresponding external data collections.
 
 # References
 
-<div id="refs" class="references csl-bib-body hanging-indent">
+<div id="refs" class="references csl-bib-body hanging-indent"
+entry-spacing="0">
 
 <div id="ref-Cohen2023" class="csl-entry">
 
 Cohen, Denis, Werner Krause, and Tarik Abou-Chadi. 2024.
 “<span class="nocase">Comparative vote switching: A new framework for
 studying dynamic multiparty competition</span>.” *The Journal of
-Politics*.
+Politics* 86 (2): 597–607.
 
 </div>
 
